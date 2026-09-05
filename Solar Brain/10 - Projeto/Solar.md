@@ -22,7 +22,7 @@ Três serviços, uma fronteira.
 - [[Contrato GET health]] — o mesmo envelope nos dois serviços, e as duas plateias que o leem
 - [[Multi-repo e CI-CD]] — quatro repositórios, um pipeline cada
 
-Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]]
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]]
 
 ## Camada de IA
 
