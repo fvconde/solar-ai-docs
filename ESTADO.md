@@ -6,7 +6,7 @@
 
 **Última atualização:** 05/09/2026
 **Entrega:** 29/09/2026 23:59 · **Congelamento de código:** 24/09/2026
-**Fase atual:** 0 · Fundação
+**Fase atual:** 1 · Conversa viva
 
 ---
 
@@ -51,6 +51,7 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **05/09** — `solar-ai-api` migrada para **.NET 10** e para **controllers** (ASP.NET Core MVC), no lugar do .NET 9 com minimal API do esqueleto inicial. Substitui apenas o detalhe de versão da linha de 21/08 — a repartição poliglota continua a mesma. Motivo: o .NET 10 é o runtime corrente e nada no projeto prende ao 9; e minimal API concentra rota, validação e DI em delegates dentro do `Program.cs`, que não escala para as áreas do domínio (leads, conversas, agendamentos, métricas). Com controllers, o `Program.cs` tem cinco linhas e cada área nova tem lugar óbvio. Custo aceito: mais cerimônia por endpoint; e o `Microsoft.AspNetCore.OpenApi` saiu do `csproj` por estar sem uso — volta no S-04, cujo aceite exige Swagger. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20NET%2010%20com%20controllers.md)
 - **05/09** — O compose do `solar-ai-docs` deixou de **definir** os serviços e passou a **compô-los** por `include`: `solar-ai-api/compose.yml` traz Postgres + API, `solar-ai/compose.yml` traz o agente, e o orquestrador só declara `name: solar` e inclui os dois. Refina a linha acima; o ambiente e as portas são os mesmos. Motivo: CI/CD por repositório é objetivo declarado (S-27, S-28) e um pipeline não deveria clonar um segundo repo para buscar um YAML — agora cada fragmento sobe sozinho. A alternativa de dois composes **independentes** foi descartada: cada `up` cria rede própria, e no S-05, quando a API chamar o agente, seria preciso uma rede `external` criada à mão antes de qualquer subida — pré-requisito manual que falha em silêncio, com DNS que não resolve. Junto: a senha do Postgres mudou de casa para o `.env` do `solar-ai-api`, e o `container_name` fixo saiu, para o ambiente completo e um fragmento isolado poderem coexistir. Custo aceito: o Postgres passa a ser definido pelo repo da API. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Compose%20composto%20por%20include.md)
 - **05/09** — `solar-ai-docs` permanece **público**; os outros três repositórios, privados. Motivo: escolha explícita ao empurrar o primeiro commit, ciente de que o vault expõe decisões, riscos, orçamento de esforço e a ordem de corte dos cards. Consequência que passa a valer sempre: nada que não possa ser lido por qualquer pessoa entra neste repositório — a regra ficou escrita como primeira convenção do `Solar Brain/README.md`. Custo aceito: o raciocínio interno do projeto é público antes da entrega.
+- **05/09** — Contrato do `/health` congelado: envelope `{service, status, version, checks}` **idêntico** nos dois serviços, vocabulário `up` / `degraded` / `down`, `checks` como **dicionário**, e a tabela de status code — `up` e **`degraded` → 200**, `down` → 503. Motivo: o `/health` tem duas plateias que leem metades diferentes — o Cloud Run e o healthcheck do Compose olham só o código HTTP, o painel do S-19 olha só o corpo —, e o formato do S-02 não fixava nenhuma das duas: a API devolvia 503 com `degraded` no corpo, dizendo coisas opostas ao mesmo tempo. `degraded` responde 200 porque significa "ainda atende o que dá", e 503 mandaria o Cloud Run reciclar uma instância que está servindo; por consequência `down` fica para falha essencial, e o Postgres fora agora derruba a API para `down`. Dicionário porque absorve o índice do RAG no S-15 (`"indice_imoveis"`) sem o front mudar, e record tipado nos dois lados porque é o que dá schema no Swagger. Custo aceito: o agente perdeu `modelo` e `chave_carregada` do corpo — o modelo passou a sair na linha de log do boot. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Formato%20do%20payload%20do%20health%20check.md)
 
 ---
 
@@ -69,15 +70,18 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **05/09 — Achado: três dos quatro repositórios estavam com zero commits.** Só o `solar-ai` tinha commitado (`fce0e31`). O S-01 constava como feito porque as pastas e os remotes existem, mas `solar-ai-api`, `solar-ai-front` e `solar-ai-docs` nunca receberam um commit — o `ESTADO.md` e o vault inteiro estavam apenas no disco, sem cópia em lugar nenhum.
 - **05/09 — Primeiro commit de `solar-ai-api` (`27f748e`) e de `solar-ai-docs`, e segundo do `solar-ai` (`9b570ce`).** Nenhum `.env`, `bin/`, `obj/` ou `.obsidian/` entrou — os `.gitignore` seguraram. **`solar-ai-front` continua sem commit por não ter conteúdo**: o repositório só tem um `.claude/settings.local.json`, e o Angular nasce no S-09.
 - **05/09 — `index.lock` órfão travou o `solar-ai-docs`, pela segunda vez no projeto.** O mesmo sintoma que segurou o `solar-ai` de 31/08 a 05/09. Desta vez virou nota: `Solar Brain/20 - Bugs/Bug - index.lock orfao trava o repositorio.md`, com o diagnóstico de três checagens e a varredura dos quatro repos. Lock de 0 bytes é seguro de remover; com conteúdo, não é.
+- **05/09 — S-04 concluído. Fim da Fase 0.** Swagger exposto na API (`/swagger` e `/openapi/v1.json`, com o `Microsoft.AspNetCore.OpenApi` de volta ao `csproj`) e contrato do `/health` congelado e implementado nos dois serviços como record tipado. Verificado com o ambiente de pé: caminho feliz devolve `up` + 200 nos dois; `docker stop` no Postgres leva a API a `down` + **503** com o motivo no corpo em `Development`; container do agente sem `GEMINI_API_KEY` dá `down` + **503**; e os mesmos dois containers em produção devolvem o `down` **sem `reason`** — o motivo só no log. Vault com 38 notas e 200 conexões, grafo íntegro.
 
 ---
 
 ## Próximo
 
-1. **S-04 · Esqueletos .NET e FastAPI com `/health`** — 2h na estimativa, mas encolheu: os dois esqueletos já sobem e já respondem `/health`. Sobrou definir o formato do payload que o front e o monitoramento vão consumir. Fecha a Fase 0.
-2. **S-05 · Congelar o contrato `POST /turn`** — é o card que mais reduz risco de retrabalho; não deixar escorregar.
+1. **S-05 · Congelar o contrato `POST /turn`** — é o card que mais reduz risco de retrabalho; não deixar escorregar. Abre a Fase 1.
+2. **S-06 · Grafo mínimo e persona da Lia** — depende do S-05.
 
 **Como subir o ambiente:** `docker compose up --build` na pasta `solar-ai-docs` sobe os três. Cada serviço também sobe sozinho, do próprio repo: `docker compose up` em `solar-ai-api` dá Postgres + API, e em `solar-ai` dá o agente. Portas: Postgres 5432, API 8080, agente 8000. O Angular roda fora, com `ng serve`. Zerar o banco de verdade exige `docker compose down -v` — sem o `-v`, o volume `postgres-data` sobrevive.
+
+**Versão no `/health`:** o campo `version` vale `dev` a menos que `SOLAR_VERSION` venha do ambiente. Para ver o SHA de verdade em local, antes do `up`: `$env:SOLAR_VERSION = git rev-parse --short HEAD`. Em deploy quem injeta são os pipelines do S-27/S-28 e o Cloud Run do S-26.
 
 **Segredos:** cada repo tem o seu `.env`, com `.env.example` ao lado — credenciais do Postgres no `solar-ai-api`, chave da Gemini no `solar-ai`. O `solar-ai-docs` não tem `.env`. Cuidado: `docker compose config` imprime todos eles em texto claro.
 

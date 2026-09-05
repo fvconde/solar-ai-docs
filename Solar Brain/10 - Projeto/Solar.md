@@ -19,9 +19,10 @@ Três serviços, uma fronteira.
 - [[Arquitetura poliglota]] — Python para IA, .NET para domínio, Angular no front
 - [[Agente stateless]] — regra dura: o Python nunca toca o banco
 - [[Contrato POST turn]] — a única fronteira, e o maior risco de retrabalho
+- [[Contrato GET health]] — o mesmo envelope nos dois serviços, e as duas plateias que o leem
 - [[Multi-repo e CI-CD]] — quatro repositórios, um pipeline cada
 
-Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]]
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]]
 
 ## Camada de IA
 
