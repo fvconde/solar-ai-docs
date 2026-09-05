@@ -1,0 +1,29 @@
+# Ambiente local completo do Solar (S-02).
+#
+# Rodar daqui, da pasta solar-ai-docs:   docker compose up --build
+#
+# Este arquivo nao DEFINE servico nenhum: ele COMPOE os fragmentos que cada
+# repositorio dono publica. Cada servico e descrito pelo repo que o mantem --
+# do mesmo jeito que o Dockerfile ja e --, e aqui eles viram um ambiente so,
+# com uma rede, um mapa de portas e um `down` simetrico ao `up`.
+#
+# Por que composto e nao dois composes separados: no S-05 a API passa a chamar
+# o agente por HttpClient. Dois `docker compose up` independentes criam duas
+# redes isoladas, e fazer os dois se enxergarem exigiria uma rede `external`
+# criada a mao antes de qualquer subida -- pre-requisito manual que falha em
+# silencio, com DNS que nao resolve.
+#
+# Os quatro repositorios precisam estar clonados lado a lado numa pasta solar/.
+#
+# O Angular (solar-ai-front) NAO entra aqui de proposito: ele roda com ng serve,
+# que tem hot reload. Colocar o front no compose custaria rebuild a cada
+# alteracao de template e nao entrega nada em troca.
+
+name: solar
+
+include:
+  # Postgres + API .NET. Cada fragmento le o .env do proprio repositorio,
+  # entao a senha do banco mora junto de quem e dono do banco.
+  - ../solar-ai-api/compose.yml
+  # Agente Python. Le a chave da Gemini do .env do solar-ai.
+  - ../solar-ai/compose.yml

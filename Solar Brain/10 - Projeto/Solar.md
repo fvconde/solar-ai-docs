@@ -1,0 +1,70 @@
+---
+tipo: hub
+tags: [hub, projeto]
+---
+# Solar
+
+Plataforma de atendimento e qualificação de leads imobiliários com IA generativa. A agente conversacional se chama **Lia**.
+
+Tech Challenge Fase 5 · pós FIAP · entrega **29/09/2026** · congelamento de código **24/09/2026**.
+
+> Esta nota é o hub do grafo. O **estado** do projeto vive no `ESTADO.md` na raiz do repo; aqui vive o **porquê** expandido.
+
+---
+
+## Arquitetura
+
+Três serviços, uma fronteira.
+
+- [[Arquitetura poliglota]] — Python para IA, .NET para domínio, Angular no front
+- [[Agente stateless]] — regra dura: o Python nunca toca o banco
+- [[Contrato POST turn]] — a única fronteira, e o maior risco de retrabalho
+- [[Multi-repo e CI-CD]] — quatro repositórios, um pipeline cada
+
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]]
+
+## Camada de IA
+
+- [[LangGraph]] — o grafo da Lia
+- [[RAG]] — busca sobre a base simulada de imóveis
+- [[Indice vetorial em memoria]] — em RAM, não pgvector
+- [[Gemini free tier]] — o LLM, e suas duas armadilhas
+- [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
+
+Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]]
+
+## Produto
+
+- [[Qualificacao de leads]] — o coração do que a Lia faz
+- [[Follow-up proativo]] — o requisito que escolheu o canal
+
+Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao - Canal da demo e chat web com Telegram cortavel]] · [[Decisao - Agenda simulada por slots]]
+
+## Privacidade — disciplinas da Fase 5
+
+- [[LGPD e GDPR]] — o que a lei pede
+- [[Consentimento na abertura]] — S-33
+- [[Mascaramento de PII]] — S-34
+- [[Direito de eliminacao]] — S-29
+
+Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]]
+
+## Operação
+
+- [[Bug - index.lock orfao trava o repositorio]] — recorrente, e silencioso: um repo travado não avisa que o trabalho não está sendo versionado
+
+## Gestão
+
+- [[Orcamento de esforco]] — 67h de `Must` contra teto de 65–75h, e a ordem de corte
+
+Decisões: [[Decisao - Entrega individual confirmada]]
+
+---
+
+## Datas que importam
+
+| data | o quê |
+|---|---|
+| **15/09/2026** | gatilho duplo: cortar se a Fase 3 não fechou ([[Orcamento de esforco]]) e reavaliar privacidade ([[Decisao - Versao minima de privacidade e nao a completa]]) |
+| **24/09/2026** | congelamento de código |
+| **29/09/2026** | entrega |

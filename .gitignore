@@ -1,0 +1,8 @@
+# Configuração local do Obsidian — cada máquina tem a sua
+Solar Brain/.obsidian/
+
+# Segredos — nunca commitar
+.env
+.env.*
+!.env.example
+*.key
