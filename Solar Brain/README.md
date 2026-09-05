@@ -19,7 +19,7 @@ A pasta `.obsidian/` fica no `.gitignore` — a configuração local não é ver
 ```
 Solar Brain/
   10 - Projeto/     nota-hub que conecta tudo — comece por Solar.md
-  20 - Bugs/        Bug - <titulo>.md — investigações resolvidas (vazio até a Fase 1)
+  20 - Bugs/        Bug - <titulo>.md — investigações resolvidas
   30 - Conceitos/   um conceito técnico por nota, no recorte do Solar
   50 - Decisoes/    Decisao - <titulo>.md — uma por linha da seção Decisões do ESTADO.md
 ```
@@ -35,6 +35,7 @@ Cada linha da seção `Decisões` do ESTADO.md ganhou um link para a nota corres
 
 ## Convenções
 
+- ⚠️ **Este repositório é público.** Escolha consciente de 05/09. Tudo que entra no vault é legível por qualquer pessoa: nada de credencial, dado pessoal de terceiro, print com token, ou nome de cliente. Segredo mora em `.env`, que está no `.gitignore` — e o `docker compose config` imprime todos eles em texto claro, então essa saída também nunca entra aqui.
 - **Nomes de arquivo sem acento** — evita atrito entre Windows, Linux e git. O texto dentro da nota usa acentuação normal.
 - **Decisão** nunca é reescrita. Mudou de ideia? Nota nova, com link para a antiga, e `status: revogada` no frontmatter da velha.
 - **Conceito** é sempre no recorte do Solar. Não se documenta o que é RAG em geral — documenta-se o que RAG significa *aqui*.
