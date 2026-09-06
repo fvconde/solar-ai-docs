@@ -74,15 +74,17 @@ Ele carrega o estado inteiro do turno porque o [[Agente stateless]] não tem de 
 | `papel` | `lead` · `agente` |
 | `intencao` | `compra` · `aluguel` · `investimento` · `indefinida` |
 | `urgencia` | `alta` · `media` · `baixa` |
-| `proximaAcao` | `continuar_conversa` · `sugerir_imoveis` · `agendar_visita` · `encerrar` · `escalar_humano` |
+| `proximaAcao` | `continuar_conversa` · `sugerir_imoveis` · `agendar_reuniao` · `direcionar_especialista` · `encerrar` |
 
 `score` é inteiro de 0 a 100. Preços são **reais inteiros** — o contrato não tem centavos.
 
-`proximaAcao` tem cinco valores porque cada um muda o que o .NET faz, e nenhum outro mudaria: `sugerir_imoveis` diz que `imoveisSugeridos` veio preenchido, `agendar_visita` abre o fluxo de slots do S-17, `encerrar` dispara o resumo do S-18 e o follow-up, `escalar_humano` entrega ao corretor. "Perguntar a próxima coisa" é `continuar_conversa` — o nó qualificador da [[Qualificacao de leads]] decide *o quê* perguntar, e isso não é assunto do .NET.
+`proximaAcao` tem cinco valores porque cada um muda o que o .NET faz, e nenhum outro mudaria: `sugerir_imoveis` diz que `imoveisSugeridos` veio preenchido, `agendar_reuniao` abre o fluxo de slots do S-17, `direcionar_especialista` entrega o investidor a quem trabalha com renda, `encerrar` dispara o resumo do S-18 e o follow-up. "Perguntar a próxima coisa" é `continuar_conversa` — o nó qualificador da [[Qualificacao de leads]] decide *o quê* perguntar, e isso não é assunto do .NET.
+
+Os nomes são os do enunciado, não invenção: `agendar_reuniao` vem de "Encaminhar para reunião" (Exemplo 1) e `direcionar_especialista` de "Direcionar para especialista" (Exemplo 2). Um `escalar_humano` chegou a existir e foi removido em 05/09 — ver [[Decisao - Vocabulario do contrato alinhado ao enunciado]].
 
 ## A regra de merge
 
-`perfilLead` **entra**, `camposExtraidos` **sai**. Os dois têm os mesmos campos, menos um: `intencao` só existe no perfil de entrada, porque na saída ela subiu para o topo — é o campo mais consumido (roteamento, filtro do painel no S-20, requisito "identificação de intenção" do enunciado) e repeti-lo dentro de `camposExtraidos` criaria duas fontes para o mesmo valor.
+`perfilLead` **entra**, `camposExtraidos` **sai**. Os dois têm os mesmos campos — inclusive `expectativaRetorno`, texto livre exigido pelo Exemplo 2 do enunciado —, menos um: `intencao` só existe no perfil de entrada, porque na saída ela subiu para o topo — é o campo mais consumido (roteamento, filtro do painel no S-20, requisito "identificação de intenção" do enunciado) e repeti-lo dentro de `camposExtraidos` criaria duas fontes para o mesmo valor.
 
 A cada turno o .NET faz: **campo não-nulo de `camposExtraidos` sobrescreve o do perfil; campo nulo não toca em nada.** É o que permite ao agente devolver só o delta sem apagar o que o lead disse três turnos atrás — e é por isso que a regra do S-11 ("campo não mencionado fica null, nunca inventado") é de segurança, não de estilo.
 

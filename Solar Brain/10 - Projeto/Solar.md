@@ -22,7 +22,7 @@ Três serviços, uma fronteira.
 - [[Contrato GET health]] — o mesmo envelope nos dois serviços, e as duas plateias que o leem
 - [[Multi-repo e CI-CD]] — quatro repositórios, um pipeline cada
 
-Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]]
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]]
 
 ## Camada de IA
 
@@ -32,7 +32,7 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 - [[Gemini free tier]] — o LLM, e suas duas armadilhas
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
 
-Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]]
+Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]]
 
 ## Produto
 
@@ -53,6 +53,7 @@ Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - V
 ## Operação
 
 - [[Bug - index.lock orfao trava o repositorio]] — recorrente, e silencioso: um repo travado não avisa que o trabalho não está sendo versionado
+- [[Bug - latencia de 30s por limite por minuto]] — o free tier também limita por minuto, e essa cota falha devagar em vez de falhar alto
 
 ## Gestão
 

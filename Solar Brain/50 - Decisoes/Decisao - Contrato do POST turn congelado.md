@@ -65,6 +65,10 @@ Com os três containers de pé e o agente devolvendo eco:
 - **Tempo limite** — API apontada para um endereço que não responde, com `Agente__TimeoutSegundos=3`: **504** em 3,1s.
 - **Produção** — a mesma falha com `ASPNETCORE_ENVIRONMENT=Production` devolve **502 sem `detail`**; o motivo fica só no log.
 
+## Emendas
+
+- **05/09** — [[Decisao - Vocabulario do contrato alinhado ao enunciado]] trocou dois vocabulários: `proximaAcao` perdeu `escalar_humano` e ganhou `direcionar_especialista`, `agendar_visita` virou `agendar_reuniao`, e `expectativaRetorno` entrou em `PerfilLead` e `CamposExtraidos`. O mecanismo desta decisão — DTO espelhado, recusa de campo desconhecido dos dois lados, commit coordenado — continua valendo inteiro; foi ele que tornou a emenda segura.
+
 ## Conceitos
 
 [[Contrato POST turn]] · [[Agente stateless]] · [[Arquitetura poliglota]] · [[Qualificacao de leads]] · [[RAG]]
@@ -76,3 +80,4 @@ Com os três containers de pé e o agente devolvendo eco:
 - [[Decisao - Formato do payload do health check]]
 - [[Decisao - NET 10 com controllers]]
 - [[Decisao - Compose composto por include]]
+- [[Decisao - Vocabulario do contrato alinhado ao enunciado]]
