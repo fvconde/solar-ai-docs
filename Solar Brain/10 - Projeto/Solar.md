@@ -33,8 +33,9 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 - [[Indice vetorial em memoria]] — em RAM, não pgvector
 - [[Gemini free tier]] — o LLM, e suas duas armadilhas
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
+- [[Testar a Lia]] — o que dá para afirmar sobre uma função não determinística, e o que só dá para ler
 
-Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]]
+Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]]
 
 ## Produto
 
@@ -57,6 +58,7 @@ Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - V
 - [[Bug - index.lock orfao trava o repositorio]] — recorrente, e silencioso: um repo travado não avisa que o trabalho não está sendo versionado
 - [[Bug - latencia de 30s por limite por minuto]] — o free tier também limita por minuto, e essa cota falha devagar em vez de falhar alto
 - [[Bug - libgssapi no log da API]] — duas linhas de erro no boot que não eram erro nenhum; corrigido, mas o diagnóstico vale
+- [[Bug - negacao extraida como preferencia]] — a Lia guardou "exceto zona leste" num campo que vira busca vetorial, onde a negação inverte de sentido
 
 ## Gestão
 
