@@ -6,6 +6,8 @@ tags: [decisao, dominio, dotnet]
 ---
 # Decisão — Conversa em memória, turno serializado, perfil fundido pela API
 
+> **Emendada em 07/09 pelo S-10** — [[Decisao - Persistencia em EF Core com Postgres]]. A semântica desta nota continua valendo inteira: quem funde o perfil, como o histórico é montado, turnos serializados, turno que falha não deixa rastro. O que mudou é onde o estado mora. E a frase *"a trava por conversa vira transação"*, na seção Motivo, estava errada — a trava **fica**, porque a chamada ao agente não pode acontecer dentro de uma transação aberta. A nota nova explica por quê.
+
 ## Problema
 
 O S-07 abriu o `POST /conversas/{id}/mensagens`, que é o primeiro endpoint do Solar que **guarda estado**. Três perguntas apareceram juntas, e nenhuma tinha resposta óbvia no contrato já congelado.
