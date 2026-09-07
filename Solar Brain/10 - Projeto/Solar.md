@@ -21,8 +21,9 @@ Três serviços, uma fronteira.
 - [[Contrato POST turn]] — a única fronteira, e o maior risco de retrabalho
 - [[Contrato GET health]] — o mesmo envelope nos dois serviços, e as duas plateias que o leem
 - [[Multi-repo e CI-CD]] — quatro repositórios, um pipeline cada
+- [[Decisao - Front do chat em Angular]] — o front nasce (S-08 e S-09), e as três escolhas que o mantêm barato
 
-Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]]
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]] · [[Decisao - Front do chat em Angular]]
 
 ## Camada de IA
 
@@ -48,7 +49,7 @@ Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao -
 - [[Mascaramento de PII]] — S-34
 - [[Direito de eliminacao]] — S-29
 
-Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]]
+Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]] · [[Decisao - Front do chat em Angular]] (metade do S-33 na UI)
 
 ## Operação
 
