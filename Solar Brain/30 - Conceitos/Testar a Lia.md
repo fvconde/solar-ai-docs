@@ -21,11 +21,12 @@ O S-11 resolveu isso separando o que é **asserível** do que só é **legível*
 | Estável o bastante para asserção | Instável demais |
 |---|---|
 | `intencao` (enum de 4) | `resposta` (texto livre) |
-| `proximaAcao` (enum de 5) | `score` |
-| campo nulo vs. preenchido | redação de qualquer campo textual |
+| `proximaAcao` (enum de 5) | redação de qualquer campo textual |
+| campo nulo vs. preenchido | |
 | `precoMin` / `precoMax` / `quartos` (inteiros) | |
+| `score` — **desde o S-12** | |
 
-O `score` merece destaque: medido em duas rodadas dos mesmos roteiros, ele se moveu **até 20 pontos** com entrada idêntica (40→60, 30→20, 10→5). Ele é o número que o painel do S-19 mostra e que ordena o lead para o corretor, e hoje uma diferença de 20 pontos entre dois leads não significa nada. É o argumento mais concreto a favor do nó qualificador do S-12 ter trabalho próprio.
+O `score` mudou de lado. Enquanto saía do LLM, ele se movia **até 20 pontos** com entrada idêntica (40→60, 30→20, 10→5) e nenhum teste podia afirmar o valor dele, só que ele existia. Desde que virou [[Regua de qualificacao]] determinística ([[Decisao - Score por regua deterministica]]), ele é asserível — e melhor: asserível **de graça**, em `tests/test_qualificacao.py`, sem uma chamada ao Gemini. A suíte `-m llm` verifica só a ligação: que o score que volta do `/turn` é o mesmo que a régua calcula sobre o perfil fundido.
 
 ## A asserção que pega alucinação é a negativa
 
@@ -50,7 +51,9 @@ Consequência prática: a suíte verde significa "nenhum erro sistemático nos 2
 
 ## Custo e a armadilha da cota
 
-`pytest` roda a suíte de contrato e não gasta nada. `pytest -m llm` roda os 24 casos e gasta 24 chamadas, com pausa de 5 s entre elas.
+`pytest` roda a suíte grátis — contrato, prompts e [[Regua de qualificacao]] — e não gasta nada. `pytest -m llm` roda os casos de extração e gasta uma chamada por caso, com pausa de 5 s entre elas.
+
+A proporção mudou no S-12, e na direção certa: a suíte grátis foi de 24 para 86 testes, a paga de 25 para 27 casos. Toda regra que dá para escrever como função pura sai da superfície que custa cota.
 
 **Não rode a suíte e o `conversas_exemplo.py` na mesma janela.** Medido no S-11: com ~45 chamadas em dez minutos, a rodada seguinte de conversas deu média de **23 s** e pior caso de **99 s**, contra média de 1667 ms e pior de 3831 ms do S-06. É o limite por minuto do [[Gemini free tier]] em backoff silencioso, o mesmo mecanismo de [[Bug - latencia de 30s por limite por minuto]] — e 99 s passa longe do `Agente:TimeoutSegundos` de 45 s, ou seja, sob essa pressão um turno real viraria `504`. Espaçar as duas coisas resolve; nada no código precisa mudar.
 

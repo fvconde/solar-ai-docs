@@ -35,14 +35,15 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
 - [[Testar a Lia]] — o que dá para afirmar sobre uma função não determinística, e o que só dá para ler
 
-Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]]
+Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]]
 
 ## Produto
 
 - [[Qualificacao de leads]] — o coração do que a Lia faz
+- [[Regua de qualificacao]] — a tabela que dá o score e escolhe a próxima pergunta
 - [[Follow-up proativo]] — o requisito que escolheu o canal
 
-Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao - Canal da demo e chat web com Telegram cortavel]] · [[Decisao - Agenda simulada por slots]]
+Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao - Canal da demo e chat web com Telegram cortavel]] · [[Decisao - Agenda simulada por slots]] · [[Decisao - Score por regua deterministica]]
 
 ## Privacidade — disciplinas da Fase 5
 
@@ -59,6 +60,7 @@ Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - V
 - [[Bug - latencia de 30s por limite por minuto]] — o free tier também limita por minuto, e essa cota falha devagar em vez de falhar alto
 - [[Bug - libgssapi no log da API]] — duas linhas de erro no boot que não eram erro nenhum; corrigido, mas o diagnóstico vale
 - [[Bug - negacao extraida como preferencia]] — a Lia guardou "exceto zona leste" num campo que vira busca vetorial, onde a negação inverte de sentido
+- [[Bug - turno real vira 504 sob cota por minuto]] — a suíte satura o minuto e a conversa seguinte estoura o timeout; risco direto para a gravação do vídeo
 
 ## Gestão
 

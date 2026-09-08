@@ -15,8 +15,25 @@ A família Gemini Flash / Flash-Lite tem camada gratuita de uso via API, com cot
 ## Duas armadilhas
 
 1. **Ativar billing num projeto do Google apaga o free tier daquele projeto inteiro**, na hora e sem desfazer. Por isso o Solar usa um projeto isolado — e, desde 05/09, dois projetos com papéis fixos. A mecânica completa, incluindo o estado intermediário em que se paga *e* os dados ainda vão para treino, está em [[Billing na Gemini API]].
-2. **A cota é diária.** Sessão de iteração de prompt queima rápido. Erro `429` durante o desenvolvimento é cota, não bug no código.
+2. **A cota é diária, e o número é 500.** Medido no S-12, quando ela estourou pela primeira vez no projeto: `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, `quotaValue: 500`, por modelo e por projeto, para o `gemini-3.5-flash-lite`. Erro `429` durante o desenvolvimento é cota, não bug no código.
 3. **Existe também limite por minuto**, e ele não se parece com um erro. Em rajada de chamadas, o SDK entra em backoff e repete sozinho: o que chega ao código é uma chamada bem-sucedida que demorou 30 s, não um `429`. Descoberto no S-06 — ver [[Bug - latencia de 30s por limite por minuto]]. As duas cotas se confundem fácil: a diária falha alto, a por minuto falha devagar.
+
+## Quanto custa uma sessão de iteração
+
+Números do S-12, o dia em que os 500 acabaram:
+
+| operação | chamadas |
+|---|---|
+| `pytest -m llm` (suíte de extração) | 27 |
+| `pytest -m llm -k handoff` (subconjunto) | 4 |
+| `conversas_exemplo.py` (7 roteiros) | 29 |
+| um turno real na demo | 1 |
+
+Uma iteração honesta — mudar o prompt, rodar o gate, regravar os roteiros — custa **56 chamadas**. Cabem cerca de **oito** dessas num dia, e o S-12 precisou de mais.
+
+**Consequência prática, aprendida caro:** iterar prompt contra o subconjunto (`-k`) e guardar a suíte completa para o fim. Rodar a suíte inteira depois de cada ajuste de texto gasta o orçamento do dia em três tentativas.
+
+**As duas cotas atingem a demo, cada uma do seu jeito.** A diária derruba tudo até virar o dia. A por minuto é pior de diagnosticar: logo depois de uma bateria de testes, uma conversa real estoura o timeout de 45 s da API e vira `504` — visto no S-12, ver [[Bug - turno real vira 504 sob cota por minuto]]. Nos dois casos a regra é a mesma: **não rodar testes na hora anterior à gravação do vídeo.**
 
 ## Contrapartida registrada
 
