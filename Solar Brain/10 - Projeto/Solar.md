@@ -24,7 +24,7 @@ Três serviços, uma fronteira.
 - [[Decisao - Front do chat em Angular]] — o front nasce (S-08 e S-09), e as três escolhas que o mantêm barato
 - [[Migrations no Solar]] — o schema é código versionado, e é o que salva o deploy da Fase 6
 
-Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]] · [[Decisao - Front do chat em Angular]] · [[Decisao - Persistencia em EF Core com Postgres]]
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]] · [[Decisao - Front do chat em Angular]] · [[Decisao - Persistencia em EF Core com Postgres]] · [[Decisao - DTO proprio para a releitura da conversa]]
 
 ## Camada de IA
 
@@ -61,6 +61,7 @@ Decisões: [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - V
 - [[Bug - libgssapi no log da API]] — duas linhas de erro no boot que não eram erro nenhum; corrigido, mas o diagnóstico vale
 - [[Bug - negacao extraida como preferencia]] — a Lia guardou "exceto zona leste" num campo que vira busca vetorial, onde a negação inverte de sentido
 - [[Bug - turno real vira 504 sob cota por minuto]] — a suíte satura o minuto e a conversa seguinte estoura o timeout; risco direto para a gravação do vídeo
+- [[Bug - falha ao retomar apagava a conversa]] — um `catch` vazio no front transformava falha de rede em perda permanente de conversa, sem sintoma
 
 ## Gestão
 
