@@ -30,12 +30,12 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 
 - [[LangGraph]] — o grafo da Lia
 - [[RAG]] — busca sobre a base simulada de imóveis
-- [[Indice vetorial em memoria]] — em RAM, não pgvector
-- [[Gemini free tier]] — o LLM, e suas duas armadilhas
+- [[Indice vetorial em memoria]] — em RAM, não pgvector; 80 imóveis em 768 dimensões
+- [[Gemini free tier]] — o LLM, e suas armadilhas de cota
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
 - [[Testar a Lia]] — o que dá para afirmar sobre uma função não determinística, e o que só dá para ler
 
-Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]]
+Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]]
 
 ## Produto
 

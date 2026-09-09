@@ -16,10 +16,26 @@ A Lia usa RAG sobre a base simulada de imóveis (`solar-ai/data`) para responder
 
 A busca roda sobre o [[Indice vetorial em memoria]].
 
-## Risco aberto
+## Risco fechado em 08/09, no S-14
 
-A variedade das descrições da base **não foi verificada**. O ESTADO.md registra: se as descrições forem repetitivas, o RAG do S-15 devolve resultados indistinguíveis. Checar antes de investir no S-14.
+A variedade das descrições era o risco que podia inutilizar o RAG inteiro, e ele estava aberto desde 22/08. Medido antes de escrever uma linha do índice, sobre os 80 imóveis, sem gastar cota:
+
+| medida | valor |
+|---|---|
+| vocabulário / palavras totais | 867 / 2723 |
+| similaridade média entre pares (cosseno tf) | **0,185** (mediana 0,178) |
+| pares acima de 0,6 | **0** — o pior par dá 0,553 |
+| descrições idênticas | 0 |
+| aberturas distintas (3 primeiras palavras) | 75 de 80 |
+| bairros distintos | 57 |
+
+Prosa de verdade, média de 34 palavras, sem template repetido. A base serve.
+
+**O método vale mais que o número.** Similaridade léxica média entre pares é o teste barato para "a base tem variedade?", e roda offline, antes de existir embedding. Se a média tivesse dado alta, o conserto seria reescrever descrições — trabalho que ficaria muito mais caro depois do índice pronto e do S-15 em cima dele.
+
+Confirmado na prática logo depois: busca por *"cobertura com terraço e vista aberta"* traz três coberturas no topo; *"perto da Avenida Paulista"* traz Consolação e Planalto Paulista; *"casa com quintal para os cachorros"* traz casas térreas com quintal.
 
 ## Decisões que dependem disso
 
 - [[Decisao - Indice vetorial em memoria]]
+- [[Decisao - Cache de embeddings por hash da base]]
