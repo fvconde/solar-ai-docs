@@ -22,6 +22,7 @@ Três serviços, uma fronteira.
 - [[Contrato GET health]] — o mesmo envelope nos dois serviços, e as duas plateias que o leem
 - [[Multi-repo e CI-CD]] — quatro repositórios, um pipeline cada
 - [[Decisao - Front do chat em Angular]] — o front nasce (S-08 e S-09), e as três escolhas que o mantêm barato
+- [[Decisao - Cartao de imovel sem foto]] — o que o cartão mostra, e por que placeholder de imagem ficou de fora
 - [[Migrations no Solar]] — o schema é código versionado, e é o que salva o deploy da Fase 6
 
 Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]] · [[Decisao - Front do chat em Angular]] · [[Decisao - Persistencia em EF Core com Postgres]] · [[Decisao - DTO proprio para a releitura da conversa]]
@@ -29,13 +30,13 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 ## Camada de IA
 
 - [[LangGraph]] — o grafo da Lia
-- [[RAG]] — busca sobre a base simulada de imóveis
+- [[RAG]] — busca híbrida sobre a base simulada de imóveis: filtro duro primeiro, cosseno depois
 - [[Indice vetorial em memoria]] — em RAM, não pgvector; 80 imóveis em 768 dimensões
 - [[Gemini free tier]] — o LLM, e suas armadilhas de cota
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
 - [[Testar a Lia]] — o que dá para afirmar sobre uma função não determinística, e o que só dá para ler
 
-Decisões: [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]]
+Decisões: [[Decisao - Busca depois do LLM disparada pela regua]] · [[Decisao - Motivo do LLM como portao do cartao]] · [[Decisao - Tipo de imovel como filtro derivado do texto]] · [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]]
 
 ## Produto
 

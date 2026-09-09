@@ -42,6 +42,8 @@ fundir(perfil, intencao, extraidos)  # espelha Lead.Fundir do .NET
 
 **Essencial é piso, não gatilho.** Só a trilha de investimento tem gatilho (`DESFECHO_DA_TRILHA` → `direcionar_especialista`), porque só ela tem regra positiva no contrato. Em moradia o piso apenas libera o handoff quando a pessoa pedir; tratá-lo como suficiente fez a Lia parar de qualificar no meio da conversa.
 
+Desde o S-15, `lacunas_essenciais` tem um segundo uso: comparada antes e depois de `fundir`, ela identifica o turno que fecha o piso — o gatilho da busca de imóveis.
+
 **Invariante sob teste:** `pontuar(p) + soma dos pesos de lacunas(p) == 100`. Score e próxima pergunta são a mesma regra lida de dois lados — se esse teste quebrar, as duas se separaram.
 
 ## No grafo
@@ -76,6 +78,10 @@ A primeira versão era uma **lista numerada com imperativos** ("pergunte o prime
 
 A saída é o bloco declarar o próprio limite — *"esta lista foi montada sem a mensagem de agora"* — e o `turno.md` mandar contar a mensagem antes de aplicar o piso. Quem mexer nesses textos precisa preservar essa ressalva: sem ela, o turno em que o investidor informa a expectativa de retorno volta a devolver `continuar_conversa`.
 
+**No S-15 essa mesma limitação voltou, e desta vez o conserto foi de código.** Com o perfil fechando em `intencao`, `regiao` e `preco` na mesma frase — *"quero apartamento de 2 quartos na zona sul até 600 mil"* —, a Lia devolveu `continuar_conversa` e perguntou de novo pela intenção que ela acabara de extrair. Nenhuma redação de prompt resolve: o modelo está lendo uma lista que é verdadeira no instante em que foi montada.
+
+Quem desempata é a régua, **depois** de `fundir`: se o perfil de entrada tinha essencial em aberto e o fundido não tem mais, este é o turno da virada, e ele dispara a busca de imóveis sozinho. Ver [[Decisao - Busca depois do LLM disparada pela regua]]. É a quarta pergunta que a mesma tabela passou a responder — *já dá para mostrar imóvel?* — sem custar chamada nenhuma.
+
 ## Como mexer nos pesos
 
 São julgamento de produto, não medida — não há base rotulada para calibrar, e não haverá ([[Decisao - Nenhum ML classico no escopo]]). Para mexer:
@@ -99,5 +105,6 @@ E ela **não desce**. Preencher campo nunca baixa o score. Para ordenar uma fila
 ## Relacionadas
 
 - [[Decisao - Score por regua deterministica]]
+- [[Decisao - Busca depois do LLM disparada pela regua]]
 - [[Decisao - Um no com saida estruturada]]
 - [[Decisao - Testes do agente em duas superficies]]
