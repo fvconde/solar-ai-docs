@@ -36,7 +36,7 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
 - [[Testar a Lia]] — o que dá para afirmar sobre uma função não determinística, e o que só dá para ler
 
-Decisões: [[Decisao - Busca depois do LLM disparada pela regua]] · [[Decisao - Motivo do LLM como portao do cartao]] · [[Decisao - Tipo de imovel como filtro derivado do texto]] · [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]]
+Decisões: [[Decisao - Busca depois do LLM disparada pela regua]] · [[Decisao - Motivo do LLM como portao do cartao]] · [[Decisao - Tipo de imovel como filtro derivado do texto]] · [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]] · [[Decisao - Resumo do corretor escrito pelo LLM]]
 
 ## Produto
 
@@ -44,7 +44,7 @@ Decisões: [[Decisao - Busca depois do LLM disparada pela regua]] · [[Decisao -
 - [[Regua de qualificacao]] — a tabela que dá o score e escolhe a próxima pergunta
 - [[Follow-up proativo]] — o requisito que escolheu o canal
 
-Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao - Canal da demo e chat web com Telegram cortavel]] · [[Decisao - Agenda simulada por slots]] · [[Decisao - Score por regua deterministica]]
+Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao - Canal da demo e chat web com Telegram cortavel]] · [[Decisao - Agenda simulada por slots]] · [[Decisao - Agenda na requisicao e agendador como no do grafo]] · [[Decisao - Score por regua deterministica]]
 
 ## Privacidade — disciplinas da Fase 5
 
