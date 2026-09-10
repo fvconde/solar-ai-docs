@@ -27,4 +27,4 @@ Para execução contínua em CI:
 
 ## Conceitos
 
-[[Direito de eliminacao]] · [[Integridade referencial]] · [[Segurança da Informação]]
+[[Direito de eliminacao]] · [[Migrations no Solar]] · [[LGPD e GDPR]]

@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 09/09/2026 (S-37)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 10/09/2026 (S-17)
 
 ---
 
@@ -31,15 +31,17 @@ navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens──
 
 **Front → API.** O front conhece `POST /conversas/{guid}/mensagens` e `GET /conversas/{guid}`. O `{guid}` é escolhido pelo cliente e guardado no `localStorage`; a conversa nasce no primeiro POST. O front nunca fala com o agente.
 
-**API → agente.** `POST /turn`, contrato congelado no S-05 e espelhado em DTO nos dois repositórios — `app/contrato.py` no Python e `Contracts/ContratoTurno.cs` no .NET. Os dois lados recusam campo desconhecido: se um repo mudar sem o outro, o primeiro turno falha alto em vez de virar `null` silencioso. **Mudança no contrato exige commit coordenado nos dois repositórios.**
+**API → agente.** `POST /turn`, contrato congelado no S-05 e espelhado em DTO nos dois repositórios — `app/contrato.py` no Python e `Contracts/ContratoTurno.cs` no .NET. Os dois lados recusam campo desconhecido: se um repo mudar sem o outro, o primeiro turno falha alto em vez de virar `null` silencioso. O S-17 acrescentou `agenda[]` à requisição, `slotEscolhido` à resposta e o tipo `SlotOferecido`; o espelho tem 7 tipos e 42 campos. **Mudança no contrato exige commit coordenado nos dois repositórios.**
 
 **Agente → banco: não existe.** O agente é stateless por decisão de arquitetura. Ele recebe histórico e perfil na requisição e devolve a resposta; não abre conexão com o Postgres, não guarda nada entre turnos. Quem funde o perfil, serializa o turno e decide o que persiste é a API.
 
 ## Onde mora o estado
 
-Cinco tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores` e `encaminhamentos` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot.
+Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot.
 
 `corretores` é a única tabela **semeada**: 5 linhas literais dentro da própria migration, como os 80 imóveis são semeados por JSON. Seed não mora em `HasData` — coleção primitiva ali faz o EF ver o modelo mudando a cada build e o boot cai, com o log culpando o banco (`Solar Brain/20 - Bugs/Bug - HasData com colecao primitiva derruba o boot.md`).
+
+Os slots não ficam presos a datas de migration. Depois de aplicar o schema, a rotina de boot `AgendaInicial` garante ao menos 6 horários futuros livres por corretor ativo, em dias úteis e relativos ao relógio corrente; horários persistidos usam UTC, e a conversão para São Paulo acontece nas bordas.
 
 A trava por conversa (`TravaDeConversas`, um `SemaphoreSlim`) impede que duas mensagens simultâneas leiam o mesmo histórico e uma atualização de perfil se perca. **Ela só vale dentro de um processo** — com mais de uma instância da API a proteção some sem erro e sem log. O deploy do S-26 tem que subir com instância única enquanto for assim.
 
@@ -73,6 +75,14 @@ O casamento de região **espelha o `_regiao_bate` do `indice.py`**: termo de uma
 
 **Dedupe por contato.** `POST /conversas/{id}/contato` grava nome, telefone e e-mail. Telefone vira dígitos e e-mail vira minúsculas antes de comparar, sob índice único parcial; o mesmo contato visto noutra conversa traz aquela conversa para o lead que já existe, funde o perfil e **apaga o lead provisório**. É o que transforma base de conversas em base de clientes.
 
+## O agendamento (S-17)
+
+Os horários só entram na conversa depois do handoff. Antes de chamar o agente, a API consulta no máximo três `slots` futuros e livres do corretor atribuído e os envia em `TurnoRequest.agenda`. O nó puro `agendar` leva essa lista ao prompt; a mesma chamada estruturada do nó `responder` pode devolver `slotEscolhido`. Um gate no Python e outro na API descartam qualquer id que não tenha sido oferecido naquele turno.
+
+**A fala não confirma o banco.** A Lia só declara a intenção de reservar. A API executa um `UPDATE` condicional — corretor correto, slot futuro e `lead_id IS NULL` — na mesma transação que grava as duas mensagens e o encaminhamento. Exatamente uma disputa pode alterar a linha. A vencedora produz o evento estruturado `confirmado`; a perdedora produz `indisponivel` com até três alternativas atuais. O front prefere esse evento ao evento genérico de handoff e o `GET /conversas/{id}` o reconstrói depois do reload.
+
+Agenda vazia não derruba o turno e não autoriza invenção: o prompt orienta a Lia a dizer que a confirmação seguirá pelo contato informado. Se o agente falhar, a transação nem começa; não ficam conversa, encaminhamento ou reserva parciais.
+
 ## Privacidade
 
 Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. O que vai para o LLM passa pela camada de mascaramento do S-34.
@@ -81,7 +91,7 @@ Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. O 
 
 - **`nome` do lead, desde o S-06.** Vai em todo `TurnoRequest` dentro do `PerfilLead`, e volta em `CamposExtraidos` porque é o modelo que o extrai da conversa. Mascarar quebraria a função: a Lia chama a pessoa pelo nome, e é isso que sustenta o requisito de "conversa natural". Fica **fora** do mascaramento do S-34, e o consentimento do S-33 tem que cobrir o fato.
 
-**O que deliberadamente não vai, e por construção (S-37):** `telefone` e `email` do lead. Eles entram por formulário próprio (`POST /conversas/{id}/contato`), vão do formulário ao Postgres e do Postgres ao painel — **nunca ao turno**. A garantia não é textual e sim estrutural: o contrato congelado do `/turn` não tem campo para eles, e os dois lados recusam campo desconhecido. `Solar.Api.Tests` afirma por reflexão que nenhum dos 6 tipos do espelho carrega campo de contato, e que o espelho continua com 37 campos — o teste falha antes de qualquer vazamento entrar em produção.
+**O que deliberadamente não vai, e por construção (S-37):** `telefone` e `email` do lead. Eles entram por formulário próprio (`POST /conversas/{id}/contato`), vão do formulário ao Postgres e do Postgres ao painel — **nunca ao turno**. A garantia não é textual e sim estrutural: o contrato congelado do `/turn` não tem campo para eles, e os dois lados recusam campo desconhecido. `Solar.Api.Tests` afirma por reflexão que nenhum dos 7 tipos do espelho carrega campo de contato, e que o espelho continua com 42 campos — o teste falha antes de qualquer vazamento entrar em produção.
 
 O free tier da Gemini usa o conteúdo enviado para treino. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o único controle real, e o texto de consentimento do S-33 tem que declarar o fato.
 
