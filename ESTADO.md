@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 09/09/2026 (S-37 concluído — o encaminhamento ao corretor destrava cinco obrigatórios)
+**Última atualização:** 09/09/2026 (S-37 concluído; preparação do piloto de agentes em paralelo realizada)
 **Entrega:** 29/09/2026 23:59 · **Congelamento de código:** 24/09/2026
 **Fase atual:** 4 · Ciclo fechado
 
@@ -83,6 +83,10 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 
 ## Feito
 
+- **09/09 — Preparação do piloto de agentes em paralelo realizada.** O usuário criou `develop` nos quatro repositórios; referências locais `origin/develop` conferidas, e `solar-ai-docs` sincronizado com o remoto antes da publicação. O board ganhou oito campos de coordenação, com releitura confirmando nomes, tipos e preservação das propriedades anteriores. A convenção ativa usa essas propriedades para assinatura, reservas sequenciais e até dois cards em execução, com o usuário coordenando a integração. Guia, `AGENTS.md`, `CLAUDE.md` e este registro preparados para publicação conjunta na `develop`. Nenhum card reservado ou iniciado; o teste operacional e o acesso próprio de cada ferramenta ainda serão verificados no primeiro uso.
+
+- **09/09 — Roteiro de agentes em paralelo preparado.** [WORKFLOW-AGENTES.md](WORKFLOW-AGENTES.md) define consulta dinâmica do board, assinatura por execução, dependências e recursos compartilhados, worktrees por card nos quatro repos, revisão e integração em `develop`. Referenciado em `AGENTS.md` e `CLAUDE.md`. Adoção e teste operacional pendentes; nenhum card iniciado, mudança no Notion, branch criada ou merge realizado nesta sessão.
+
 - **22/08 — S-01 · Os 4 repositórios criados** e clonados lado a lado na pasta `solar/`.
 - **22/08 — S-03 · Base simulada de imóveis pronta**, em `solar-ai/data`. Falta validar na Fase 3 se as descrições em texto corrido têm variedade suficiente para o RAG funcionar bem.
 - **22/08 — Tarefas do Cowork agendadas**: briefing noturno em dias úteis e auditoria semanal às sextas.
@@ -147,6 +151,8 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 ---
 
 ## Próximo
+
+**Piloto de workflow (09/09):** iniciar o primeiro agente pelo prompt do [WORKFLOW-AGENTES.md](WORKFLOW-AGENTES.md), usando as propriedades de coordenação já criadas no Notion. Conferir acesso do agente e base `origin/develop`; aguardar “Reserva confirmada” antes de iniciar o segundo. A programação pode correr em paralelo, com uma única janela de teste integrado e o usuário coordenando a integração. A fila abaixo é contexto de retomada: a seleção deve reconsultar o board, incluindo cards novos e alterações.
 
 1. **S-17 · Agendamento: modelo, endpoints e nó agendador** (`Must`, não cortável, Fase 4, `solar-ai-api` + `solar-ai`, 5h) — **destravado agora**: a dependência era o S-37, e o slot já tem dono. É o card que o usuário pediu antes desta sessão e que não podia rodar. As 9 subtarefas estão em checklist no card, e a ordem é dura: **a subtarefa 5 vem primeiro e nos dois repos** — é a segunda emenda do contrato congelado (`agenda` no request, `slotEscolhido` no response, tipo `SlotOferecido`), com commit coordenado, levando o espelho de 6 tipos e 37 campos para 7 e 42. Depois disso os blocos .NET (1–4) e Python (6–7) correm em paralelo. **Decisão a tomar ao abrir:** se o `tipo` de imóvel pega carona na mesma emenda (~45 min, contra 1–2h isolado) — a dívida do S-15 ficou órfã quando o S-35 saiu da janela, e o espelho iria a 44 campos. **Armadilha própria do card:** a agenda não pode ser semeada por migration com datas fixas, senão vence antes de 29/09 — a subtarefa 2 é rotina de boot, de propósito. E vale juntar a dívida do item 6, porque este card mexe no mesmo `turno.md` e roda o mesmo `-m llm -k handoff`.
 2. **Metade que falta do S-33** (`Must`, 2h) — a UI já tem o aceite ativo e a recusa reversível desde o S-09; falta **registrar o consentimento com carimbo de tempo e versão do texto** no backend, em duas colunas do `leads` mais migration. Hoje o aceite só vive no `localStorage` do navegador. Desde 09/09 o texto também precisa declarar o **compartilhamento com um corretor humano** — finalidade que o S-37 deixou de ser hipótese e passou a existir no banco —, e o aviso do formulário de contato já afirma ao lead que aqueles dados **não vão à IA**, então o texto do S-33 não pode contradizê-lo.
