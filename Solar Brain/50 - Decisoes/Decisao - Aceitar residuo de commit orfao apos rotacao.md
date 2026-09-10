@@ -31,4 +31,4 @@ Essa verificação precisa ser feita **de fora do container**, pela porta public
 
 ## Conceitos
 
-[[Segurança da Informação]] · [[Direito de eliminacao]]
+[[LGPD e GDPR]] · [[Direito de eliminacao]]
