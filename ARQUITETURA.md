@@ -95,7 +95,7 @@ Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No
 
 **O que deliberadamente não vai, e por construção (S-37):** `telefone` e `email` do lead. Eles entram por formulário próprio (`POST /conversas/{id}/contato`), vão do formulário ao Postgres e do Postgres ao painel — **nunca ao turno**. A garantia não é textual e sim estrutural: o contrato congelado do `/turn` não tem campo para eles, e os dois lados recusam campo desconhecido. `Solar.Api.Tests` afirma por reflexão que nenhum dos 7 tipos do espelho carrega campo de contato, e que o espelho continua com 42 campos — o teste falha antes de qualquer vazamento entrar em produção.
 
-O free tier da Gemini usa o conteúdo enviado para treino. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o único controle real, e o texto de consentimento do S-33 tem que declarar o fato.
+O free tier da Gemini usa o conteúdo enviado para treino, e o desenvolvimento roda nele. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o **único controle real** sobre o que sai daqui. **Desde 11/09 o texto de consentimento do S-33 descreve o regime alvo**, o tier pago, e não o de desenvolvimento: o aviso curto e a página `/privacidade` afirmam, de forma alinhada, que as mensagens não são usadas pelo provedor para treinar ou melhorar modelos. Isso é decisão de produto registrada, não descrição do estado atual — adotar o tier pago é pré-condição para a declaração ser verdadeira em uso real. Quem escrever o README do S-30 precisa usar as mesmas palavras, senão os entregáveis divergem.
 
 ## Regras que não mudam
 
