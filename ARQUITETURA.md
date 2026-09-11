@@ -85,11 +85,13 @@ Agenda vazia não derruba o turno e não autoriza invenção: o prompt orienta a
 
 ## Privacidade
 
-Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. O que vai para o LLM passa pela camada de mascaramento do S-34.
+Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No agente, CPF, telefone, e-mail e CEP passam por uma camada única de regex e mapa de tokens por turno antes das duas fronteiras com o Google: geração da conversa/apresentação e embedding da busca. A resposta estruturada é des-tokenizada antes de chegar ao lead, portanto a tela exibe o valor original e nunca a etiqueta interna.
 
 **Exceções — o que vai ao modelo em texto claro, e por quê.** Toda exceção mora aqui, nunca na cabeça de ninguém:
 
 - **`nome` do lead, desde o S-06.** Vai em todo `TurnoRequest` dentro do `PerfilLead`, e volta em `CamposExtraidos` porque é o modelo que o extrai da conversa. Mascarar quebraria a função: a Lia chama a pessoa pelo nome, e é isso que sustenta o requisito de "conversa natural". Fica **fora** do mascaramento do S-34, e o consentimento do S-33 tem que cobrir o fato.
+
+- **Valores necessários para qualificação e busca, desde o S-34.** Intenção, faixa de preço, quartos, região, urgência e expectativa de retorno continuam em texto claro porque o modelo precisa deles para extrair o perfil, conduzir a conversa e justificar imóveis. CPF, telefone, e-mail e CEP não têm função nessas decisões e são sempre tokenizados quando aparecem espontaneamente na fala do lead.
 
 **O que deliberadamente não vai, e por construção (S-37):** `telefone` e `email` do lead. Eles entram por formulário próprio (`POST /conversas/{id}/contato`), vão do formulário ao Postgres e do Postgres ao painel — **nunca ao turno**. A garantia não é textual e sim estrutural: o contrato congelado do `/turn` não tem campo para eles, e os dois lados recusam campo desconhecido. `Solar.Api.Tests` afirma por reflexão que nenhum dos 7 tipos do espelho carrega campo de contato, e que o espelho continua com 42 campos — o teste falha antes de qualquer vazamento entrar em produção.
 
