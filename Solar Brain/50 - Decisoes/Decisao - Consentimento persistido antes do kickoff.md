@@ -16,7 +16,7 @@ Criar `POST /conversas/{id}/consentimento` para registrar `ConsentimentoEm` e `V
 
 `POST /conversas/{id}/mensagens` deixa de criar conversa e responde conflito quando não encontra um lead consentido. O front guarda apenas o identificador da conversa no navegador, consulta o carimbo no servidor e só então envia o kickoff.
 
-O aviso curto declara o uso do conteúdo para treino no free tier e o compartilhamento com corretor humano. O link abre uma página completa; a retenção apenas referencia a política da Solar, cuja regra continua pertencendo ao S-30.
+Por decisão do usuário, a declaração de uso para treino foi revertida: o aviso curto e a página completa agora afirmam, de forma alinhada, que as mensagens não são usadas pelo provedor para treinar ou melhorar modelos. Essa decisão diverge conscientemente do critério escrito do card, que permanece inalterado. O aviso ainda declara a finalidade do processamento e o encaminhamento para atendimento humano; o link abre uma página completa, e a retenção apenas referencia a política da Solar, cuja regra continua pertencendo ao S-30.
 
 Quando a deduplicação por telefone ou e-mail funde dois leads, o registro sobrevivente conserva o aceite explícito mais recente, sempre transferindo carimbo e versão juntos. O modelo atual comporta um único evento de consentimento; escolher o mais recente preserva a evidência do aviso mais novo que a pessoa aceitou, enquanto manter o primeiro poderia deixar como vigente uma versão já superada. Essa regra evita que o aceite morra junto com o lead removido e não substitui um histórico imutável de eventos, caso ele seja exigido no futuro.
 
