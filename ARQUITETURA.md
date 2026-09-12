@@ -83,6 +83,18 @@ Os horários só entram na conversa depois do handoff. Antes de chamar o agente,
 
 Agenda vazia não derruba o turno e não autoriza invenção: o prompt orienta a Lia a dizer que a confirmação seguirá pelo contato informado. Se o agente falhar, a transação nem começa; não ficam conversa, encaminhamento ou reserva parciais.
 
+## O follow-up (S-24)
+
+Um `BackgroundService` na API — o primeiro `IHostedService` do projeto — varre conversas inativas e manda a Lia retomar o contato. A varredura e o limiar de inatividade são configuráveis em `FollowUp`: o `appsettings.json` carrega o padrão de produção (inatividade de 2h, varredura a cada 15min) e o `appsettings.Development.json` os valores de demonstração (2min e 30s). **O padrão do arquivo base nunca é o valor da demo** — agente que persegue lead é antipadrão, e o limite de 2 tentativas por conversa é o outro lado dessa mesma regra.
+
+Só é elegível a conversa que está inativa além do limiar, tem menos de 2 tentativas, **tem consentimento válido**, não tem desfecho de encerramento e não foi encaminhada. O estado mora em duas colunas de `conversas`: `tentativas_reengajamento` e `desfecho`.
+
+**O gatilho é um header, e a guarda é estrutural.** `AgenteClient` expõe dois métodos: `TurnoAsync`, que os controllers públicos usam, e `ReengajarAsync`, que acrescenta `X-Solar-Trigger: follow-up`. O agente só ativa o nó reengajador quando esse header chega. Como apenas o serviço de varredura chama `ReengajarAsync`, o caminho de reengajamento é inalcançável a partir do endpoint público — por construção, não por checagem que alguém possa esquecer. O contrato congelado do `/turn` não foi tocado.
+
+**A fala não precede o sucesso.** A transação que grava a mensagem e incrementa o contador só abre depois de o agente responder. Agente fora do ar não deixa mensagem pela metade nem consome tentativa. Só a fala da Lia é persistida: o follow-up não fabrica mensagem do lead.
+
+No front, a aba aberta faz *polling* e a mensagem aparece ao vivo; reabrir a conversa também a traz, porque ela está na trilha como qualquer outra. O controle de ativar e desativar pela interface ainda não existe.
+
 ## Privacidade
 
 Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No agente, CPF, telefone, e-mail e CEP passam por uma camada única de regex e mapa de tokens por turno antes das duas fronteiras com o Google: geração da conversa/apresentação e embedding da busca. A resposta estruturada é des-tokenizada antes de chegar ao lead, portanto a tela exibe o valor original e nunca a etiqueta interna.
@@ -95,7 +107,9 @@ Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No
 
 **O que deliberadamente não vai, e por construção (S-37):** `telefone` e `email` do lead. Eles entram por formulário próprio (`POST /conversas/{id}/contato`), vão do formulário ao Postgres e do Postgres ao painel — **nunca ao turno**. A garantia não é textual e sim estrutural: o contrato congelado do `/turn` não tem campo para eles, e os dois lados recusam campo desconhecido. `Solar.Api.Tests` afirma por reflexão que nenhum dos 7 tipos do espelho carrega campo de contato, e que o espelho continua com 42 campos — o teste falha antes de qualquer vazamento entrar em produção.
 
-O free tier da Gemini usa o conteúdo enviado para treino, e o desenvolvimento roda nele. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o **único controle real** sobre o que sai daqui. **Desde 11/09 o texto de consentimento do S-33 descreve o regime alvo**, o tier pago, e não o de desenvolvimento: o aviso curto e a página `/privacidade` afirmam, de forma alinhada, que as mensagens não são usadas pelo provedor para treinar ou melhorar modelos. Isso é decisão de produto registrada, não descrição do estado atual — adotar o tier pago é pré-condição para a declaração ser verdadeira em uso real. Quem escrever o README do S-30 precisa usar as mesmas palavras, senão os entregáveis divergem.
+O free tier da Gemini usa o conteúdo enviado para treino, e o desenvolvimento roda nele. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o **único controle real** sobre o que sai daqui. **Desde 11/09 o texto de consentimento do S-33 descreve o regime alvo**, o tier pago, e não o de desenvolvimento: o aviso curto e a página `/privacidade` afirmam, de forma alinhada, que as mensagens não são usadas pelo provedor para treinar ou melhorar modelos. Isso é decisão de produto registrada, não descrição do estado atual — adotar o tier pago é pré-condição para a declaração ser verdadeira em uso real. O README do hub, entregue pelo S-30, usa essas mesmas palavras; os entregáveis não divergem.
+
+**Retenção e eliminação moram no README do hub, e só lá (S-30).** O prazo declarado é de 12 meses contados do último contato, e o pedido de eliminação do titular chega pelo corretor ou pelo atendimento humano, que aciona os endpoints protegidos por `X-Chave-Privacidade`. Aqui fica apenas o fato técnico que o README também declara: **não existe rotina de expurgo automático nem TTL no banco** — a eliminação é sob demanda, e a automação é roadmap. Citar daqui, nunca reescrever: texto de conformidade escrito em dois lugares diverge em um.
 
 ## Regras que não mudam
 
