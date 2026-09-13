@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 10/09/2026 (S-17)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 13/09/2026 (S-36 e S-23)
 
 ---
 
@@ -42,6 +42,8 @@ Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conve
 `corretores` é a única tabela **semeada**: 5 linhas literais dentro da própria migration, como os 80 imóveis são semeados por JSON. Seed não mora em `HasData` — coleção primitiva ali faz o EF ver o modelo mudando a cada build e o boot cai, com o log culpando o banco (`Solar Brain/20 - Bugs/Bug - HasData com colecao primitiva derruba o boot.md`).
 
 Os slots não ficam presos a datas de migration. Depois de aplicar o schema, a rotina de boot `AgendaInicial` garante ao menos 6 horários futuros livres por corretor ativo, em dias úteis e relativos ao relógio corrente; horários persistidos usam UTC, e a conversão para São Paulo acontece nas bordas.
+
+`mensagens.imoveis_sugeridos` é `jsonb` e guarda o **snapshot** do que a Lia mostrou naquele turno, não o id para reconsultar — o motivo é texto escrito sobre aquele lead e a base pode mudar (S-36). A coluna carrega três estados distinguíveis, e a distinção é semântica: **nulo** em fala do lead, lista **vazia** em fala da Lia sem sugestão, lista preenchida quando houve. Quem ler a coluna não pode colapsar nulo e vazio.
 
 A trava por conversa (`TravaDeConversas`, um `SemaphoreSlim`) impede que duas mensagens simultâneas leiam o mesmo histórico e uma atualização de perfil se perca. **Ela só vale dentro de um processo** — com mais de uma instância da API a proteção some sem erro e sem log. O deploy do S-26 tem que subir com instância única enquanto for assim.
 
@@ -94,6 +96,16 @@ Só é elegível a conversa que está inativa além do limiar, tem menos de 2 te
 **A fala não precede o sucesso.** A transação que grava a mensagem e incrementa o contador só abre depois de o agente responder. Agente fora do ar não deixa mensagem pela metade nem consome tentativa. Só a fala da Lia é persistida: o follow-up não fabrica mensagem do lead.
 
 No front, a aba aberta faz *polling* e a mensagem aparece ao vivo; reabrir a conversa também a traz, porque ela está na trilha como qualquer outra. O controle de ativar e desativar pela interface ainda não existe.
+
+## O grafo da Lia e o supervisor (S-23)
+
+O turno entra por um nó supervisor: `START → supervisor → {qualificador, agendador, consultor, reengajador}`. O supervisor é **função pura, sem chamada ao modelo**, e decide a rota por fato estrutural do estado — reengajamento ativo, slots na requisição, essenciais fechados com intenção de catálogo, ou a rota padrão de qualificação.
+
+**Ele não chamar o LLM não é economia incidental, é o que torna o nó possível.** O critério do card exigia o supervisor e, na mesma frase, que o custo por turno não subisse do patamar de 1 chamada no turno comum e 2 no turno que sugere. Um supervisor movido a modelo custaria uma chamada em todo turno. O porquê está em [ESTADO.md](ESTADO.md) na linha de 13/09.
+
+**Três nós chamam o LLM** — `_responder`, `_reengajar` e `_apresentar`. `_qualificar`, `_pontuar`, `_consultar`, `_agendar` e `_supervisor` são funções puras: régua determinística, fusão de perfil, busca vetorial, injeção de agenda e roteamento. Função determinística é passo de pipeline, não agente — descrever o sistema como agentes autônomos é exagero que não sobrevive à arguição.
+
+Cada turno emite uma linha de log INFO com o GUID da conversa e o nó escolhido, e é por ela que se audita o roteamento sem instrumentar nada.
 
 ## Privacidade
 
