@@ -63,3 +63,4 @@ Uma passada de regex por mensagem e por consulta; um módulo novo de 156 linhas 
 - `Decisao - Encaminhamento ao corretor com contato fora do LLM.md` — a garantia estrutural do S-37, que este card complementa
 - `Decisao - Versao minima de privacidade e nao a completa.md`
 - `Decisao - Uma chave unica para privacidade e painel.md`
+- [[Decisao - Resumo do corretor como fronteira stateless separada]] — **o título desta nota envelheceu por causa dela:** desde o S-18 as fronteiras com o Google são **três**, e a terceira é a geração do resumo. Lá vale ainda uma diferença deliberada: os tokens de contato **não** são des-tokenizados na saída do resumo, ao contrário do turno.

@@ -22,8 +22,8 @@ O ambiente local sobe pelo `docker-compose.yml` deste repositório. O Angular ro
 ## As fronteiras, e o que atravessa cada uma
 
 ```
-navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens──> solar-ai-api ──/turn──> solar-ai
-                                                                       │
+navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens──> solar-ai-api ──/turn────> solar-ai
+                                                                       │              └─/resumo──> solar-ai
                                                                    EF Core
                                                                        ↓
                                                                    postgres
@@ -31,17 +31,21 @@ navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens──
 
 **Front → API.** O front conhece `POST /conversas/{guid}/mensagens` e `GET /conversas/{guid}`. O `{guid}` é escolhido pelo cliente e guardado no `localStorage`; a conversa nasce no primeiro POST. O front nunca fala com o agente.
 
-**API → agente.** `POST /turn`, contrato congelado no S-05 e espelhado em DTO nos dois repositórios — `app/contrato.py` no Python e `Contracts/ContratoTurno.cs` no .NET. Os dois lados recusam campo desconhecido: se um repo mudar sem o outro, o primeiro turno falha alto em vez de virar `null` silencioso. O S-17 acrescentou `agenda[]` à requisição, `slotEscolhido` à resposta e o tipo `SlotOferecido`; o espelho tem 7 tipos e 42 campos. **Mudança no contrato exige commit coordenado nos dois repositórios.**
+**API → agente, primeira fronteira: `POST /turn`.** Contrato congelado no S-05 e espelhado em DTO nos dois repositórios — `app/contrato.py` no Python e `Contracts/ContratoTurno.cs` no .NET. Os dois lados recusam campo desconhecido: se um repo mudar sem o outro, o primeiro turno falha alto em vez de virar `null` silencioso. O S-17 acrescentou `agenda[]` à requisição, `slotEscolhido` à resposta e o tipo `SlotOferecido`; o espelho tem 7 tipos e 42 campos. **Mudança no contrato exige commit coordenado nos dois repositórios.**
+
+**API → agente, segunda fronteira: `POST /resumo` (S-18).** A primeira fronteira nova desde o congelamento do `/turn`, e ela nasceu barata de propósito: reaproveita `PerfilLead`, `MensagemHistorico` e `ImovelSugerido`, já espelhados, e cria **um tipo novo por lado** — `ResumoResponse`, com `perfil`, `orcamento`, `imoveis`, `objecoes` e `proximoPasso`. Valem as mesmas regras do `/turn`: `extra="forbid"` no Python e `JsonUnmappedMemberHandling.Disallow` no .NET, commit coordenado, e falha do agente virando 502 ou 504, nunca 500. **O `/turn` não foi tocado** — são endpoints separados, e é isso que permitiu a segunda fronteira sem reabrir o contrato congelado.
 
 **Agente → banco: não existe.** O agente é stateless por decisão de arquitetura. Ele recebe histórico e perfil na requisição e devolve a resposta; não abre conexão com o Postgres, não guarda nada entre turnos. Quem funde o perfil, serializa o turno e decide o que persiste é a API.
 
 ## Onde mora o estado
 
-Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot.
+Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot. A última aplicada é `20260914002310_ResumoNoEncaminhamento`, do S-18.
 
 `corretores` é a única tabela **semeada**: 5 linhas literais dentro da própria migration, como os 80 imóveis são semeados por JSON. Seed não mora em `HasData` — coleção primitiva ali faz o EF ver o modelo mudando a cada build e o boot cai, com o log culpando o banco (`Solar Brain/20 - Bugs/Bug - HasData com colecao primitiva derruba o boot.md`).
 
 Os slots não ficam presos a datas de migration. Depois de aplicar o schema, a rotina de boot `AgendaInicial` garante ao menos 6 horários futuros livres por corretor ativo, em dias úteis e relativos ao relógio corrente; horários persistidos usam UTC, e a conversão para São Paulo acontece nas bordas.
+
+`encaminhamentos.resumo` é `jsonb` nulável e guarda o resumo já gerado para o corretor (S-18). Nulo ali significa **ainda não gerado**, não "sem conteúdo" — a ausência de conteúdo é expressa pelas cinco seções internas, cada uma nulável por si. É a distinção que evita regerar à toa e queimar cota.
 
 `mensagens.imoveis_sugeridos` é `jsonb` e guarda o **snapshot** do que a Lia mostrou naquele turno, não o id para reconsultar — o motivo é texto escrito sobre aquele lead e a base pode mudar (S-36). A coluna carrega três estados distinguíveis, e a distinção é semântica: **nulo** em fala do lead, lista **vazia** em fala da Lia sem sugestão, lista preenchida quando houve. Quem ler a coluna não pode colapsar nulo e vazio.
 
@@ -77,6 +81,18 @@ O casamento de região **espelha o `_regiao_bate` do `indice.py`**: termo de uma
 
 **Dedupe por contato.** `POST /conversas/{id}/contato` grava nome, telefone e e-mail. Telefone vira dígitos e e-mail vira minúsculas antes de comparar, sob índice único parcial; o mesmo contato visto noutra conversa traz aquela conversa para o lead que já existe, funde o perfil e **apaga o lead provisório**. É o que transforma base de conversas em base de clientes.
 
+## O resumo para o corretor (S-18)
+
+O encaminhamento passa a carregar o que o corretor lê em trinta segundos. `POST /encaminhamentos/{id}/resumo` devolve o `jsonb` já gravado em `encaminhamentos.resumo`; quando ele é nulo, a API reúne perfil, histórico recente e a união deduplicada dos imóveis mostrados, chama o agente, persiste e devolve. `?forcar=true` é a única forma de regerar.
+
+**A geração é preguiçosa e acontece uma vez, fora do turno do lead.** Pôr a segunda chamada dentro de `POST /conversas/{id}/mensagens` faria a pessoa esperar por um texto que ela nunca vê, dentro do orçamento de 45 s e com a trava da conversa segurada — um turno bom viraria `504` sob pressão de cota. Custo real medido: **1 chamada na primeira leitura, zero em todas as seguintes.**
+
+**As cinco seções são nuláveis, e a nulidade é informação.** `perfil`, `orcamento`, `imoveis`, `objecoes` e `proximoPasso` voltam `null` quando não há fato na transcrição que as sustente — seção vazia não é inventada. Isso é asserível por nulo contra preenchido, sem julgar texto, que é a filosofia de teste do projeto desde o S-11. Em conversa real validada na integração, `imoveis` e `objecoes` vieram nulos. **Quem consome não pode tratar nulo como erro nem como "carregando".**
+
+**`objecoes` existe porque o `PerfilLead` descarta a negação de propósito.** Quando o lead diz só o que *não* quer, o campo estruturado fica nulo — `regiao: "exceto zona leste"` viraria consulta ao índice vetorial, e embedding não tem operador de negação (decisão de 07/09). Só a transcrição carrega isso, e ler transcrição para extrair objeção é trabalho de LLM. É a frase que explica o card inteiro: o campo estruturado joga a negação fora porque embedding não entende "exceto"; o resumo a recupera do texto, porque um humano entende.
+
+**Falha de resumo não derruba nada.** O encaminhamento fica de pé com `resumo` nulo e ação de tentar de novo; o turno do lead nunca é afetado.
+
 ## O agendamento (S-17)
 
 Os horários só entram na conversa depois do handoff. Antes de chamar o agente, a API consulta no máximo três `slots` futuros e livres do corretor atribuído e os envia em `TurnoRequest.agenda`. O nó puro `agendar` leva essa lista ao prompt; a mesma chamada estruturada do nó `responder` pode devolver `slotEscolhido`. Um gate no Python e outro na API descartam qualquer id que não tenha sido oferecido naquele turno.
@@ -109,7 +125,9 @@ Cada turno emite uma linha de log INFO com o GUID da conversa e o nó escolhido,
 
 ## Privacidade
 
-Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No agente, CPF, telefone, e-mail e CEP passam por uma camada única de regex e mapa de tokens por turno antes das duas fronteiras com o Google: geração da conversa/apresentação e embedding da busca. A resposta estruturada é des-tokenizada antes de chegar ao lead, portanto a tela exibe o valor original e nunca a etiqueta interna.
+Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No agente, CPF, telefone, e-mail e CEP passam por uma camada única de regex e mapa de tokens antes das **três** fronteiras com o Google: geração da conversa/apresentação, embedding da busca e, desde o S-18, a geração do resumo do corretor. A resposta estruturada do turno é des-tokenizada antes de chegar ao lead, portanto a tela exibe o valor original e nunca a etiqueta interna.
+
+**O resumo é a exceção à des-tokenização, e de propósito.** Ao contrário do turno, os tokens de contato **não** são restaurados na saída do `/resumo`: o corretor lê o telefone real no painel, vindo do banco, e nunca do texto gerado pelo modelo. Restaurar ali colocaria dado de contato dentro de um texto que o modelo escreveu, sem necessidade nenhuma — o painel já tem o dado pela via estruturada do S-37.
 
 **Exceções — o que vai ao modelo em texto claro, e por quê.** Toda exceção mora aqui, nunca na cabeça de ninguém:
 
