@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Execução paralela de cards
 
-Quando o usuário invocar o fluxo de agentes em paralelo, leia [WORKFLOW-AGENTES.md](WORKFLOW-AGENTES.md) antes de selecionar ou reservar um card. Esse fluxo adapta o rito de sessão única abaixo e de `retomar-solar`: cada executor registra a própria entrega, o integrador consolida `ESTADO.md`, e a assinatura/atualização operacional do Notion segue a autorização de execução. Confira a preparação; o guia não configura branches, campos ou coordenação automaticamente. Fora desse fluxo explícito, mantenha o rito existente.
+O fluxo de cards em paralelo tem dois papéis e um documento para cada um. Como **Maestro**, siga a skill `orquestrate`: seleção, reserva no Notion, Andar e worktrees, delegação, validação e consolidação depois da integração. Como **executor** de um card, leia [WORKFLOW-AGENTES.md](WORKFLOW-AGENTES.md) — o contrato do executor. Esse fluxo adapta o rito de sessão única abaixo e de `retomar-solar`: cada executor registra a própria entrega em `execucoes/`, só o Maestro consolida `ESTADO.md`, e a atualização operacional do Notion segue a autorização de execução. Fora desse fluxo explícito, mantenha o rito existente.
 
 ## O que é este repositório
 

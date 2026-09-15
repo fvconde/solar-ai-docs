@@ -2,7 +2,7 @@
 
 ## Execução paralela de cards
 
-Quando o usuário pedir execução de cards por agentes em paralelo, siga [WORKFLOW-AGENTES.md](WORKFLOW-AGENTES.md). O guia define consulta dinâmica do Notion, reserva, worktrees por card e integração em `develop`. Confira os pré-requisitos de adoção; não presuma que branches, campos do board ou um coordenador já foram configurados. Para esse fluxo explícito, cada executor registra sua entrega em arquivo próprio e o integrador consolida `ESTADO.md`.
+Se você foi recrutado como **executor** de um card, leia [WORKFLOW-AGENTES.md](WORKFLOW-AGENTES.md): é o contrato do executor — worktrees e caminhos, comandos proibidos, ambiente e cota, entrega e PR, modelo do registro de execução e formato do relatório. Seleção de card, reserva no Notion e integração em `develop` não são suas; ficam com o Maestro. O briefing do seu card vence sobre este guia onde for específico, e cada executor registra a própria entrega em arquivo próprio, sem tocar `ESTADO.md`.
 
 ## Estrutura do projeto
 
