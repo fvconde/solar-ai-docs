@@ -1,10 +1,12 @@
 ---
 tipo: decisao
 data: 2026-09-10
-status: vigente
+status: revogada
 tags: [decisao, seguranca, lgpd, painel, s-20, s-29]
 ---
 # Decisão — Uma chave única governa a exclusão LGPD e o painel do corretor
+
+> **Revogada em 15/09 pelo S-42.** O painel passou a exigir login e senha por corretor, e a chave de privacidade ficou restrita aos endpoints destrutivos. Ver [[Decisao - Login por corretor substitui a chave unica no painel]]. O texto abaixo fica como estava: ele registra por que a consequência foi aceita durante cinco dias, e o conserto que este arquivo já previa.
 
 ## Problema
 
