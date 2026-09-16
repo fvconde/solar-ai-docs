@@ -6,3 +6,12 @@ Solar Brain/.obsidian/
 .env.*
 !.env.example
 *.key
+
+# Material de orquestração — decisão do usuário em 12/09: não versionar.
+# Briefing é o contrato que o orquestrador passa ao executor, e o registro de
+# orquestração é o diário da janela. Os dois são efêmeros e falam de quem
+# executou, não do que o projeto virou.
+# O que VAI para o repositório é o registro por execução, execucoes/S-XX-<uuid>.md,
+# que o §7 do WORKFLOW-AGENTES.md exige — esses continuam versionados.
+execucoes/briefing-*
+execucoes/orquestracao-*

@@ -55,3 +55,4 @@ O `solar-ai-api` ganhou seu **primeiro projeto de testes** — 43 casos xUnit, s
 - [[Decisao - Agenda simulada por slots]] — o S-17 depende deste card: o slot pertence ao corretor atribuído aqui
 - [[Decisao - Persistencia em EF Core com Postgres]] — onde `corretores` e `encaminhamentos` entram
 - [[Bug - HasData com colecao primitiva derruba o boot]] — o custo de descobrir onde o seed podia morar
+- [[Decisao - Resumo do corretor como fronteira stateless separada]] — o S-18 deu conteúdo ao encaminhamento criado aqui: `encaminhamentos.resumo` guarda o que o corretor lê, e o contato continua vindo do banco, nunca do texto do modelo

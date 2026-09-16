@@ -25,7 +25,7 @@ Três serviços, uma fronteira.
 - [[Decisao - Cartao de imovel sem foto]] — o que o cartão mostra, e por que placeholder de imagem ficou de fora
 - [[Migrations no Solar]] — o schema é código versionado, e é o que salva o deploy da Fase 6
 
-Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]] · [[Decisao - Front do chat em Angular]] · [[Decisao - Persistencia em EF Core com Postgres]] · [[Decisao - DTO proprio para a releitura da conversa]] · [[Decisao - Encaminhamento ao corretor com contato fora do LLM]]
+Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agente Python stateless]] · [[Decisao - Quatro repositorios separados]] · [[Decisao - Ambiente local em Docker Compose]] · [[Decisao - Compose composto por include]] · [[Decisao - NET 10 com controllers]] · [[Decisao - Formato do payload do health check]] · [[Decisao - Contrato do POST turn congelado]] · [[Decisao - Conversa em memoria com turno serializado]] · [[Decisao - Vocabulario do contrato alinhado ao enunciado]] · [[Decisao - Front do chat em Angular]] · [[Decisao - Persistencia em EF Core com Postgres]] · [[Decisao - DTO proprio para a releitura da conversa]] · [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] [[Decisao - Mascaramento nas duas fronteiras com o Google]]
 
 ## Camada de IA
 
@@ -36,7 +36,7 @@ Decisões: [[Decisao - Arquitetura poliglota Python e NET]] · [[Decisao - Agent
 - [[Billing na Gemini API]] — os três estados de tier, e por que o do meio é o pior
 - [[Testar a Lia]] — o que dá para afirmar sobre uma função não determinística, e o que só dá para ler
 
-Decisões: [[Decisao - Busca depois do LLM disparada pela regua]] · [[Decisao - Motivo do LLM como portao do cartao]] · [[Decisao - Tipo de imovel como filtro derivado do texto]] · [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]] · [[Decisao - Resumo do corretor escrito pelo LLM]]
+Decisões: [[Decisao - Busca depois do LLM disparada pela regua]] · [[Decisao - Motivo do LLM como portao do cartao]] · [[Decisao - Tipo de imovel como filtro derivado do texto]] · [[Decisao - Indice vetorial em memoria]] · [[Decisao - Cache de embeddings por hash da base]] · [[Decisao - LLM Gemini Flash free tier]] · [[Decisao - Nenhum ML classico no escopo]] · [[Decisao - Dois projetos Google separados]] · [[Decisao - Modelo Gemini fixado sem alias]] · [[Decisao - Um no com saida estruturada]] · [[Decisao - Testes do agente em duas superficies]] · [[Decisao - Score por regua deterministica]] · [[Decisao - Resumo do corretor escrito pelo LLM]] · [[Decisao - Supervisor deterministico com custo zero de LLM]]
 
 ## Produto
 
@@ -53,7 +53,7 @@ Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao -
 - [[Mascaramento de PII]] — S-34
 - [[Direito de eliminacao]] — S-29
 
-Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o contato não entra no payload do LLM) · [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]] · [[Decisao - Front do chat em Angular]] (metade do S-33 na UI)
+Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o contato não entra no payload do LLM) · [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]] · [[Decisao - Front do chat em Angular]] (metade do S-33 na UI) · [[Decisao - Login por corretor substitui a chave unica no painel]] (S-42, revoga a chave compartilhada no painel) · [[Decisao - Telefone email e transcricao exclusivos do detalhe do lead]] (S-21, PII e histórico restritos ao detalhe)
 
 ## Operação
 

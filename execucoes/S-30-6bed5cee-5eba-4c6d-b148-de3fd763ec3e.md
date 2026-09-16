@@ -1,0 +1,55 @@
+# Execução — S-30 — 6bed5cee-5eba-4c6d-b148-de3fd763ec3e
+
+- **Página do Notion e ID:** `S-30 · README e diagrama de arquitetura` — `3c43478c-8945-81a8-bbad-f60cd065bae9` ([Link Notion](https://app.notion.com/p/3c43478c894581a8bbadf60cd065bae9))
+- **Agente / sessão:** Antigravity · execução `6bed5cee-5eba-4c6d-b148-de3fd763ec3e` · Andar `S-30 — README e diagrama`
+- **Estado / última atividade UTC:** `Em revisão` / 2026-09-12T00:45:00Z
+- **Escopo e critérios de aceite consultados:**
+  - Briefing integral em `solar-ai-docs/execucoes/briefing-S-30-6bed5cee-5eba-4c6d-b148-de3fd763ec3e.md`.
+  - Guia de coordenação `solar-ai-docs/WORKFLOW-AGENTES.md`.
+  - Card no Notion (propriedades `Critério de aceite`, `Contexto de retomada`, `Recursos reservados`).
+  - Criação de README hub em `solar-ai-docs` com problema de negócio, arquitetura, stack, instruções de execução local, governança de privacidade LGPD/GDPR, decisões/trade-offs e roadmap justificado.
+  - Diagrama de arquitetura versionado marcando as DUAS fronteiras onde dados pessoais saem do domínio para o Google (geração conversacional e embedding de busca).
+  - Criação/atualização dos READMEs específicos nos três repositórios de código (`solar-ai-api`, `solar-ai`, `solar-ai-front`), todos com links absolutos para o hub.
+  - Verificabilidade estrita no tempo presente: toda declaração de privacidade aponta para código existente e o que não existe está explicitamente alocado no roadmap (preservação da pendência de follow-up no front).
+- **Dependências por ID e evidências de conclusão:**
+  - `S-29`: integrado em `solar-ai-api` (endpoints administrativos de exclusão LGPD com autorização de chave).
+  - `S-33`: integrado em `solar-ai-api` `c0864b1`, `solar-ai-front` `4370f7a`, `solar-ai-docs` `dbbfa90` (consentimento persistido antes de mensagens e página `/privacidade`).
+  - `S-34`: integrado em `solar-ai` `ad055f5`, `solar-ai-docs` `e8cb761` (mascaramento de PII nas duas fronteiras externas com o Google).
+  - `S-37`: integrado em `solar-ai-api` `37370a3` (atribuição determinística de corretor e contato estruturalmente fora do `/turn`).
+- **Recursos reservados:**
+  - Todos os `README.md` dos quatro repositórios.
+  - Diagrama de arquitetura versionado marcando as duas fronteiras externas.
+  - Seção de privacidade e texto da regra de retenção (fonte única).
+  - Não foram reservados nem tocados: código de aplicação, schema, migrations, contrato `/turn` e portas da janela de teste integrado.
+- **Repositórios / caminhos / branches / SHAs base:**
+  - `solar-ai-docs`: `solar\worktrees\S-30\solar-ai-docs`, branch `feature/S-30`, base `1507484`
+  - `solar-ai`: `solar\worktrees\S-30\solar-ai`, branch `feature/S-30`, base `ad055f5`
+  - `solar-ai-api`: `solar\worktrees\S-30\solar-ai-api`, branch `feature/S-30`, base `c0864b1`
+  - `solar-ai-front`: `solar\worktrees\S-30\solar-ai-front`, branch `feature/S-30`, base `4370f7a`
+- **O que foi alterado:**
+  - `solar-ai-docs/README.md`: Criado como Hub central do projeto. Cobre problema de negócio, os 11 requisitos do enunciado, diagrama Mermaid detalhado com as duas fronteiras Google (`_invocar` e `Indice.buscar`), stack por componente, execução via compose include e front standalone, governança LGPD/GDPR completa (bases legais, política de retenção oficial de 12 meses a contar do último contato com expurgo automático alocado no roadmap técnico, canal humano de recebimento de exclusão via corretor/atendimento acionado na API, mascaramento reversível de PII, exceções funcionais para nome e valores de busca, blindagem de contato, limitações numéricas aceitas, regime alvo do tier pago com pré-condição operacional e melhorias de produção), decisões de arquitetura e roadmap justificado (pgvector, base dinâmica e armadilhas do S-35, WhatsApp, Google Calendar, CRM, Voice AI, observabilidade, ML clássico e portal self-service de exclusão como card novo).
+  - `solar-ai-api/README.md`: Criado com foco no domínio, modelo relacional de 6 tabelas, migrations automáticas no boot, geração dinâmica de slots (`AgendaInicial`), endpoints (`/conversas`, `/leads`, `/painel`, `/health`), governança de privacidade (`AutorizacaoPrivacidade`, rate limiting, exclusão em cascata) e instruções de execução/testes.
+  - `solar-ai/README.md`: Criado com foco na arquitetura stateless do agente Lia, grafo LangGraph de 6 nós, contrato congelado `POST /turn` (7 tipos, 42 campos, `extra="forbid"`), camada `MascaradorPII` nas duas fronteiras externas com o Google, índice vetorial em memória com cache por hash sha256 do corpus e testes automatizados.
+  - `solar-ai-front/README.md`: Atualizado com apontamento para o hub no topo, detalhamento das interfaces (chat com consentimento prévio e kickoff silencioso, painel do corretor `/painel`, página `/privacidade`), contratos consumidos e preservação rigorosa da pendência de follow-up (`Retomada proativa (follow-up) — controle de ativar/desativar ainda não existe`).
+  - Todos os links entre repositórios foram configurados exclusivamente com URLs absolutas do GitHub (`https://github.com/fvconde/solar-ai-*`).
+- **Validações:**
+  - Inspeção e auditoria direta de código em todos os repositórios para assegurar aderência estrita ao critério do tempo presente.
+  - Contrato congelado `POST /turn` conferido nos DTOs espelhados (`Contracts/ContratoTurno.cs` e `app/contrato.py`): 7 modelos, 42 campos, `extra="forbid"` e `JsonUnmappedMemberHandling.Disallow`.
+  - Ausência de links relativos `../` cruzando fronteiras de repositórios nos 4 READMEs conferida via busca de padrões.
+  - Git remotes conferidos e links absolutos do GitHub validados contra os repositórios oficiais.
+  - Remoção completa dos marcadores de pendência após as decisões oficiais do usuário para retenção (12 meses do último contato) e canal de exclusão (corretor/atendimento humano acionando API).
+- **Pendências ou bloqueios:**
+  - Nenhuma pendência técnica deste card.
+  - Merge em `develop` não realizado (proibição estrita do workflow).
+- **PRs e commits de entrega por repositório:**
+  - `solar-ai-api`: Commit `8ddac7b`, [PR #5](https://github.com/fvconde/solar-ai-api/pull/5)
+  - `solar-ai`: Commit `64fc022`, [PR #3](https://github.com/fvconde/solar-ai/pull/3)
+  - `solar-ai-front`: Commit `79c4880`, [PR #4](https://github.com/fvconde/solar-ai-front/pull/4)
+  - `solar-ai-docs`: Commit [pendente de criação com este registro], PR a ser aberto em seguida.
+- **Alterações propostas para ESTADO, arquitetura e vault:**
+  - Proposta para o integrador registrar no `ESTADO.md`: "S-30 concluído e entregue em PRs: README hub e READMEs dos três serviços criados/atualizados, diagrama de arquitetura versionado com destaque das duas fronteiras com o Google (geração e busca), seção completa de governança LGPD/GDPR atuando como fonte única da política de retenção (12 meses do último contato) e canal humano de eliminação, e roadmap justificado cobrindo S-35 e cortes da POC."
+  - `ARQUITETURA.md` e `ESTADO.md` mantidos exclusivamente para leitura durante a execução, sem alterações locais.
+- **Próximo passo exato:**
+  - Integrador revisar os 4 PRs abertos para `develop`, validar a consistência cruzada da documentação e consolidar o estado global no `ESTADO.md` e `ARQUITETURA.md`.
+- **Integração:**
+  - Responsável: Usuário / Integrador. Merges em `develop` não executados.

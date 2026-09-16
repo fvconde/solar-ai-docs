@@ -24,3 +24,4 @@ Tem um atrito real com o requisito de *conversa natural* e *fluxo humanizado* do
 
 - [[Decisao - Camada minima de privacidade como Must]]
 - [[Decisao - Front do chat em Angular]]
+- [[Decisao - Consentimento persistido antes do kickoff]]
