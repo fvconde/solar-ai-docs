@@ -53,7 +53,7 @@ Decisões: [[Decisao - Identidade de produto Solar e agente Lia]] · [[Decisao -
 - [[Mascaramento de PII]] — S-34
 - [[Direito de eliminacao]] — S-29
 
-Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o contato não entra no payload do LLM) · [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]] · [[Decisao - Front do chat em Angular]] (metade do S-33 na UI) · [[Decisao - Login por corretor substitui a chave unica no painel]] (S-42, revoga a chave compartilhada no painel)
+Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o contato não entra no payload do LLM) · [[Decisao - Camada minima de privacidade como Must]] · [[Decisao - Versao minima de privacidade e nao a completa]] · [[Decisao - S-29 reenquadrado com endpoint de exclusao]] · [[Decisao - Front do chat em Angular]] (metade do S-33 na UI) · [[Decisao - Login por corretor substitui a chave unica no painel]] (S-42, revoga a chave compartilhada no painel) · [[Decisao - Telefone email e transcricao exclusivos do detalhe do lead]] (S-21, PII e histórico restritos ao detalhe)
 
 ## Operação
 
