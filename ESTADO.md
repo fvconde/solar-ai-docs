@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 16/09/2026 (S-43 integrado nos três repositórios; o namespace do painel foi separado da rota /painel do SPA)
+**Última atualização:** 19/09/2026 (dois bugs de handoff corrigidos em `solar-ai` e `solar-ai-api` — referência a imóvel e conflito de modalidade —, e melhoria visual do front sem card)
 **Entrega:** 29/09/2026 23:59 · **Congelamento de código:** 24/09/2026
 **Fase atual:** 4 · Ciclo fechado
 
@@ -109,6 +109,18 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **16/09** — **O namespace /api/painel separa a API do painel da rota /painel do SPA (S-43).** A API passou a expor as operações do painel sob /api/painel, enquanto a página do Angular continua em /painel; o proxy local tem uma única entrada /api. /turn, /conversas e /health permanecem fora desta mudança, e o contrato congelado do /turn não foi reaberto por uma alteração de roteamento. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Prefixo%20api%20separa%20painel%20do%20SPA.md)
 
 ## Feito
+
+- **19/09 — Dois bugs de handoff corrigidos (`solar-ai`, `solar-ai-api`), sem card, e uma melhoria visual do front por vontade do usuário, sem necessidade.** `develop` em três repos: `solar-ai` `06c986d`, `solar-ai-api` `e51a074`, `solar-ai-front` `bdd9c3e`; `solar-ai-docs` não tocado no código, só este registro. Push direto em `develop`, sem PR — mudança pequena e sem card reservado no board.
+
+  **O bug: a Lia perdia a referência ao imóvel escolhido e atropelava conflito de modalidade.** Quando o lead dizia "quero a primeira opção", ela às vezes refazia a busca em vez de travar no imóvel já mostrado, porque nada no histórico marcava quais imóveis tinham sido apresentados em cada fala. Corrigido em duas pontas coordenadas: `MensagemHistorico` ganhou `imoveisSugeridos` como snapshot da vitrine daquela fala, e o `solar-ai/app/lia/grafo.py` ganhou `_imovel_referenciado` (lê ordinal — primeira, segunda, terceira — contra o histórico) e `_conflito_modalidade` (detecta quando o lead mistura sinal de aluguel com valor de compra, ou muda de ideia no meio da conversa). Junto: `TurnoRequest` ganhou `contatoInformado` e `visitaConfirmada`, e a Lia deixou de prometer que "um corretor já vai entrar em contato" antes de pedir telefone ou e-mail de verdade.
+
+  **Achado que quase virou regressão silenciosa: o novo campo `contatoInformado` batia no guard de privacidade por reflexão do S-37.** `ContratoDoTurnoTeste.Nenhum_tipo_do_espelho_carrega_contato` bloqueia qualquer campo do contrato espelhado cujo nome contenha "contato", "telefone", "celular", "email" ou "whatsapp" — a garantia estrutural de que o telefone do lead nunca atravessa a fronteira para o Gemini. `contatoInformado` é booleano e nunca carrega o valor em si, mas colidia com o filtro por conter a palavra. Resolvido com exceção explícita e comentada no teste, em vez de reescrever o campo em quatro arquivos de dois repositórios para fugir de uma palavra — a garantia real (nenhum valor de contato sai) continua intacta, só a lista de nomes proibidos ganhou uma ressalva nomeada. O teste de contagem de campos do espelho subiu de 42 para **45**.
+
+  **Verificação, não só declaração.** `solar-ai`: **255 passed, 38 deselected** (grátis, sem chamada ao Gemini; inclui os 8 casos novos de `tests/test_incoerencias_conversa.py`, o arquivo que motivou a correção). `solar-ai-api`: **120/120 aprovados contra Postgres real** (container subido para esta verificação, banco `solar_test` já existia) — rodada em vermelho antes do ajuste do teste (118/120, os dois falhando exatamente como descrito acima), verde depois. `solar-ai-front`: **85/85 SUCCESS** no Karma/Chrome Headless.
+
+  **A parte do front não é bug nem card: é gosto do usuário.** `ItemLia` ganhou `revelar: boolean` — fala que chega ao vivo entra sob um véu de animação com duração proporcional ao tamanho do texto (900 ms a 2800 ms), com os cartões de imóvel surgindo em sequência depois do véu; histórico recarregado do `GET` entra pronto, sem animar de novo. Setas do scrollbar do navegador removidas globalmente em `styles.scss`. Nasceu junto de `mensagem-lia.spec.ts` (7 casos novos, incluídos nos 85).
+
+  **Achado sem relação com este commit, então não corrigido agora: o build do front segue falhando por orçamento de `painel.scss`** (10,50 kB contra 10,00 kB), já registrado na entrada do S-43 de 16/09. Confirmado que o arquivo não está no diff desta sessão — pendência preexistente, não regressão.
 
 - **15/09 — S-42 integrado, em janela de card único.** `develop` nos quatro repos: `solar-ai-front` `0733d71`, `solar-ai-api` `41a61ac`, `solar-ai-docs` `983f5c4`, `solar-ai` `2265bd1` (não tocado). Três PRs, nenhum conflito. Revalidação **em `develop`**, na árvore integrada e não transferida dos PRs: API **113/113** com Postgres real, front **66 SUCCESS** e build limpo.
 - **16/09 — S-43 integrado, em janela de card único.** develop nos três repositórios: solar-ai-api b34de59b6ff31f2fc80149d30955d51141f58cc2, solar-ai-front bfc7f873e2745453050bcd926bf9598bbab7719d e solar-ai-docs 0fc65377ed604260e3203cc19c23ba54b98e68a8; solar-ai não foi tocado e permanece em 2265bd1d6a76a9fa636d45b1cad2677084f75f02. PRs integrados: API #12, front #10 e docs #14.
