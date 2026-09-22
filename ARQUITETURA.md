@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 13/09/2026 (S-36 e S-23)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 16/09/2026 (S-43)
 
 ---
 
@@ -22,14 +22,16 @@ O ambiente local sobe pelo `docker-compose.yml` deste repositório. O Angular ro
 ## As fronteiras, e o que atravessa cada uma
 
 ```
-navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens──> solar-ai-api ──/turn────> solar-ai
+navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens, /api/painel──> solar-ai-api ──/turn────> solar-ai
                                                                        │              └─/resumo──> solar-ai
                                                                    EF Core
                                                                        ↓
                                                                    postgres
 ```
 
-**Front → API.** O front conhece `POST /conversas/{guid}/mensagens` e `GET /conversas/{guid}`. O `{guid}` é escolhido pelo cliente e guardado no `localStorage`; a conversa nasce no primeiro POST. O front nunca fala com o agente.
+**Front → API.** O front conhece `POST /conversas/{guid}/mensagens` e `GET /conversas/{guid}` para o chat, e `/api/painel/...` para o painel do corretor. O `{guid}` é escolhido pelo cliente e guardado no `localStorage`; a conversa nasce no primeiro POST. O front nunca fala com o agente.
+
+**Painel e página do SPA.** A rota de página `/painel` pertence ao Angular e continua sendo servida pelo front. As operações do painel usam `/api/painel/...`; no desenvolvimento, uma única entrada `/api` do proxy encaminha essas chamadas para a API. Em produção, o reverse proxy precisa conservar a mesma separação.
 
 **API → agente, primeira fronteira: `POST /turn`.** Contrato congelado no S-05 e espelhado em DTO nos dois repositórios — `app/contrato.py` no Python e `Contracts/ContratoTurno.cs` no .NET. Os dois lados recusam campo desconhecido: se um repo mudar sem o outro, o primeiro turno falha alto em vez de virar `null` silencioso. O S-17 acrescentou `agenda[]` à requisição, `slotEscolhido` à resposta e o tipo `SlotOferecido`; o espelho tem 7 tipos e 42 campos. **Mudança no contrato exige commit coordenado nos dois repositórios.**
 

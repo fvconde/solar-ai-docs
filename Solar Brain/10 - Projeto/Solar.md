@@ -80,3 +80,7 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 | **15/09/2026** | gatilho duplo: cortar se a Fase 3 não fechou ([[Orcamento de esforco]]) e reavaliar privacidade ([[Decisao - Versao minima de privacidade e nao a completa]]) |
 | **24/09/2026** | congelamento de código |
 | **29/09/2026** | entrega |
+
+## Decisão recente
+
+- [[Decisao - Prefixo api separa painel do SPA]] — o namespace da API do painel não disputa mais a rota de página /painel (S-43).
