@@ -246,8 +246,15 @@ Em uma operação comercial definitiva em larga escala, as seguintes evoluções
 2. **Segregação de Papéis e Credenciais**: Separação estrita entre a credencial de visualização do painel do corretor e a credencial administrativa de eliminação LGPD (atualmente unificadas sob `Seguranca:ChavePrivacidade`).
 3. **Autenticação e RBAC Corporativo**: Implementação de autenticação baseada em padrões abertos (OAuth2 / OpenID Connect / JWT) com controle de acesso baseado em papéis (RBAC) para corretores e administradores.
 4. **Portal do Titular Self-Service**: Interface web onde o próprio titular pode solicitar e acompanhar a exclusão ou portabilidade de seus dados via validação em duas etapas (e-mail/SMS OTP).
-5. **Automação Periódica de Expurgo (TTL Worker)**: Serviço agendado em background para expurgo automático de conversas e leads inativos conforme os prazos de retenção estabelecidos.
-6. **Observabilidade e Trilha de Auditoria**: Implementação de rastreamento distribuído (OpenTelemetry) com logs de auditoria imutáveis para operações de leitura e expurgo de dados pessoais.
+5. **Observabilidade e Trilha de Auditoria**: Implementação de rastreamento distribuído (OpenTelemetry) com logs de auditoria imutáveis para operações de leitura e expurgo de dados pessoais.
+
+### Implementação do expurgo automático
+
+A rotina implementa a [política de retenção da seção 5.3](#53-política-de-retenção-de-dados-fonte-única). O `ServicoDeExpurgo`, registrado como `BackgroundService`, faz uma varredura diária; no `appsettings.json` base, `Expurgo:PrazoRetencaoMeses=12`. Em `Development`, há configuração explícita de 1 mês e intervalo de 30 segundos para demonstração; esses valores não se aplicam à produção.
+
+O prazo parte de `Max(Mensagem.Em)` para mensagens com `Papel == "lead"` em todas as conversas do lead. Mensagens do agente, incluindo follow-up, e encaminhamentos não estendem o prazo. Sem mensagem do lead, usa-se a menor data entre `Lead.CriadoEm` e `Conversa.CriadaEm`. A regra não consegue observar contatos da plataforma que não estejam registrados como mensagem do lead.
+
+A rotina reaproveita `ConversaRepositorio.ExcluirLeadAsync`, com `TravaDeConversas.TravarMultiplasAsync` e revalidação após a trava; preserva a conta e a sessão. A auditoria registra somente a quantidade expurgada e o horário, sem identidade.
 
 ---
 
