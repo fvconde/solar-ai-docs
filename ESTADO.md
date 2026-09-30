@@ -5,7 +5,7 @@
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
 **Última atualização:** 29/09/2026 (S-44 integrado nos três repositórios; entrega adiada para 12/10)
-**Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 24/09/2026 na regra original; a data nova ainda não foi fixada
+**Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
 ---
@@ -109,6 +109,9 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **16/09** — **O namespace /api/painel separa a API do painel da rota /painel do SPA (S-43).** A API passou a expor as operações do painel sob /api/painel, enquanto a página do Angular continua em /painel; o proxy local tem uma única entrada /api. /turn, /conversas e /health permanecem fora desta mudança, e o contrato congelado do /turn não foi reaberto por uma alteração de roteamento. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Prefixo%20api%20separa%20painel%20do%20SPA.md)
 - **29/09** — **Login único com três papéis, e a sessão passa a expirar (S-44).** Cliente, corretor e supervisor entram pela mesma porta sob `/api`, com erro de login único. Emenda a decisão de 15/09 do S-42 na parte da sessão: o cookie de dez anos e a falta de logout saem, e entram a sessão de 30 dias renovada com o uso e o `DELETE /api/sessao`, que revoga no servidor. A conversa ganha dono (`conversas.conta_id`) e só é lida com a sessão dessa conta; a deduplicação de lead deixa de ser global e passa a valer dentro do mesmo dono. Corretor novo nasce em análise e só recebe lead depois da aprovação do supervisor. Custo aceito: sem SMTP, os e-mails de aprovação, recusa e redefinição só existem no log de Development. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Login%20unico%20com%20tres%20papeis%20e%20sessao%20de%2030%20dias.md)
 - **29/09** — **Entrega adiada de 29/09 para 12/10/2026**, informado pelo usuário. Com cerca de 13 dias a mais, a ordem de trabalho muda: S-26 (deploy) e S-39 (expurgo por retenção) entram antes do vídeo e do pitch, que ficam para depois de um novo congelamento. A data desse congelamento ainda não foi fixada.
+- **29/09** — **Congelamento de código em 09/10/2026**, decidido pelo usuário. De 09/10 a 12/10 ficam só o vídeo (S-31) e o pitch (S-32). Card de código que não couber até 09/10 fica cortado, com o motivo escrito no próprio card.
+- **29/09** — **Regras do expurgo por retenção, decididas antes de reservar o S-39.** (1) "Último contato" é a última mensagem **enviada pelo lead**, somando todas as conversas dele; a mensagem automática do follow-up não conta, porque senão o próprio reengajamento estenderia a retenção de quem está em silêncio. (2) O prazo é o mesmo para todos, inclusive para o lead encaminhado ao corretor, e o README continua declarando um prazo único. (3) O expurgo atinge lead, conversas e mensagens, **nunca a conta de login**: a conta de cliente só sai quando o próprio titular a exclui em `/api/conta`, como já acontece desde o S-44.
+- **29/09** — **A demo e o pitch seguem no free tier do Gemini**, decidido pelo usuário: o produto é MVP, e passar para o tier pago é só trocar a chave de API. Isso reabre a divergência registrada em **Riscos abertos**: o aviso de consentimento do S-33 declara o regime do tier pago.
 
 ## Feito
 
