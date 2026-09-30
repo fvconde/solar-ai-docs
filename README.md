@@ -250,7 +250,7 @@ Em uma operação comercial definitiva em larga escala, as seguintes evoluções
 
 ### Implementação do expurgo automático
 
-A rotina implementa a [política de retenção da seção 5.3](#53-política-de-retenção-de-dados-fonte-única). O `ServicoDeExpurgo`, registrado como `BackgroundService`, faz uma varredura diária; no `appsettings.json` base, `Expurgo:PrazoRetencaoMeses=12`. Em `Development`, há configuração explícita de 1 mês e intervalo de 30 segundos para demonstração; esses valores não se aplicam à produção.
+A rotina implementa a [política de retenção da seção 5.3](#53-política-de-retenção-de-dados-fonte-única). O `ServicoDeExpurgo`, registrado como `BackgroundService`, aguarda o atraso inicial antes do primeiro ciclo: `Expurgo:AtrasoInicial=00:05:00` na configuração base, com fallback seguro de cinco minutos, e `00:00:10` em `Development` para demonstração. Depois do primeiro ciclo, as varreduras seguem `Expurgo:IntervaloVarredura`: diariamente na base (`1.00:00:00`) e a cada 30 segundos em `Development` (`00:00:30`). O prazo base permanece `Expurgo:PrazoRetencaoMeses=12`; o mês configurado em `Development` é exclusivo da demonstração e não se aplica à produção.
 
 O prazo parte de `Max(Mensagem.Em)` para mensagens com `Papel == "lead"` em todas as conversas do lead. Mensagens do agente, incluindo follow-up, e encaminhamentos não estendem o prazo. Sem mensagem do lead, usa-se a menor data entre `Lead.CriadoEm` e `Conversa.CriadaEm`. A regra não consegue observar contatos da plataforma que não estejam registrados como mensagem do lead.
 
