@@ -10,7 +10,7 @@ O fluxo de cards em paralelo tem dois papéis e um documento para cada um. Como 
 
 ## O que é este repositório
 
-`solar-ai-docs` é o repositório de **documentação e orquestração** do Solar — plataforma de atendimento e qualificação de leads imobiliários com IA generativa, agente conversacional "Lia" (Tech Challenge Fase 5, FIAP; entrega **29/09/2026**, congelamento de código **24/09/2026**).
+`solar-ai-docs` é o repositório de **documentação e orquestração** do Solar — plataforma de atendimento e qualificação de leads imobiliários com IA generativa, agente conversacional "Lia" (Tech Challenge Fase 5, FIAP; entrega **12/10/2026**, adiada de 29/09; congelamento de código original **24/09/2026**, data nova a fixar).
 
 Não tem código de aplicação. Tem quatro coisas: o `ESTADO.md`, o `ARQUITETURA.md`, o `docker-compose.yml` que compõe o ambiente local dos outros repos, e o vault `Solar Brain/`.
 

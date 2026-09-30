@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 16/09/2026 (S-43)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 29/09/2026 (S-44)
 
 ---
 
@@ -33,6 +33,8 @@ navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens, /api
 
 **Painel e página do SPA.** A rota de página `/painel` pertence ao Angular e continua sendo servida pelo front. As operações do painel usam `/api/painel/...`; no desenvolvimento, uma única entrada `/api` do proxy encaminha essas chamadas para a API. Em produção, o reverse proxy precisa conservar a mesma separação.
 
+**Conta e sessão (S-44).** Cliente, corretor e supervisor entram pela mesma porta: `POST /api/sessoes`, `GET` e `DELETE /api/sessao`, cadastro em `POST /api/contas` (cliente) e `POST /api/corretores` (corretor, que nasce em análise), conta em `/api/conta`, redefinição de senha em `/api/senha/...` e aprovação de corretor em `/api/painel/corretores/...`. A sessão é um cookie de 30 dias renovado com o uso e revogável no servidor. **Conversa com dono** (`conversas.conta_id` preenchido) só é lida e escrita com a sessão dessa conta; sem ela, a API responde `404`. Conversa sem dono continua funcionando só pelo UUID. Contrato completo em `execucoes/contrato-S-44-0a7099b3-7fe0-4e3b-90e7-81245441c62a.md`; o porquê está na linha de 29/09 do `ESTADO.md`.
+
 **API → agente, primeira fronteira: `POST /turn`.** Contrato congelado no S-05 e espelhado em DTO nos dois repositórios — `app/contrato.py` no Python e `Contracts/ContratoTurno.cs` no .NET. Os dois lados recusam campo desconhecido: se um repo mudar sem o outro, o primeiro turno falha alto em vez de virar `null` silencioso. O S-17 acrescentou `agenda[]` à requisição, `slotEscolhido` à resposta e o tipo `SlotOferecido`; o espelho tem 7 tipos e 42 campos. **Mudança no contrato exige commit coordenado nos dois repositórios.**
 
 **API → agente, segunda fronteira: `POST /resumo` (S-18).** A primeira fronteira nova desde o congelamento do `/turn`, e ela nasceu barata de propósito: reaproveita `PerfilLead`, `MensagemHistorico` e `ImovelSugerido`, já espelhados, e cria **um tipo novo por lado** — `ResumoResponse`, com `perfil`, `orcamento`, `imoveis`, `objecoes` e `proximoPasso`. Valem as mesmas regras do `/turn`: `extra="forbid"` no Python e `JsonUnmappedMemberHandling.Disallow` no .NET, commit coordenado, e falha do agente virando 502 ou 504, nunca 500. **O `/turn` não foi tocado** — são endpoints separados, e é isso que permitiu a segunda fronteira sem reabrir o contrato congelado.
@@ -41,7 +43,7 @@ navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens, /api
 
 ## Onde mora o estado
 
-Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot. A última aplicada é `20260914002310_ResumoNoEncaminhamento`, do S-18.
+Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot. Além das seis, `sessoes` e `recuperacoes_senha` vêm do S-42. A última migration é `20260923030409_S44DedupePorConta`, do S-44. **`corretores` guarda todas as contas**, inclusive clientes (`perfil = cliente`, `status_corretor` nulo), e `conversas.conta_id` aponta para ela com `ON DELETE CASCADE`. A deduplicação de lead por telefone e e-mail vale dentro do mesmo dono, não mais no banco inteiro.
 
 `corretores` é a única tabela **semeada**: 5 linhas literais dentro da própria migration, como os 80 imóveis são semeados por JSON. Seed não mora em `HasData` — coleção primitiva ali faz o EF ver o modelo mudando a cada build e o boot cai, com o log culpando o banco (`Solar Brain/20 - Bugs/Bug - HasData com colecao primitiva derruba o boot.md`).
 

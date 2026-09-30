@@ -84,3 +84,4 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 ## Decisão recente
 
 - [[Decisao - Prefixo api separa painel do SPA]] — o namespace da API do painel não disputa mais a rota de página /painel (S-43).
+- [[Decisao - Login unico com tres papeis e sessao de 30 dias]] — cliente, corretor e supervisor entram pela mesma porta; a sessão expira e tem saída (S-44).
