@@ -171,31 +171,30 @@ $urlApi = 'https://solar-api-' + $numeroProjeto + '.' + $regiao + '.run.app'
 $urlAgente = 'https://solar-agente-' + $numeroProjeto + '.' + $regiao + '.run.app'
 ```
 
-São URLs determinísticas derivadas do número **lido**, não URLs observadas nem confirmação de serviço existente. O segmento `<servico>-<numero>` deve ter até 63 caracteres. Ver [URLs determinísticas oficiais](https://docs.cloud.google.com/run/docs/triggering/https-request#deterministic_url). Após cada deploy, comparar com `status.url`; divergência bloqueia publicação e exige revisão das URLs/audiences pelo líder, sem normalizar diferenças arbitrariamente. `Deploy.ps1` já confere número real e URLs publicadas antes de seu eventual binding público.
+São URLs determinísticas derivadas do número **lido**, não URLs observadas nem confirmação de serviço existente. O segmento `<servico>-<numero>` deve ter até 63 caracteres. Ver [URLs determinísticas oficiais](https://docs.cloud.google.com/run/docs/triggering/https-request#deterministic_url). Depois do deploy, o guard UrlPublicada exige nome/marca exatos e a presenca exata da URL deterministica esperada e de status.url na lista canonica run.googleapis.com/urls anunciada pelo servico. status.url pode conter hash, como observado no passo C. Lista ausente/invalida ou origem faltante bloqueia publicacao; nao normalizar diferencas arbitrarias. Guard5017d9b aprovado pelo Maestro em PS7/5.1.
 
-## 7. Bootstrap privado e prova de peers — gate pendente
+## 7. Bootstrap privado e confianca no IP — resolvida pelo desenho aprovado
 
-**Dependência ainda não resolvida por automação:** o deploy exige CIDRs/saltos observados; a observação exige uma cadeia implantada. `BootstrapPeersComprovado` e `PeersObservadosConfirmados` são declarações humanas, não criam bootstrap nem provam confiança. Não preencher IPs de exemplo, presumir ranges Cloud Run ou usar `/0` para atravessar o gate. Sem procedimento aprovado e evidência, parar antes da seção 8.
+O Maestro aceitou o [passo C](../../execucoes/S-26-diagnostico-passo-C-3bdd7f92-dda2-492e-a399-2e209a1e6238.md) e o usuario aprovou S-26-decisao-desenho-ip.md em 01/10. O diagnostico terminou e seus cinco recursos foram removidos; nao repetir nuvem diagnostica.
 
-Procedimento proposto, sujeito à aprovação específica do Maestro e a comandos concretos revisados pelo líder:
+Nas nove amostras de tres revisoes gen2, o peer TCP do front e da API foi 169.254.169.126. O Cloud Run acrescentou uma entrada direita ao XFF do front, preservando prefixos enviados pelo cliente. O helper normaliza esse IP com FRONT_TRUSTED_PROXY_CIDRS=169.254.169.126/32 e FRONT_TRUSTED_HOPS=1. Sao constantes do plano apoiadas na evidencia aprovada, nao entradas livres.
 
-1. Apresentar uma implantação diagnóstica temporária e privada, suas imagens/revisões, comandos, IAM, duração e custo. Se ela exigir código ou script adicional, voltar ao Maestro antes de implementá-lo. Os scripts atuais não automatizam esta etapa; não usar switches falsamente confirmados como atalho.
-2. Manter API/agente privados; front diagnóstico também sem `allUsers`. Autorizar apenas o operador de diagnóstico no front, SA front na API e SA API no agente. Não atribuir `run.invoker` ao projeto inteiro. Usar acesso autenticado controlado, com tokens somente em memória.
-3. Observar peer TCP e cadeia XFF em cada fronteira Cloud Run → nginx → Cloud Run → API, usando requisições sintéticas. Coletar apenas metadados mínimos necessários, sem cookies, tokens, payloads de conversa ou PII. Repetir observações relevantes a novas conexões/revisões; um endereço visto uma vez não demonstra uma faixa estável e exclusiva.
-4. Enviar prefixos XFF forjados e provar que não alteram o IP efetivo/rate limit. Confirmar que nginx remove prefixos não confiáveis, sobrescreve `X-Serverless-Authorization`, que o helper não é exposto e que a API só aceita o emissor esperado. Testar também peer desconhecido e excesso de saltos.
-5. Justificar allow-lists canônicas e número finito de saltos em cada lado, com evidência e garantia de confiança suficiente. Se a topologia não permitir essa garantia, parar e devolver o desenho ao Maestro; não ampliar a lista para fazê-la passar.
-6. Remover instrumentação e permissões diagnósticas temporárias, registrar as revisões finais e reapresentar a prova sobre elas. Só então declarar os peers confirmados. Qualquer mudança de topologia invalida a declaração até nova revisão.
+A API usa ProxyTrust__ForwardedForHeaderName=X-Solar-Client-IP, ProxyTrust__KnownProxies__0=169.254.169.126 e ProxyTrust__ForwardLimit=1. O nginx sobrescreve X-Solar-Client-IP com $client_ip normalizado e conserva X-Forwarded-For normalizado para compatibilidade. Nesse modo, a API ignora XFF e remove header proprio invalido, com virgula ou repetido antes do middleware; conserva o IP do peer sem400 e sem logar o valor. O modo padrao X-Forwarded-For continua disponivel com comportamento anterior.
+
+O peer link-local da API nao identifica o front, e o egress compartilhado nao vira allow-list. A confianca em X-Solar-Client-IP depende de IAM: somente a SA dedicada do front recebe run.invoker direto da API; somente a SA da API recebe run.invoker direto do agente. Nginx sobrescreve X-Serverless-Authorization com token da SA front e audiencia da API, sem devolver token ao navegador.
+
+**Limite dos owners:** owners e outras identidades com permissao efetiva herdada podem invocar a API diretamente e forjar o header proprio; pertencem a fronteira administrativa confiavel. O HTTP200 do operador no diagnostico nao comprovou exclusividade de identidade. Verificar IAM direto e herdado, nao conceder run.invoker de projeto nem allUsers na API/agente, e registrar o limite sem remover permissoes alheias.
+
+BootstrapPeersComprovado agora referencia o passo C e este desenho aceito; o switch e registro de autorizacao, nao prova automatica. As secoes9/10 precisam confirmar a cadeia real da aplicacao: peer da API169.254.169.126, header proprio chegando intacto pelo Cloud Run, headers XFF/X-Solar-Client-IP forjados sem efeito no IP efetivo e no rate limit. **Peer diferente no deploy real: parar e devolver ao Maestro; nunca ampliar lista ou usar /0.**
 
 ## 8. Configuração final e deploy privado
 
-Somente depois da seção 7, definir `$cidrsFront`, `$cidrsApi`, `$saltosFront` e `$saltosApi` a partir da evidência aprovada. Não há valores de exemplo neste documento. Preparar as entradas não secretas:
+Depois da decisao da secao7, preparar apenas URLs e SHAs reais nas entradas nao secretas. O plano fixa peers, saltos e nome do header; nao fornecer cidrs/saltos livres:
 
 ```powershell
 $entradas = @{
     UrlFront=$urlFront; UrlApi=$urlApi; UrlAgente=$urlAgente
     ShaFront=$shas.Front; ShaApi=$shas.Api; ShaAgente=$shas.Agente
-    FrontCidrsObservados=$cidrsFront; ApiCidrsObservados=$cidrsApi
-    SaltosFrontObservados=$saltosFront; SaltosApiObservados=$saltosApi
     PeersObservadosConfirmados=$true
 }
 $planoDeploy = & (Join-Path $scripts 'Deploy.ps1') -Entradas $entradas -VersoesSegredos $versoes -NumeroProjeto $numeroProjeto -BootstrapPeersComprovado
@@ -208,9 +207,9 @@ Revisar `Acoes`, mapas de ambiente e referências de segredos antes de autorizar
 & (Join-Path $scripts 'Deploy.ps1') -Entradas $entradas -VersoesSegredos $versoes -NumeroProjeto $numeroProjeto -BootstrapPeersComprovado -Executar -PeloLider -AprovacaoMaestro $execucao
 ```
 
-Ordem interna: agente → API → front, depois bindings de invoker e verificação de URLs. Todos usam `--region=southamerica-east1 --cpu=1 --memory=512Mi --max-instances=1 --no-allow-unauthenticated --invoker-iam-check`, imagem SHA e SA dedicada. Portas: agente 8000, API/front 8080. API: `--no-cpu-throttling --min-instances=1 --set-cloudsql-instances=solar-ai-cloud:southamerica-east1:solar-s26-3bdd7f92`; front/agente: `--cpu-throttling --min-instances=0`. A API fica com CPU contínua para os workers S-24/S-39 executarem entre requisições; este card não altera esses workers.
+Ordem interna: agente → API → front; aplicar invoker no agente para a SA API ANTES do invoker da API para a SA front; espera IAM limitada; verificacao de URLs. Nenhuma sonda nova/health encadeado ou impersonacao. Todos usam `--region=southamerica-east1 --execution-environment=gen2 --cpu=1 --memory=512Mi --max-instances=1 --no-allow-unauthenticated --invoker-iam-check`, imagem SHA e SA dedicada. Portas: agente 8000, API/front 8080. API: `--no-cpu-throttling --min-instances=1 --set-cloudsql-instances=solar-ai-cloud:southamerica-east1:solar-s26-3bdd7f92`; front/agente: `--cpu-throttling --min-instances=0`. A API fica com CPU contínua para os workers S-24/S-39 executarem entre requisições; este card não altera esses workers.
 
-O script aplica `--set-secrets=<variavel>=<nome>:<versao-numerica>` na API/agente e `--clear-secrets` no front. Os mapas não secretos são passados por arquivo JSON temporário de ambiente, removido em `finally`; isso preserva vírgulas dos CIDRs. Nenhum segredo vai para esse arquivo. API em `ASPNETCORE_ENVIRONMENT=Production`, agente em `SOLAR_ENV=production`; SMTP Gmail porta 587 com STARTTLS. Front usa `FRONT_AUTH_MODE=iam`; API ativa autenticação do agente. Audiences são as URLs HTTPS canônicas dos respectivos destinatários.
+O script aplica `--set-secrets=<variavel>=<nome>:<versao-numerica>` na API/agente e `--clear-secrets` no front. Os mapas não secretos são passados por arquivo JSON temporário de ambiente, removido em `finally`; isso preserva os mapas sem delimitadores no argv. Nenhum segredo vai para esse arquivo. API em `ASPNETCORE_ENVIRONMENT=Production`, agente em `SOLAR_ENV=production`; SMTP Gmail porta 587 com STARTTLS. Front usa `FRONT_AUTH_MODE=iam`; API ativa autenticação do agente. Audiences são as URLs HTTPS canônicas dos respectivos destinatários.
 
 Bindings: `gcloud run services add-iam-policy-binding solar-api --region=southamerica-east1 --member=serviceAccount:s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com --role=roles/run.invoker --condition=None`; equivalente para `solar-agente`, membro SA API. Ambos com projeto explícito. Verificar políticas efetivas, inclusive permissões herdadas: o preflight cobre bindings de projeto/serviço, mas não constitui auditoria completa de herança da organização/pasta.
 
@@ -221,6 +220,12 @@ Bindings: `gcloud run services add-iam-policy-binding solar-api --region=southam
 | `SOLAR_VERSION` = SHA completo de cada imagem | Identifica a combinação implantada; API, agente e front recebem seus próprios SHAs, correspondentes às tags construídas dos worktrees limpos. Conferir versões nos healths da API/agente e configuração/imagem do front. |
 | Painel protegido | Sem cookie, a rota do painel de dados via front deve responder 401 sem dados; API privada por IAM recebe somente SA front, agente privado somente SA API. Cookies/sessão continuam exigidos na aplicação. OpenAPI/Swagger devem responder 404 em Production. IAM não substitui autenticação de usuário. |
 
+### Espera IAM antes das verificacoes
+
+O executor conserva o token do operador somente em memoria e sonde o front privado em GET /api/sessao, sem cookie. Sucesso e401 **da aplicacao**, com codigo sessao_invalida;403/502 ainda nao comprovam front→API. Fazer uma sonda cada60s, primeira depois da espera inicial, por no maximo10min/dez sondas. Nao aceitar apenas200 da SPA ou401 HTML do proxy. Redirecionamentos, erro de transporte ou resposta inesperada interrompem; sem registrar corpo/token.
+
+Depois do sucesso, esperar somente o tempo restante ate completar cinco minutos desde a conclusao do binding do agente. Nao sondar API→agente com owner/impersonacao nem adicionar endpoint. Esta espera nao prova propagacao: a prova e o primeiro turno real da secao10, sob aprovacao de cota. Se front→API nao passar no prazo, interromper antes das verificacoes/publicacao e devolver o bloqueio ao Maestro.
+
 ## 9. Provas antes de publicar e liberação do front
 
 Com serviços privados, o líder verifica imagens/SHAs, regiões, CPU/instâncias, variáveis, versões de segredos, URLs, IAM, peers/XFF e endpoints por acesso autenticado controlado. Em especial, a API direta sem identidade será barrada pelo IAM; o **401 da aplicação** deve ser observado via front autenticado na camada Cloud Run, sem cookie de sessão da aplicação. Confirmar ausência de permissões diagnósticas excedentes.
@@ -228,6 +233,8 @@ Com serviços privados, o líder verifica imagens/SHAs, regiões, CPU/instância
 Não passar `-LiberarFrontPublico` enquanto essas provas e a aprovação de publicação estiverem pendentes. Esse switch acrescenta ao plano `gcloud run services add-iam-policy-binding solar-front --region=southamerica-east1 --member=allUsers --role=roles/run.invoker --condition=None`, depois de verificar URLs.
 
 **Limite do script:** executar novamente `Deploy.ps1 -LiberarFrontPublico` refaz os três deploys antes do binding. Para publicar exatamente as revisões já verificadas, o líder deve submeter e executar apenas o binding público acima, com `--project=solar-ai-cloud --quiet --format=json`, após reconferir os serviços. Se optar por refazer o deploy, precisa de nova verificação das revisões; o script não pausa para smoke antes de publicar. Nunca liberar `allUsers` na API/agente.
+
+Prova do criterio2 nas revisoes reais: API ve o peer169.254.169.126; X-Solar-Client-IP do nginx chega intacto; XFF e header proprio forjados pelo cliente sao sobrescritos no front e nao alteram o IP efetivo/rate limit. Na API, header proprio invalido/multiplo cai para o peer; XFF nao e fonte nesse modo. Provar buckets separados por IP normalizado e ausencia de vazamento de valor em logs. Owners continuam a excecao administrativa registrada na secao7. Peer diferente interrompe, sem ampliar trust.
 
 ## 10. Aceite real (critério 10) e registro (critério 11)
 
@@ -245,6 +252,12 @@ O líder estima o consumo de Gemini e solicita aprovação ao Maestro **antes da
 | Peers e falsificação | Repetir observação e ataques XFF sintéticos na cadeia final/publicada; IP efetivo e rate limit não podem ser escolhidos pelo cliente. Confirmar TLS e helper interno inacessível. |
 
 Falha em qualquer prova impede declarar o critério 10 concluído. O líder registra comandos sanitizados, data, revisões, URLs verificadas, SHAs, resultados, custos, consumo Gemini, aprovações e limitações no registro da execução (critério 11). Publicação de branches e um PR por repositório alterado contra `develop` cabem exclusivamente ao líder, no momento autorizado pelo briefing; nunca há merge implícito. O título previsto é `S-26 · Deploy dos três serviços e Postgres gerenciado`, com UUID no corpo. No relatório final ao Maestro, incluir critérios 1 a 11 com evidências, URLs, consumo Gemini, tarefas/devoluções, branches, SHAs e PRs reais; comunicar bloqueios quando ocorrerem. O implementador não altera esse registro nem o Notion.
+
+### Primeira prova real API→agente e falha IAM
+
+Na primeira conversa real autorizada da secao10, confirmar que o agente executou. Se IAM recusar antes do agente, nao ha execucao Gemini nem estado no agente; logs da plataforma podem existir. Para um502, fazer **uma unica nova tentativa apos dois minutos**; se falhar novamente, parar e devolver ao Maestro, sem repetir bateria ou alterar IAM/allow-list. A recusa IAM deve ser distinguida de outros502: um502 isolado nao prova custo zero nem ausencia de estado na API; conferir a evidencia sem PII e o estado de negocio.
+
+Contabilizar chamadas efetivas no teto20 aprovado e preservar as provas de falha/rollback na cadeia real. Este procedimento e futuro: nenhuma conversa, Gemini ou SMTP real esta autorizada nesta implementacao local.
 
 ## 11. Falhas parciais e recuperação
 
