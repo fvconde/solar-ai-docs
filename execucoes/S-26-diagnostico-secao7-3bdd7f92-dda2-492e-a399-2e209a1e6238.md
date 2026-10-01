@@ -43,6 +43,8 @@ foreach ($shell in @('pwsh','powershell.exe')) {
 
 ## Comandos concretos propostos — não executados nesta etapa
 
+Atualização para o passo B, 01/10: [passo A](S-26-diagnostico-passo-A-3bdd7f92-dda2-492e-a399-2e209a1e6238.md) identificou rejeição local de `status.url` com hash, embora ambas as URLs estivessem anunciadas. Maestro autorizou nova d1 condicionalmente a essa identificação e à correção restrita a estes comandos. Seis Ids distintos e guard de URL anunciada abaixo; audiência determinística preservada. Líder conferiu **8/8 blocos de sintaxe e 13/13 fixtures locais do guard em PS7**, sem SDK/rede. Preparação inicial do array de fixtures sem parênteses agrupou quatro itens em um; corrigida antes da execução, contagem final explicitamente exigida. Nenhum script de produção alterado; guard equivalente em `Operacoes.ps1` permanece proposta para revisão do Maestro.
+
 O gate reduzido autoriza APIs e recursos de diagnóstico. Estes blocos são apresentados ao Maestro **antes da nuvem**, para a revisão solicitada. Não executar o provisionamento de recursos da aplicação, segredos, imagens da aplicação ou deploy final. Nenhum binding é aplicado no nível do projeto. Nunca imprimir o token ou as observações brutas.
 
 ### 1. Preflight local da conta e habilitação autorizada de APIs
@@ -73,9 +75,9 @@ $membroOperador = 'user:' + $config.core.account
 $config = $null; $textoConfig = $null
 
 function Invoke-DiagGcloud {
-    param([string[]]$Argumentos)
+    param([string[]]$Argumentos,[string]$Id='diag-gcloud')
     $argvDiag = @($Argumentos) + @(('--project=' + $projeto), '--quiet')
-    return Invoke-S26Transporte (New-S26Comando 'diag-gcloud' $gcloud $argvDiag)
+    return Invoke-S26Transporte (New-S26Comando $Id $gcloud $argvDiag)
 }
 & (Join-Path $scripts 'Provisionar.ps1') -Etapa Apis -Executar -PeloLider -AprovacaoMaestro $execucao
 ```
@@ -125,17 +127,32 @@ if ($numeroProjeto -cnotmatch '\A[1-9][0-9]{5,19}\z') { throw 'Numero do projeto
 $urlInterno = 'https://s26-diag-interno-' + $numeroProjeto + '.' + $regiao + '.run.app'
 $urlBorda = 'https://s26-diag-borda-' + $numeroProjeto + '.' + $regiao + '.run.app'
 $comuns = @(('--region=' + $regiao),('--image=' + $imagemEco),'--execution-environment=gen2','--ingress=all','--port=8080','--cpu=1','--memory=512Mi','--min-instances=0','--max-instances=1','--no-allow-unauthenticated','--invoker-iam-check','--clear-secrets',('--labels=' + $marca),'--format=json')
+function Assert-DiagUrlAnunciada {
+    param($Servico,[string]$Nome,[string]$UrlEsperada)
+    $idGuard = 'diag-url-' + $Nome
+    if ($Servico.metadata.name -cne $Nome -or $Servico.metadata.labels.'s26-execucao' -cne $execucao) { throw ($idGuard + ': nome/ownership divergente.') }
+    $jsonUrls = $Servico.metadata.annotations.'run.googleapis.com/urls'
+    if ([string]::IsNullOrWhiteSpace($jsonUrls) -or -not $jsonUrls.TrimStart().StartsWith('[')) { throw ($idGuard + ': lista anunciada ausente/invalida.') }
+    try { $urlsAnunciadas = ConvertFrom-Json -InputObject $jsonUrls -NoEnumerate }
+    catch { throw ($idGuard + ': JSON de URLs invalido.') }
+    if ($urlsAnunciadas -isnot [array] -or $urlsAnunciadas.Count -lt 1 -or $urlsAnunciadas.Count -gt 8) { throw ($idGuard + ': lista de URLs invalida.') }
+    foreach ($urlAnunciada in $urlsAnunciadas) {
+        if ($urlAnunciada -isnot [string] -or $urlAnunciada -cnotmatch '\Ahttps://[a-z0-9-]+(?:\.[a-z0-9-]+)*\.run\.app\z') { throw ($idGuard + ': origem anunciada invalida.') }
+    }
+    if ($UrlEsperada -cnotin $urlsAnunciadas -or $Servico.status.url -cnotin $urlsAnunciadas) { throw ($idGuard + ': origem esperada/status.url nao anunciados.') }
+}
 function Publish-DiagRodada {
     param([ValidateSet('d1','d2','d3')][string]$rodada)
-    [void](Invoke-DiagGcloud -Argumentos (@('run','deploy','s26-diag-interno',('--service-account=' + $emailInterno),'--no-cpu-throttling','--set-env-vars=DIAG_MODE=eco',('--revision-suffix=' + $rodada)) + $comuns))
-    [void](Invoke-DiagGcloud -Argumentos (@('run','deploy','s26-diag-borda',('--service-account=' + $emailBorda),'--cpu-throttling',('--set-env-vars=DIAG_MODE=encadear,DIAG_INTERNAL_URL=' + $urlInterno),('--revision-suffix=' + $rodada)) + $comuns))
+    [void](Invoke-DiagGcloud -Id 'diag-deploy-interno' -Argumentos (@('run','deploy','s26-diag-interno',('--service-account=' + $emailInterno),'--no-cpu-throttling','--set-env-vars=DIAG_MODE=eco',('--revision-suffix=' + $rodada)) + $comuns))
+    [void](Invoke-DiagGcloud -Id 'diag-deploy-borda' -Argumentos (@('run','deploy','s26-diag-borda',('--service-account=' + $emailBorda),'--cpu-throttling',('--set-env-vars=DIAG_MODE=encadear,DIAG_INTERNAL_URL=' + $urlInterno),('--revision-suffix=' + $rodada)) + $comuns))
     if ($rodada -eq 'd1') {
-        [void](Invoke-DiagGcloud -Argumentos @('run','services','add-iam-policy-binding','s26-diag-borda',('--region=' + $regiao),('--member=' + $membroOperador),'--role=roles/run.invoker','--condition=None','--format=json'))
-        [void](Invoke-DiagGcloud -Argumentos @('run','services','add-iam-policy-binding','s26-diag-interno',('--region=' + $regiao),('--member=serviceAccount:' + $emailBorda),'--role=roles/run.invoker','--condition=None','--format=json'))
+        [void](Invoke-DiagGcloud -Id 'diag-iam-borda' -Argumentos @('run','services','add-iam-policy-binding','s26-diag-borda',('--region=' + $regiao),('--member=' + $membroOperador),'--role=roles/run.invoker','--condition=None','--format=json'))
+        [void](Invoke-DiagGcloud -Id 'diag-iam-interno' -Argumentos @('run','services','add-iam-policy-binding','s26-diag-interno',('--region=' + $regiao),('--member=serviceAccount:' + $emailBorda),'--role=roles/run.invoker','--condition=None','--format=json'))
     }
-    $borda = Invoke-DiagGcloud -Argumentos @('run','services','describe','s26-diag-borda',('--region=' + $regiao),'--format=json') | ConvertFrom-Json
-    $interno = Invoke-DiagGcloud -Argumentos @('run','services','describe','s26-diag-interno',('--region=' + $regiao),'--format=json') | ConvertFrom-Json
-    if ($borda.status.url -cne $urlBorda -or $interno.status.url -cne $urlInterno) { throw 'URL/audiencia diverge; parar.' }
+    $borda = Invoke-DiagGcloud -Id 'diag-describe-borda' -Argumentos @('run','services','describe','s26-diag-borda',('--region=' + $regiao),'--format=json') | ConvertFrom-Json
+    $interno = Invoke-DiagGcloud -Id 'diag-describe-interno' -Argumentos @('run','services','describe','s26-diag-interno',('--region=' + $regiao),'--format=json') | ConvertFrom-Json
+    Assert-DiagUrlAnunciada -Servico $borda -Nome 's26-diag-borda' -UrlEsperada $urlBorda
+    Assert-DiagUrlAnunciada -Servico $interno -Nome 's26-diag-interno' -UrlEsperada $urlInterno
 }
 Publish-DiagRodada -rodada d1
 # Depois de conferir d1 e executar as sondagens, somente se nao houver condicao de parada:
