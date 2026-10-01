@@ -2,6 +2,8 @@
 
 Execução `3bdd7f92-dda2-492e-a399-2e209a1e6238`. Ordem do Maestro aprovada pelo usuário em 01/10/2026, arquivo de origem `S-26-gate-secao7-ordem.md` no scratchpad do Maestro. **Primeiro passo local concluído; nenhum comando de nuvem deste relatório foi executado.**
 
+Revisão do Maestro em 01/10: eco `ae8342d` e comandos P1–P5 aprovados. O transporte nativo foi bloqueado por misturar stderr com stdout. Correção local `d1ac704f17d3a8427aa076f8eabf6b5635f5c307`, avaliada pelo líder: stdout exclusivo, stderr descartado, sucesso determinado pelo código nativo e erros sanitizados. **15/15 testes com processos reais locais, 17/17 planos, 33/33 segredos e 133/133 configuração em PowerShell 7.6.6 e Windows PowerShell 5.1.26100.9444**, repetidos independentemente. O preflight e `Invoke-DiagGcloud` abaixo reutilizam esse transporte. Aguarda revisão curta do Maestro antes de qualquer gcloud; nenhuma chamada ao SDK foi usada nesta validação.
+
 ## Entrega e avaliação do líder
 
 - Implementação Luna: `ae8342d134b1dbf858c7e45fd3f4fff0ce80cd89`, somente `deploy/S-26/diagnostico/eco.py`, `Dockerfile` e `test_eco.py`; 728 linhas adicionadas. Modelo observado no terminal nesta tarefa: GPT-6.1-Sol high; não alterado pelo líder.
@@ -18,6 +20,25 @@ $repoDocs = 'C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS
 git -C $repoDocs show ae8342d134b1dbf858c7e45fd3f4fff0ce80cd89 -- deploy/S-26/diagnostico
 git -C $repoDocs diff ae8342d134b1dbf858c7e45fd3f4fff0ce80cd89^ ae8342d134b1dbf858c7e45fd3f4fff0ce80cd89 --check
 python -B -m unittest discover -s (Join-Path $repoDocs 'deploy/S-26/diagnostico') -p test_eco.py
+```
+
+## Correção do transporte — revisão antes da nuvem
+
+Commit do implementador `d1ac704f17d3a8427aa076f8eabf6b5635f5c307`, somente `Operacoes.ps1` e `Testar-Transporte-Nativo.ps1` (136 linhas adicionadas, 2 removidas). O líder conferiu o diff inteiro e repetiu as quatro suítes nos dois PowerShells. Os 15 testes nativos usam Python e launcher `.cmd` fictícios, sem executor simulado: JSON e token com aviso em stderr, falha com sentinelas e mensagem sanitizada, argumentos, preferências e código global presente/ausente. A revisão parcial identificou referência mutável no código global anterior; o implementador corrigiu e acrescentou cobertura antes do commit.
+
+O líder também conferiu **8/8 blocos de sintaxe e 4/4 casos reais do preflight/helper atualizado** nos dois PowerShells: JSON do preflight, JSON do helper, token fictício e falha sanitizada. Apenas a definição do helper extraída do relatório foi executada, apontando para Python local; comandos remotos não foram executados. A preparação inicial com Python `-c` e aspas falhou em PS5.1; o fixture final em arquivo temporário passou e foi removido. O transporte não altera o modo de passagem de argumentos do chamador.
+
+Comandos locais reproduzíveis, sem SDK:
+
+```powershell
+git -C $repoDocs show d1ac704f17d3a8427aa076f8eabf6b5635f5c307 -- deploy/S-26/Operacoes.ps1 deploy/S-26/Testar-Transporte-Nativo.ps1
+$scripts = Join-Path $repoDocs 'deploy/S-26'
+foreach ($shell in @('pwsh','powershell.exe')) {
+    foreach ($teste in @('Testar-Transporte-Nativo.ps1','Testar-Planos.ps1','Testar-Segredos.ps1','Testar-Configuracao-Producao.ps1')) {
+        & $shell -NoProfile -File (Join-Path $scripts $teste)
+        if ($LASTEXITCODE -ne 0) { throw 'Validacao local falhou.' }
+    }
+}
 ```
 
 ## Comandos concretos propostos — não executados nesta etapa
@@ -42,8 +63,8 @@ $saInterno = 's26-diag-interno-3bdd7f92'
 $emailBorda = $saBorda + '@' + $projeto + '.iam.gserviceaccount.com'
 $emailInterno = $saInterno + '@' + $projeto + '.iam.gserviceaccount.com'
 
-$textoConfig = & $gcloud config list --format=json 2>&1 | Out-String
-if ($LASTEXITCODE -ne 0) { throw 'Falha de preflight local.' }
+. (Join-Path $scripts 'Operacoes.ps1')
+$textoConfig = Invoke-S26Transporte (New-S26Comando 'diag-preflight' $gcloud @('config','list','--format=json'))
 $config = $textoConfig | ConvertFrom-Json
 if ($config.core.project -cne $projeto -or [string]::IsNullOrWhiteSpace($config.core.account)) { throw 'Conta/projeto incorretos.' }
 # Este plano requer operador com conta de usuario Google; outra identidade exige revisao.
@@ -54,9 +75,7 @@ $config = $null; $textoConfig = $null
 function Invoke-DiagGcloud {
     param([string[]]$Argumentos)
     $argvDiag = @($Argumentos) + @(('--project=' + $projeto), '--quiet')
-    $saidaDiag = & $gcloud @argvDiag 2>&1 | Out-String
-    if ($LASTEXITCODE -ne 0) { throw 'Comando de diagnostico falhou; detalhes externos suprimidos.' }
-    return $saidaDiag.Trim()
+    return Invoke-S26Transporte (New-S26Comando 'diag-gcloud' $gcloud $argvDiag)
 }
 & (Join-Path $scripts 'Provisionar.ps1') -Etapa Apis -Executar -PeloLider -AprovacaoMaestro $execucao
 ```
