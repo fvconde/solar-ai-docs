@@ -39,7 +39,13 @@ $fake = {
         'iam-projeto' { return '{"bindings":[]}' }
         'numero-projeto' { return '{"projectNumber":"123456789012"}' }
         'conferir-url-publicada' {
-            return '{"status":{"url":"https://' + $a.Argumentos[3] + '-123456789012.southamerica-east1.run.app"}}'
+            $nome = $a.Argumentos[3]
+            $url = 'https://' + $nome + '-123456789012.southamerica-east1.run.app'
+            return ConvertTo-Json -InputObject @{
+                metadata=@{name=$nome;labels=@{'s26-execucao'=$ctx.Execucao};
+                    annotations=@{'run.googleapis.com/urls'=('[' + '"' + $url + '"]')}}
+                status=@{url=$url}
+            } -Depth 10 -Compress
         }
         default {
             if ($a.Id -like 'iam-*') { return '{"bindings":[]}' }

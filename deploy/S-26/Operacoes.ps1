@@ -273,11 +273,52 @@ function Invoke-S26Verificacao($Contexto, $Verificacao, [scriptblock]$Executor, 
             if ([string]$projeto.projectNumber -cne $Verificacao.Numero) { throw 'Numero real do projeto diverge da entrada.' }
         }
         'UrlPublicada' {
-            $servico = (Invoke-S26Transporte (New-S26Gcloud $Contexto 'conferir-url-publicada' @(
-                'run','services','describe',$Verificacao.Servico,('--region=' + $Contexto.Regiao))) $Executor) | ConvertFrom-Json
-            $url = ConvertTo-S26OrigemHttps $servico.status.url
-            if ($url -cne $Verificacao.Url) {
-                throw 'status.url diverge da URL/audiencia fornecida. Manter privado e revisar configuracao.'
+            $recusa = 'status.url/URLs anunciadas ou nome/ownership invalidos. Manter privado e revisar configuracao.'
+            $jsonServico = Invoke-S26Transporte (New-S26Gcloud $Contexto 'conferir-url-publicada' @(
+                'run','services','describe',$Verificacao.Servico,('--region=' + $Contexto.Regiao))) $Executor
+            if ($jsonServico -isnot [string] -or -not $jsonServico.TrimStart().StartsWith('{')) { throw $recusa }
+            try { $servico = ConvertFrom-Json -InputObject $jsonServico -ErrorAction Stop }
+            catch { throw $recusa }
+            # Preservar o tipo original de cada campo (array unitario nao vira
+            # string/objeto escalar pela enumeracao do pipeline).
+            $campo = {
+                param($objeto, [string]$chave)
+                if ($objeto -isnot [pscustomobject]) { return }
+                $propriedade = $objeto.PSObject.Properties[$chave]
+                if ($null -ne $propriedade) { return ,$propriedade.Value }
+            }
+            $metadata = & $campo $servico 'metadata'
+            $nome = & $campo $metadata 'name'
+            $labels = & $campo $metadata 'labels'
+            $dono = & $campo $labels 's26-execucao'
+            if ($nome -isnot [string] -or $nome -cne $Verificacao.Servico -or
+                $dono -isnot [string] -or $dono -cne $Contexto.Execucao) { throw $recusa }
+            $annotations = & $campo $metadata 'annotations'
+            $jsonUrls = & $campo $annotations 'run.googleapis.com/urls'
+            # Schema restrito de JSON: array de strings (nao comentarios, tipos
+            # mistos ou virgula final aceitos por alguns parsers PowerShell).
+            $stringJson = '"(?:[^"\\\x00-\x1f]|\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4}))*"'
+            $espacoJson = '[ \t\r\n]*'
+            $arrayJson = '\A' + $espacoJson + '\[' + $espacoJson + '(?:' + $stringJson +
+                $espacoJson + '(?:,' + $espacoJson + $stringJson + $espacoJson + ')*)?\]' + $espacoJson + '\z'
+            if ($jsonUrls -isnot [string] -or $jsonUrls -cnotmatch $arrayJson) { throw $recusa }
+            try {
+                # Envelope preserva arrays vazios/unitarios/aninhados em 5.1 e 7,
+                # sem usar -NoEnumerate (inexistente no ConvertFrom-Json de 5.1).
+                $envelope = ConvertFrom-Json -InputObject ('{"urls":' + $jsonUrls + '}') -ErrorAction Stop
+                $urls = $envelope.urls
+            } catch { throw $recusa }
+            if ($urls -isnot [array] -or $urls.Count -lt 1 -or $urls.Count -gt 8) { throw $recusa }
+            $status = & $campo $servico 'status'
+            $statusUrl = & $campo $status 'url'
+            foreach ($url in @($Verificacao.Url, $statusUrl) + $urls) {
+                if ($url -isnot [string] -or $url -cnotmatch '\Ahttps://[a-z0-9-]+(?:\.[a-z0-9-]+)*\.run\.app\z') {
+                    throw $recusa
+                }
+                try { [void](ConvertTo-S26OrigemHttps $url) } catch { throw $recusa }
+            }
+            if ($Verificacao.Url -cnotin $urls -or $statusUrl -cnotin $urls) {
+                throw $recusa
             }
         }
         'Iam' {
