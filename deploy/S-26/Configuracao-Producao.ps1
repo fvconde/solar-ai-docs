@@ -82,14 +82,10 @@ function New-S26ConfiguracaoProducao {
         [string]$ShaFront,
         [string]$ShaApi,
         [string]$ShaAgente,
-        [string[]]$FrontCidrsObservados,
-        [string[]]$ApiCidrsObservados,
-        [string]$SaltosFrontObservados,
-        [string]$SaltosApiObservados,
         [switch]$PeersObservadosConfirmados
     )
     if (-not $PeersObservadosConfirmados) {
-        throw 'Confirme somente peers e saltos efetivamente observados; nao presuma ranges Cloud Run.'
+        throw 'Confirme os peers efetivamente observados e aprovados; nao presuma ranges Cloud Run.'
     }
     $front = ConvertTo-S26OrigemHttps $UrlFront
     $api = ConvertTo-S26OrigemHttps $UrlApi
@@ -102,14 +98,6 @@ function New-S26ConfiguracaoProducao {
             throw 'Informe o SHA completo de 40 caracteres hexadecimais de cada servico.'
         }
     }
-    foreach ($saltos in @($SaltosFrontObservados, $SaltosApiObservados)) {
-        if ($saltos -cnotmatch '\A[1-8]\z') {
-            throw 'Cada limite de saltos observados deve estar entre 1 e 8.'
-        }
-    }
-    $cidrsFront = @(ConvertTo-S26CidrsObservados $FrontCidrsObservados)
-    $cidrsApi = @(ConvertTo-S26CidrsObservados $ApiCidrsObservados)
-
     # Somente depois de TODAS as validacoes construimos a configuracao.
     $variaveisApi = [ordered]@{
         ASPNETCORE_ENVIRONMENT = 'Production'
@@ -118,14 +106,13 @@ function New-S26ConfiguracaoProducao {
         Agente__Autenticacao__Ativa = 'true'
         Cors__Origens__0 = $front
         Painel__UrlBaseDoFront = $front
-        ProxyTrust__ForwardLimit = [string]$SaltosApiObservados
+        ProxyTrust__ForwardedForHeaderName = 'X-Solar-Client-IP'
+        ProxyTrust__KnownProxies__0 = '169.254.169.126'
+        ProxyTrust__ForwardLimit = '1'
         SOLAR_VERSION = $ShaApi.ToLowerInvariant()
         Email__Smtp__Host = 'smtp.gmail.com'
         Email__Smtp__Porta = '587'
         Email__Smtp__StartTls = 'true'
-    }
-    for ($i = 0; $i -lt $cidrsApi.Count; $i++) {
-        $variaveisApi['ProxyTrust__KnownIPNetworks__' + $i] = $cidrsApi[$i]
     }
     return [ordered]@{
         Regiao = 'southamerica-east1'
@@ -160,8 +147,8 @@ function New-S26ConfiguracaoProducao {
                 Variaveis = [ordered]@{
                     FRONT_AUTH_MODE = 'iam'
                     FRONT_API_URL = $api
-                    FRONT_TRUSTED_PROXY_CIDRS = ($cidrsFront -join ',')
-                    FRONT_TRUSTED_HOPS = [string]$SaltosFrontObservados
+                    FRONT_TRUSTED_PROXY_CIDRS = '169.254.169.126/32'
+                    FRONT_TRUSTED_HOPS = '1'
                     SOLAR_VERSION = $ShaFront.ToLowerInvariant()
                 }
                 Segredos = [ordered]@{}

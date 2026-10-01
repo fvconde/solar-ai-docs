@@ -132,7 +132,7 @@ function New-S26PlanoDeploy {
             ('--image=' + (Get-S26Imagem $c $servico $sha)),
             ('--service-account=' + (Get-S26EmailConta $c $servico)),
             ('--port=' + $s.Porta),'--cpu=1','--memory=512Mi','--max-instances=1',
-            '--no-allow-unauthenticated','--invoker-iam-check',('--labels=' + $c.Marca))
+            '--execution-environment=gen2','--no-allow-unauthenticated','--invoker-iam-check',('--labels=' + $c.Marca))
         if ($servico -eq 'Api') {
             $argumentos += @('--no-cpu-throttling','--min-instances=1',
                 ('--set-cloudsql-instances=' + $c.Projeto + ':' + $c.Regiao + ':' + $c.Instancia))
@@ -148,12 +148,19 @@ function New-S26PlanoDeploy {
         $p.Acoes += $acao
         $p.VerificacoesFinais += [ordered]@{Tipo='UrlPublicada'; Servico=$s.Nome; Url=$urlEntrada}
     }
-    foreach ($par in @(@('solar-api','Front'), @('solar-agente','Api'))) {
+    foreach ($par in @(@('solar-agente','Api'), @('solar-api','Front'))) {
         $p.Acoes += New-S26Gcloud $c ('invoker-' + $par[0]) @('run','services','add-iam-policy-binding',
             $par[0],('--region=' + $c.Regiao),'--role=roles/run.invoker',
             ('--member=serviceAccount:' + (Get-S26EmailConta $c $par[1])),'--condition=None')
     }
     # Publicacao e separada e acontece APOS conferir todas as URLs.
+    # Sonda somente front/API; tempo apos binding nao comprova API/agente.
+    $p.EsperaIam = [ordered]@{
+        OrigemFront=$config.Servicos.Api.Variaveis.Painel__UrlBaseDoFront
+        Metodo='GET'; Caminho='/api/sessao'; IntervaloSegundos=60
+        MaximoTentativas=10; PrazoSegundos=600; MinimoDesdeBindingAgenteSegundos=300
+        ProvaAgentePendente=$true
+    }
     if ($LiberarFrontPublico) {
         $p.PublicarDepoisDeVerificar = New-S26Gcloud $c 'publicar-somente-front' @(
             'run','services','add-iam-policy-binding','solar-front',('--region=' + $c.Regiao),

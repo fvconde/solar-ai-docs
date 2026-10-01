@@ -17,6 +17,9 @@ function Recusa([scriptblock]$Teste, [string]$Trecho='') {
     }
     Exigir $recusou 'Deveria recusar.'
 }
+$script:agoraIam = [datetime]::SpecifyKind([datetime]'2026-01-01', [DateTimeKind]::Utc)
+$relogioIam = { $script:agoraIam }
+$dormirIam = { param($segundos) $script:agoraIam = $script:agoraIam.AddSeconds($segundos) }
 $ctx = New-S26Contexto
 $script:chamadas = New-Object 'System.Collections.Generic.List[object]'
 $script:inventario = @{}
@@ -29,6 +32,7 @@ $fake = {
         return '[]'
     }
     switch ($a.Id) {
+        'sonda-iam-front-api' { return [pscustomobject]@{StatusCode=401;Corpo='{"codigo":"sessao_invalida"}'} }
         'conferir-config' { return '{"core":{"project":"solar-ai-cloud","account":"operador-ficticio"}}' }
         'conferir-apis' {
             return ConvertTo-Json -InputObject @('run','artifactregistry','sqladmin','secretmanager','iam' | ForEach-Object {
@@ -70,9 +74,7 @@ $entradas = @{
     UrlAgente='https://solar-agente-123456789012.southamerica-east1.run.app'
     UrlFront='https://solar-front-123456789012.southamerica-east1.run.app'
     ShaApi=$shas.Api;ShaAgente=$shas.Agente;ShaFront=$shas.Front
-    FrontCidrsObservados=@('192.0.2.0/24','2001:db8::/32')
-    ApiCidrsObservados=@('198.51.100.0/24')
-    SaltosFrontObservados=1;SaltosApiObservados=2;PeersObservadosConfirmados=$true
+    PeersObservadosConfirmados=$true
 }
 $versoes = @{}
 foreach ($nome in ($ctx.SegredosApi + $ctx.SegredosAgente)) { $versoes[$nome]='1' }
@@ -164,6 +166,7 @@ Caso 'git sujo bloqueia antes de configurar docker e construir' {
 }
 Caso 'deploy privado, limites CPU API e secretversions explicitas' {
     foreach ($a in @($deploy.Acoes | Where-Object Id -like 'deploy-*')) {
+        Exigir ($a.Argumentos -contains '--execution-environment=gen2')
         Exigir ($a.Argumentos -contains '--no-allow-unauthenticated')
         Exigir ($a.Argumentos -contains '--cpu=1' -and $a.Argumentos -contains '--memory=512Mi')
         Exigir ($a.Argumentos -contains '--max-instances=1')
@@ -173,7 +176,7 @@ Caso 'deploy privado, limites CPU API e secretversions explicitas' {
         Exigir (-not (($a.Argumentos -join ' ') -match ':latest'))
     }
 }
-Caso 'virgulas CIDR preservadas em arquivo JSON e removido ao final' {
+Caso 'mapas fixos preservados em arquivo JSON e removido ao final' {
     Preparar-Owned $deploy
     $script:chamadas.Clear()
     $script:arquivos = @()
@@ -184,11 +187,16 @@ Caso 'virgulas CIDR preservadas em arquivo JSON e removido ao final' {
             $arquivo = $arg.Substring(16)
             $script:arquivos += $arquivo
             $vars = Get-Content -LiteralPath $arquivo -Raw | ConvertFrom-Json
-            if ($a.Id -eq 'deploy-Front') { Exigir ($vars.FRONT_TRUSTED_PROXY_CIDRS -ceq '192.0.2.0/24,2001:db8::/32') }
+            if ($a.Id -eq 'deploy-Front') { Exigir ($vars.FRONT_TRUSTED_PROXY_CIDRS -ceq '169.254.169.126/32') }
+            if ($a.Id -eq 'deploy-Api') {
+                Exigir ($vars.ProxyTrust__ForwardedForHeaderName -ceq 'X-Solar-Client-IP')
+                Exigir ($vars.ProxyTrust__KnownProxies__0 -ceq '169.254.169.126' -and $vars.ProxyTrust__ForwardLimit -ceq '1')
+                Exigir (-not @($vars.PSObject.Properties | Where-Object Name -like 'ProxyTrust__KnownIPNetworks*').Count)
+            }
         }
         & $fake $a
     }
-    [void](Invoke-S26Plano $deploy -Executar -PeloLider -AprovacaoMaestro $ctx.Execucao -Executor $fakeDeploy)
+    [void](Invoke-S26Plano $deploy -Executar -PeloLider -AprovacaoMaestro $ctx.Execucao -Executor $fakeDeploy -Relogio $relogioIam -Dormir $dormirIam)
     foreach ($f in $script:arquivos) { Exigir (-not (Test-Path -LiteralPath $f)) }
     $ids = @($script:chamadas | ForEach-Object { $_.Id })
     Exigir ($ids[-1] -eq 'publicar-somente-front')
@@ -201,7 +209,7 @@ Caso 'URL divergente bloqueia publicacao' {
         if ($a.Id -eq 'conferir-url-publicada') { return '{"status":{"url":"https://outra.test"}}' }
         & $fake $a
     }
-    Recusa { Invoke-S26Plano $deploy -Executar -PeloLider -AprovacaoMaestro $ctx.Execucao -Executor $fakeUrl } 'status.url'
+    Recusa { Invoke-S26Plano $deploy -Executar -PeloLider -AprovacaoMaestro $ctx.Execucao -Executor $fakeUrl -Relogio $relogioIam -Dormir $dormirIam } 'status.url'
     Exigir (-not @($script:chamadas | Where-Object Id -eq 'publicar-somente-front').Count)
 }
 Caso 'sem peers/bootstrap ou com latest recusa planejamento' {

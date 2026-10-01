@@ -1,5 +1,6 @@
 # Infraestrutura de execucao da tarefa 8. Dot-source nao executa comandos.
 . (Join-Path $PSScriptRoot 'Configuracao-Producao.ps1')
+. (Join-Path $PSScriptRoot 'Espera-Iam.ps1')
 
 function New-S26Contexto {
     $id = '3bdd7f92-dda2-492e-a399-2e209a1e6238'
@@ -85,6 +86,7 @@ function Invoke-S26Nativo($Acao) {
         if ($null -eq $codigo -or $codigo -ne 0) { throw 'Falha de processo.' }
         return $saida.Trim()
     }
+    if ($Acao.Tipo -eq 'SondaIam') { return Invoke-S26SondaIamNativa $Acao }
     if ($Acao.Tipo -ne 'Rest') { throw 'Tipo de operacao desconhecido.' }
     # Auth e HTTP somente na execucao real. Token jamais e argumento de processo.
     $ctx = New-S26Contexto
@@ -202,13 +204,16 @@ function Invoke-S26EsperaSql($Contexto, $Operacao, [scriptblock]$Executor) {
         'sql','operations','wait',$nome,'--timeout=1800')) $Executor)
 }
 function Invoke-S26Plano($Plano, [switch]$Executar, [switch]$PeloLider,
-                         [string]$AprovacaoMaestro, [scriptblock]$Executor) {
+                         [string]$AprovacaoMaestro, [scriptblock]$Executor,
+    [scriptblock]$Relogio = { [datetime]::UtcNow },
+    [scriptblock]$Dormir = { param([double]$Segundos) Start-Sleep -Milliseconds ([int][Math]::Ceiling($Segundos * 1000)) }) {
     if (-not $Executar) { return $Plano }
     Assert-S26Autorizacao -Executar -PeloLider:$PeloLider -AprovacaoMaestro $AprovacaoMaestro
     $presentes = Assert-S26Recursos $Plano $Executor
     foreach ($verificacao in $Plano.Verificacoes) {
         Invoke-S26Verificacao $Plano.Contexto $verificacao $Executor $presentes
     }
+    $bindingAgenteUtc = $null
     foreach ($acao in $Plano.Acoes) {
         if ($acao.Contains('SomenteSeExiste') -and -not $presentes.ContainsKey($acao.SomenteSeExiste)) { continue }
         $arquivo = $null
@@ -222,12 +227,20 @@ function Invoke-S26Plano($Plano, [switch]$Executar, [switch]$PeloLider,
                 $executavel = New-S26Comando $acao.Id $acao.Programa ($acao.Argumentos + @('--env-vars-file=' + $arquivo))
             }
             $saida = Invoke-S26Transporte $executavel $Executor
+            if ($Plano.Contains('EsperaIam') -and $acao.Id -eq 'invoker-solar-agente') {
+                $bindingAgenteUtc = & $Relogio
+            }
             if ($acao.Tipo -eq 'Rest' -and $acao.Uri -like 'https://sqladmin.googleapis.com/*') {
                 Invoke-S26EsperaSql $Plano.Contexto ($saida | ConvertFrom-Json) $Executor
             }
         } finally {
             if ($arquivo -and [IO.File]::Exists($arquivo)) { [IO.File]::Delete($arquivo) }
         }
+    }
+    if ($Plano.Contains('EsperaIam')) {
+        if ($null -eq $bindingAgenteUtc) { throw 'Binding do agente nao concluido; verificacoes/publicacao bloqueadas.' }
+        Wait-S26IamFrontApi -OrigemFront $Plano.EsperaIam.OrigemFront -BindingAgenteUtc $bindingAgenteUtc `
+            -Executor $Executor -Relogio $Relogio -Dormir $Dormir
     }
     if ($Plano.Contains('VerificacoesFinais')) {
         foreach ($verificacao in $Plano.VerificacoesFinais) {

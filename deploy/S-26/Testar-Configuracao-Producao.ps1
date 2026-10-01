@@ -1,5 +1,5 @@
 # Executar com powershell.exe ou pwsh -NoProfile -File <caminho absoluto>.
-# Somente fixtures ficticias: dominios .test e redes reservadas para documentacao.
+# Dominios .test e SHAs ficticios; constantes aprovadas sem interacao com nuvem.
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'Configuracao-Producao.ps1')
@@ -39,10 +39,6 @@ $base = @{
     ShaFront = ('a' * 40)
     ShaApi = ('b' * 40)
     ShaAgente = ('c' * 40)
-    FrontCidrsObservados = @('192.0.2.0/24', '2001:db8:1::/48')
-    ApiCidrsObservados = @('198.51.100.17/32', '2001:db8:2::/48')
-    SaltosFrontObservados = 2
-    SaltosApiObservados = 3
     PeersObservadosConfirmados = $true
 }
 
@@ -55,13 +51,13 @@ Testar 'mapas API completos, allow-list indexada e SMTP com STARTTLS' {
         Agente__Autenticacao__Ativa = 'true'
         Cors__Origens__0 = 'https://front.test'
         Painel__UrlBaseDoFront = 'https://front.test'
-        ProxyTrust__ForwardLimit = '3'
+        ProxyTrust__ForwardLimit = '1'
+        ProxyTrust__ForwardedForHeaderName = 'X-Solar-Client-IP'
+        ProxyTrust__KnownProxies__0 = '169.254.169.126'
         SOLAR_VERSION = ('b' * 40)
         Email__Smtp__Host = 'smtp.gmail.com'
         Email__Smtp__Porta = '587'
         Email__Smtp__StartTls = 'true'
-        ProxyTrust__KnownIPNetworks__0 = '198.51.100.17/32'
-        ProxyTrust__KnownIPNetworks__1 = '2001:db8:2::/48'
     }) $config.Servicos.Api.Variaveis
 }
 Testar 'mapas agente com modelos atuais e front IAM' {
@@ -75,8 +71,8 @@ Testar 'mapas agente com modelos atuais e front IAM' {
     Assert-Mapa ([ordered]@{
         FRONT_AUTH_MODE = 'iam'
         FRONT_API_URL = 'https://api.test'
-        FRONT_TRUSTED_PROXY_CIDRS = '192.0.2.0/24,2001:db8:1::/48'
-        FRONT_TRUSTED_HOPS = '2'
+        FRONT_TRUSTED_PROXY_CIDRS = '169.254.169.126/32'
+        FRONT_TRUSTED_HOPS = '1'
         SOLAR_VERSION = ('a' * 40)
     }) $config.Servicos.Front.Variaveis
 }
@@ -117,23 +113,17 @@ Testar 'origem canonica retira barra raiz/443 e normaliza SHA' {
     Assert-Igual 'https://api.test' $config.Servicos.Front.Variaveis.FRONT_API_URL
     Assert-Igual ('d' * 40) $config.Servicos.Api.Variaveis.SOLAR_VERSION
 }
-Testar 'um CIDR nao vira lista de caracteres e oito saltos sao aceitos' {
+foreach ($chave in @('FrontCidrsObservados','ApiCidrsObservados','SaltosFrontObservados','SaltosApiObservados')) {
     $p = $base.Clone()
-    $p.FrontCidrsObservados = @('2001:0db8::1/128')
-    $p.ApiCidrsObservados = @('203.0.113.2/32')
-    $p.SaltosFrontObservados = 1
-    $p.SaltosApiObservados = 8
-    $config = New-S26ConfiguracaoProducao @p
-    Assert-Igual '2001:db8::1/128' $config.Servicos.Front.Variaveis.FRONT_TRUSTED_PROXY_CIDRS
-    Assert-Igual '203.0.113.2/32' $config.Servicos.Api.Variaveis.ProxyTrust__KnownIPNetworks__0
-    Assert-Igual '8' $config.Servicos.Api.Variaveis.ProxyTrust__ForwardLimit
+    $p[$chave] = 'entrada-livre-proibida'
+    Testar-Rejeicao ('parametro livre removido: ' + $chave) $p
 }
 Testar 'chamadas independentes nao compartilham estado nem alteram entrada' {
     $primeiro = New-S26ConfiguracaoProducao @base
     $primeiro.Servicos.Api.Variaveis.Agente__BaseUrl = 'alterado'
     $segundo = New-S26ConfiguracaoProducao @base
     Assert-Igual 'https://agente.test' $segundo.Servicos.Api.Variaveis.Agente__BaseUrl
-    Assert-Igual 2 $base.ApiCidrsObservados.Count
+    Assert-Igual 7 $base.Count
 }
 
 foreach ($chave in $base.Keys) {
@@ -163,43 +153,13 @@ foreach ($chave in @('ShaFront', 'ShaApi', 'ShaAgente')) {
         Testar-Rejeicao ('SHA invalido em ' + $chave) $p
     }
 }
-foreach ($chave in @('SaltosFrontObservados', 'SaltosApiObservados')) {
-    foreach ($invalido in @('', 0, -1, 9, '1.5', 'um', '01')) {
-        $p = $base.Clone()
-        $p[$chave] = $invalido
-        Testar-Rejeicao ('limite de saltos invalido em ' + $chave) $p
-    }
-}
-foreach ($chave in @('FrontCidrsObservados', 'ApiCidrsObservados')) {
-    foreach ($invalido in @('', '0.0.0.0/0', '::/0', '192.0.2.1',
-                            '192.0.2.0/33', '2001:db8::/129', '192.0.2.7/24',
-                            '2001:db8::1/64', '127.1/32', '::ffff:192.0.2.1/128',
-                            'fe80::%1/64', 'rede/24', '192.0.2.0/24 ')) {
-        $p = $base.Clone()
-        $p[$chave] = @($invalido)
-        Testar-Rejeicao ('CIDR invalido em ' + $chave) $p
-    }
-    $p = $base.Clone()
-    $p[$chave] = @()
-    Testar-Rejeicao ('allow-list vazia em ' + $chave) $p
-    $p[$chave] = @('192.0.2.0/24', '192.0.2.0/24')
-    Testar-Rejeicao ('CIDR duplicado em ' + $chave) $p
-    $p[$chave] = @(1..33 | ForEach-Object { '192.0.2.' + $_ + '/32' })
-    Testar-Rejeicao ('mais de 32 CIDRs em ' + $chave) $p
-}
 $p = $base.Clone()
 $p.PeersObservadosConfirmados = $false
 Testar-Rejeicao 'sem confirmacao explicita de observacao' $p
 
-foreach ($chave in @('UrlFront', 'UrlApi', 'UrlAgente', 'ShaFront', 'ShaApi', 'ShaAgente',
-                     'SaltosFrontObservados', 'SaltosApiObservados',
-                     'FrontCidrsObservados', 'ApiCidrsObservados')) {
+foreach ($chave in @('UrlFront', 'UrlApi', 'UrlAgente', 'ShaFront', 'ShaApi', 'ShaAgente')) {
     $p = $base.Clone()
-    if ($chave -like '*Cidrs*') {
-        $p[$chave] = @("192.0.2.0/24`n")
-    } else {
-        $p[$chave] = [string]$p[$chave] + "`n"
-    }
+    $p[$chave] = [string]$p[$chave] + "`n"
     Testar-Rejeicao ('quebra de linha proibida em ' + $chave) $p
 }
 
