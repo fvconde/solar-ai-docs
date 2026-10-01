@@ -63,8 +63,26 @@ function Invoke-S26Transporte($Acao, [scriptblock]$Executor) {
 function Invoke-S26Nativo($Acao) {
     if ($Acao.Tipo -eq 'Comando') {
         $argumentos = @($Acao.Argumentos)
-        $saida = & $Acao.Programa @argumentos 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw 'Falha de processo.' }
+        $preferenciaErro = $ErrorActionPreference
+        $variavelCodigoAnterior = Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+        $codigoAnterior = if ($null -ne $variavelCodigoAnterior) { $variavelCodigoAnterior.Value } else { $null }
+        # Variavel local: PS7 nao transforma exit nao zero em erro PowerShell;
+        # PS5.1 ignora esta preferencia. O chamador mantem seu proprio valor.
+        $PSNativeCommandUseErrorActionPreference = $false
+        try {
+            # PS5.1 pode produzir RemoteException ao redirecionar stderr com Stop.
+            # Capturar somente stdout e decidir pelo codigo do processo real.
+            $ErrorActionPreference = 'Continue'
+            # O engine grava LASTEXITCODE global; uma variavel local o ocultaria.
+            $global:LASTEXITCODE = $null
+            $saida = & $Acao.Programa @argumentos 2>$null | Out-String
+            $codigo = $global:LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $preferenciaErro
+            if ($null -ne $variavelCodigoAnterior) { $global:LASTEXITCODE = $codigoAnterior }
+            else { Remove-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue }
+        }
+        if ($null -eq $codigo -or $codigo -ne 0) { throw 'Falha de processo.' }
         return $saida.Trim()
     }
     if ($Acao.Tipo -ne 'Rest') { throw 'Tipo de operacao desconhecido.' }
