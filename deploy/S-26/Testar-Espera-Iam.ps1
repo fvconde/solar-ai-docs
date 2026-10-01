@@ -227,4 +227,231 @@ Caso 'plano deploy gerado fixa gen2 e ordem bindings antes da espera' {
     Exigir ($ids[-2] -ceq 'invoker-solar-agente' -and $ids[-1] -ceq 'invoker-solar-api')
     Exigir (-not $p.Contains('PublicarDepoisDeVerificar'))
 }
-Write-Output ('PASSOU: ' + $script:total + ' testes espera IAM offline; zero SDK/rede/espera real.')
+
+# Processos reais locais: nenhum SDK, HTTP, metadata ou espera IAM real.
+$temporario = Join-Path ([IO.Path]::GetTempPath()) ('s26 token fixture ' + [guid]::NewGuid().ToString('N'))
+$controle = $null
+$temposProcessos = New-Object 'System.Collections.Generic.List[object]'
+try {
+    [void][IO.Directory]::CreateDirectory($temporario)
+    $python = (Get-Command python.exe -ErrorAction Stop).Source
+    $fixture = Join-Path $temporario 'processo ficticio.py'
+    $launcher = Join-Path $temporario 'launcher ficticio.cmd'
+    $codigoPython = @'
+import json
+import subprocess
+import sys
+import time
+sys.stdout.reconfigure(encoding="utf-8")
+modo = sys.argv[1]
+if modo == "json":
+    print(json.dumps({"argv": sys.argv[2:], "ficticio": True}, ensure_ascii=False))
+    print("SENTINELA_STDERR_NAO_VAZAR", file=sys.stderr)
+elif modo == "token":
+    print("S26_" + "ficticio_" + str(6 * 7))
+    print("SENTINELA_STDERR_NAO_VAZAR", file=sys.stderr)
+elif modo == "falha":
+    print("SENTINELA_STDOUT_NAO_VAZAR")
+    print("SENTINELA_STDERR_NAO_VAZAR", file=sys.stderr)
+    sys.exit(23)
+elif modo == "lento":
+    subprocess.Popen([sys.executable, __file__, "filho"])
+    print("SENTINELA_STDOUT_NAO_VAZAR", flush=True)
+    print("SENTINELA_STDERR_NAO_VAZAR", file=sys.stderr, flush=True)
+    time.sleep(60)
+elif modo == "filho":
+    subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    time.sleep(60)
+elif modo == "vazio":
+    print("SENTINELA_STDERR_NAO_VAZAR", file=sys.stderr)
+elif modo == "excesso":
+    print("x" * 40000)
+else:
+    sys.exit(24)
+'@
+    [IO.File]::WriteAllText($fixture, $codigoPython, (New-Object Text.UTF8Encoding($false)))
+    [IO.File]::WriteAllText($launcher, ('@echo off' + "`r`n" + '@"' + $python + '" "' + $fixture + '" %*' + "`r`n"),
+        (New-Object Text.UTF8Encoding($false)))
+    Initialize-S26ProcessoToken
+    function Preparar-Processo {
+        $script:snapshots = New-Object 'System.Collections.Generic.List[object]'
+        $script:observador = [Action[int[]]]{
+            param([int[]]$ids)
+            $script:snapshots.Add(@($ids))
+        }
+    }
+    function Exigir-ArvoreAusente([int]$Minimo) {
+        $ids = @($script:snapshots | ForEach-Object { $_ } | Select-Object -Unique)
+        Exigir ($ids.Count -ge $Minimo)
+        Exigir ($script:snapshots[-1].Count -eq 0)
+        foreach ($idCriado in $ids) {
+            $ativo = $null
+            try { $ativo = [Diagnostics.Process]::GetProcessById($idCriado) }
+            catch [ArgumentException] { }
+            try { Exigir ($null -eq $ativo -or $ativo.HasExited) }
+            finally { if ($ativo) { $ativo.Dispose() } }
+        }
+    }
+    function Invocar-Fixture([bool]$Cmd, [string]$Modo, [string[]]$Extras=@(),
+        [double]$Timeout=5, [datetime]$Deadline=([datetime]::UtcNow.AddSeconds(10))) {
+        if ($Cmd) { $programa=$launcher; $argv=@($Modo)+$Extras }
+        else { $programa=$python; $argv=@($fixture,$Modo)+$Extras }
+        Invoke-S26TokenSonda -Programa $programa -Argumentos $argv -TimeoutSegundos $Timeout -LimiteUtc $Deadline -Observador $script:observador
+    }
+    $controleInfo = New-Object Diagnostics.ProcessStartInfo
+    $controleInfo.FileName = $python
+    $controleInfo.Arguments = '-c "import time; time.sleep(60)"'
+    $controleInfo.UseShellExecute = $false
+    $controleInfo.CreateNoWindow = $true
+    $controleInfo.RedirectStandardOutput = $true
+    $controleInfo.RedirectStandardError = $true
+    $controle = [Diagnostics.Process]::Start($controleInfo)
+
+    foreach ($cmd in @($false,$true)) {
+        $rotulo = if ($cmd) { 'launcher.cmd' } else { 'executavel Python' }
+        Caso ($rotulo + ': JSON stdout parseavel, stderr separado, argv com espacos') {
+            Preparar-Processo
+            $argumentos = @('um argumento com espacos', '', 'final\', 'Unicode acao', 'a;b', 'a=b')
+            $capturado = @(Invocar-Fixture $cmd 'json' $argumentos *>&1)
+            Exigir ($capturado.Count -eq 1 -and $capturado[0] -is [string])
+            Exigir (-not $capturado[0].Contains('SENTINELA'))
+            $json = $capturado[0] | ConvertFrom-Json
+            Exigir ($json.ficticio -and $json.argv.Count -eq $argumentos.Count)
+            for ($i=0; $i -lt $argumentos.Count; $i++) { Exigir ($json.argv[$i] -ceq $argumentos[$i]) }
+            Exigir-ArvoreAusente 1
+        }
+        Caso ($rotulo + ': token stdout apenas RAM, aviso stderr descartado') {
+            Preparar-Processo
+            $capturado = @(Invocar-Fixture $cmd 'token' *>&1)
+            Exigir ($capturado.Count -eq 1 -and $capturado[0] -ceq ('S26_'+'ficticio_'+42))
+            Exigir-ArvoreAusente 1
+        }
+        Caso ($rotulo + ': exit nao zero sanitizado e sem vazamento') {
+            Preparar-Processo
+            $capturado = @(& { try { Invocar-Fixture $cmd 'falha' } catch { $_.Exception.Message } } *>&1)
+            Exigir ($capturado.Count -eq 1 -and $capturado[0] -ceq 'Obtencao de token SondaIam falhou; detalhes externos suprimidos.')
+            Exigir-ArvoreAusente 1
+        }
+        Caso ($rotulo + ': timeout encerra apenas arvore criada, com filho e neto') {
+            Preparar-Processo
+            $cronometro = [Diagnostics.Stopwatch]::StartNew()
+            $capturado = @(& { try { Invocar-Fixture $cmd 'lento' -Timeout 2 } catch { $_.Exception.Message } } *>&1)
+            $cronometro.Stop()
+            Exigir ($capturado.Count -eq 1 -and $capturado[0] -ceq 'Obtencao de token SondaIam falhou; detalhes externos suprimidos.')
+            Exigir ($cronometro.Elapsed.TotalSeconds -lt 2.2)
+            $temposProcessos.Add(@{Orcamento=2;Medido=$cronometro.Elapsed.TotalSeconds})
+            $minimo = if ($cmd) { 4 } else { 3 }
+            Exigir-ArvoreAusente $minimo
+            Exigir (-not $controle.HasExited)
+        }
+        Caso ($rotulo + ': deadline restante menor que timeout encerra arvore') {
+            Preparar-Processo
+            $cronometro = [Diagnostics.Stopwatch]::StartNew()
+            Recusa { Invocar-Fixture $cmd 'lento' -Timeout 5 -Deadline ([datetime]::UtcNow.AddSeconds(1.2)) }
+            $cronometro.Stop()
+            Exigir ($cronometro.Elapsed.TotalSeconds -lt 1.4)
+            $temposProcessos.Add(@{Orcamento=1.2;Medido=$cronometro.Elapsed.TotalSeconds})
+            $minimo = if ($cmd) { 4 } else { 3 }
+            Exigir-ArvoreAusente $minimo
+            Exigir (-not $controle.HasExited)
+        }
+        Caso ($rotulo + ': stdout vazio recusa token') {
+            Preparar-Processo
+            Recusa { Invocar-Fixture $cmd 'vazio' }
+            Exigir-ArvoreAusente 1
+        }
+        Caso ($rotulo + ': stdout excessivo limitado e sanitizado') {
+            Preparar-Processo
+            Recusa { Invocar-Fixture $cmd 'excesso' -Timeout 2 }
+            Exigir-ArvoreAusente 1
+        }
+    }
+    Caso 'executavel: aspas, metacaracteres e backslashes intactos sem shell' {
+        Preparar-Processo
+        $argumentos = @('aspa"literal', 'a&b|c', '%NAO_EXPANDIR%', '^!<>', 'C:\pasta com espacos\', 'a\"b')
+        $json = (Invocar-Fixture $false 'json' $argumentos) | ConvertFrom-Json
+        for ($i=0; $i -lt $argumentos.Count; $i++) { Exigir ($json.argv[$i] -ceq $argumentos[$i]) }
+        Exigir-ArvoreAusente 1
+    }
+    foreach ($argInseguro in @('a&b','%NAO_EXPANDIR%','!expansao!','a|b','a>b','a<b','a^b','a"b')) {
+        Caso 'launcher: argumento fora do contrato fechado recusa antes de criar processo' {
+            Preparar-Processo
+            Recusa { Invocar-Fixture $true 'json' @($argInseguro) }
+            Exigir ($script:snapshots.Count -eq 0)
+        }
+    }
+    Caso 'prazo esgotado recusa sem criar processo' {
+        Preparar-Processo
+        Recusa { Invocar-Fixture $false 'token' -Deadline ([datetime]::UtcNow.AddSeconds(-1)) }
+        Exigir ($script:snapshots.Count -eq 0)
+    }
+    foreach ($modoSonda in @('falha','lento')) {
+        Caso ('fluxo SondaIam real local: ' + $modoSonda + ' antes de qualquer HTTP') {
+            Preparar-Processo
+            $launcherSonda = Join-Path $temporario ('sonda ' + $modoSonda + '.cmd')
+            [IO.File]::WriteAllText($launcherSonda, ('@echo off' + "`r`n" + '@"' + $python + '" "' + $fixture + '" ' + $modoSonda + ' %*' + "`r`n"),
+                (New-Object Text.UTF8Encoding($false)))
+            $contextoOriginal = (Get-Item Function:New-S26Contexto).ScriptBlock
+            $tokenOriginal = (Get-Item Function:Invoke-S26TokenSonda).ScriptBlock
+            try {
+                # Somente fixture local. O helper de processo real continua sendo executado.
+                function New-S26Contexto { return @{Gcloud=$launcherSonda;Projeto='projeto-ficticio'} }
+                function Invoke-S26TokenSonda {
+                    param($Programa,$Argumentos,$TimeoutSegundos,$LimiteUtc)
+                    & $tokenOriginal -Programa $Programa -Argumentos $Argumentos -TimeoutSegundos $TimeoutSegundos `
+                        -LimiteUtc $LimiteUtc -Observador $script:observador
+                }
+                $acao = [ordered]@{Id='sonda-iam-front-api';Tipo='SondaIam';OrigemFront='https://front.test'
+                    Uri='https://front.test/api/sessao';TimeoutSegundos=5;LimiteUtc=[datetime]::UtcNow.AddSeconds(1.2)}
+                $cronometro = [Diagnostics.Stopwatch]::StartNew()
+                $capturado = @(& { try { Invoke-S26Transporte $acao } catch { $_.Exception.Message } } *>&1)
+                $cronometro.Stop()
+                Exigir ($capturado.Count -eq 1 -and $capturado[0] -ceq 'Operacao S-26 falhou [sonda-iam-front-api]; detalhes externos suprimidos.')
+                Exigir ($cronometro.Elapsed.TotalSeconds -lt 1.4)
+                $temposProcessos.Add(@{Orcamento=1.2;Medido=$cronometro.Elapsed.TotalSeconds})
+                $minimo = if ($modoSonda -eq 'lento') { 4 } else { 1 }
+                Exigir-ArvoreAusente $minimo
+                Exigir (-not $controle.HasExited)
+            } finally {
+                Set-Item Function:New-S26Contexto -Value $contextoOriginal
+                Set-Item Function:Invoke-S26TokenSonda -Value $tokenOriginal
+            }
+        }
+    }
+    Caso 'preferencias e LASTEXITCODE global preservados pelo helper exclusivo' {
+        Preparar-Processo
+        $preferencia = $ErrorActionPreference
+        $anterior = Get-Variable LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+        $existia = $null -ne $anterior
+        $valor = if ($existia) { $anterior.Value } else { $null }
+        try {
+            $global:LASTEXITCODE = 123
+            [void](Invocar-Fixture $false 'token')
+            Exigir ($global:LASTEXITCODE -eq 123 -and $ErrorActionPreference -ceq $preferencia)
+            Remove-Variable LASTEXITCODE -Scope Global
+            [void](Invocar-Fixture $false 'token')
+            Exigir ($null -eq (Get-Variable LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue))
+        } finally {
+            if ($existia) { $global:LASTEXITCODE = $valor }
+            else { Remove-Variable LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue }
+        }
+    }
+} finally {
+    if ($controle) {
+        if (-not $controle.HasExited) {
+            $controle.Kill()
+            if (-not $controle.WaitForExit(5000)) { throw 'Processo de controle nao encerrou.' }
+        }
+        $controle.Dispose()
+    }
+    # Somente este diretorio absoluto exclusivo, nunca nomes compartilhados.
+    $resolvido = [IO.Path]::GetFullPath($temporario)
+    $tempRaiz = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\') + '\'
+    if (-not $resolvido.StartsWith($tempRaiz, [StringComparison]::OrdinalIgnoreCase) -or
+        [IO.Path]::GetFileName($resolvido) -notmatch '\As26 token fixture [a-f0-9]{32}\z') { throw 'Limpeza recusada.' }
+    if ([IO.Directory]::Exists($resolvido)) { Remove-Item -LiteralPath $resolvido -Recurse -Force }
+}
+
+$maximo2 = ($temposProcessos | Where-Object { $_.Orcamento -eq 2 } | ForEach-Object { $_.Medido } | Measure-Object -Maximum).Maximum
+$maximo12 = ($temposProcessos | Where-Object { $_.Orcamento -eq 1.2 } | ForEach-Object { $_.Medido } | Measure-Object -Maximum).Maximum
+Write-Output ('PASSOU: ' + $script:total + ' testes espera IAM/processos locais; zero SDK/rede/nuvem; timeout2s max=' + [Math]::Round($maximo2,3) + 's; deadline1.2s max=' + [Math]::Round($maximo12,3) + 's.')
