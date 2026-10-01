@@ -222,7 +222,9 @@ Bindings: `gcloud run services add-iam-policy-binding solar-api --region=southam
 
 ### Espera IAM antes das verificacoes
 
-O executor conserva o token do operador somente em memoria e sonde o front privado em GET /api/sessao, sem cookie. Sucesso e401 **da aplicacao**, com codigo sessao_invalida;403/502 ainda nao comprovam front→API. Fazer uma sonda cada60s, primeira depois da espera inicial, por no maximo10min/dez sondas. Nao aceitar apenas200 da SPA ou401 HTML do proxy. Redirecionamentos, erro de transporte ou resposta inesperada interrompem; sem registrar corpo/token.
+O executor conserva o token do operador somente em memoria e sonda o front privado em GET /api/sessao, sem cookie. Sucesso e401 **da aplicacao**, com codigo sessao_invalida;403/502 ainda nao comprovam front→API. Fazer uma sonda cada60s, primeira depois da espera inicial, por no maximo10min/dez sondas. Nao aceitar apenas200 da SPA ou401 HTML do proxy. Redirecionamentos, erro de transporte ou resposta inesperada interrompem; sem registrar corpo/token.
+
+Cada sonda tem no maximo20s para obter o token e completar HTTP, dentro do prazo total600s. A leitura do token usa helper exclusivo Windows: processo criado suspenso e associado a Job Object antes de executar, somente handles stdout/NUL herdados, stdout limitado32KiB somente em memoria e stderr descartado. Se o prazo esgotar, encerra e confere apenas a arvore criada, com reserva para limpeza, e bloqueia URL/publicacao com erro sanitizado. O transporte nativo geral nao muda; testes Python/.cmd locais provaram timeout e ausencia de filhos em PS7/5.1. Isso nao substitui a futura prova com Google Cloud SDK/IAM reais.
 
 Depois do sucesso, esperar somente o tempo restante ate completar cinco minutos desde a conclusao do binding do agente. Nao sondar API→agente com owner/impersonacao nem adicionar endpoint. Esta espera nao prova propagacao: a prova e o primeiro turno real da secao10, sob aprovacao de cota. Se front→API nao passar no prazo, interromper antes das verificacoes/publicacao e devolver o bloqueio ao Maestro.
 
