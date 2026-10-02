@@ -191,7 +191,7 @@ Esta seção constitui a **fonte única da política oficial de retenção de da
 
 - **Prazo Oficial de Retenção**: Os dados pessoais do lead (perfil, preferências e contatos) e todo o histórico de mensagens e conversas vinculadas são mantidos pelo período de **12 (doze) meses contados da data do último contato** do titular com a plataforma ou com o corretor parceiro.
 - **Descarte e Eliminação**: Findo o prazo de doze meses sem novas interações, os dados cadastrais do lead, as mensagens e os registros de atendimento são definitiva e irreversivelmente eliminados.
-- **Operação no Tempo Presente vs. Roadmap Técnico**: Em conformidade com o estado real do código, registra-se com transparência que **hoje a eliminação é executada sob demanda** através dos endpoints administrativos da API; **não existe rotina implementada de expurgo automático por TTL** no banco de dados. A implementação de um worker/job em background para expurgo periódico automatizado compõe o roadmap técnico de infraestrutura da plataforma.
+- **Operação no Tempo Presente**: Em conformidade com o estado real do código, o prazo acima é **cumprido por rotina automática**: um serviço em background da API varre diariamente os leads e elimina aqueles cujo último contato ultrapassou o prazo, conforme detalhado em [Implementação do expurgo automático](#implementação-do-expurgo-automático). O pedido de eliminação feito pelo titular antes do fim do prazo continua sendo atendido sob demanda, através dos endpoints administrativos da API.
 
 ### 5.4 Compartilhamento de Dados Pessoais
 Os dados pessoais coletados são compartilhados estritamente com os seguintes destinatários:
