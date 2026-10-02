@@ -4,7 +4,7 @@ Execução `3bdd7f92-dda2-492e-a399-2e209a1e6238`, líder Codex S-26, projeto `s
 
 ## Estado: provas retomadas concluídas; aguarda revisão do Maestro
 
-**134 chamadas**, com status observado registrado em todas: **133 asserções HTTP conformes**, **um caso informativo** e **zero outras falhas**. Distribuição: **124 respostas 401 e 10 respostas 429**. O caso 4 informativo retornou **401**.
+**Rodada inicial: 134 chamadas**, 133 asserções conformes e um caso informativo 401. **Complemento com forjas isoladas: 65/65 chamadas conformes**. Acumulado desta retomada: **199 chamadas registradas, 198 asserções conformes, um informativo e zero outras falhas**; **186 respostas 401 e 13 respostas 429**. A sequência a–d exata está documentada abaixo.
 
 Não houve redeploy, mudança de configuração, leitura de logs ou aquisição do IP público do operador nesta retomada. Publicação `allUsers` e primeira chamada Gemini continuam aguardando seus gates; nenhum envio SMTP foi solicitado. Recursos pagos permanecem ativos e privados.
 
@@ -100,3 +100,35 @@ A prova **API → agente no primeiro turno real** continua pendente do gate Gemi
 Não foram solicitadas chamadas Gemini nem SMTP. Não houve SDK de provisionamento/deploy, acesso a valores de segredos, Git push, PR, merge, Notion, alteração de produção ou configuração de modelo. Nenhum teardown nesta ordem: SQL, API de CPU contínua/min1, imagens, segredos e demais recursos continuam sujeitos a custo; a fatura não foi apurada.
 
 **Próximo passo: parar e devolver este relatório ao Maestro.**
+
+## Complemento: comparação relativa com forjas isoladas — ordem do Maestro
+
+A nova ordem proibiu arquivo com IP e consulta externa de IP e especificou uma chamada **só com XFF forjado** e outra **só com X-Solar-Client-IP forjado**. As forjas da rodada inicial combinavam ambos. Executei uma coorte complementar para cumprir os casos separados; as demais provas já concluídas foram preservadas.
+
+**65/65 chamadas conformes**, da primeira chamada às **01:12:25.077 UTC** ao encerramento do driver às **01:14:53.528 UTC**; status observado registrado em todas. Nenhuma falha.
+
+| Etapa | Chamadas globais | Observado |
+|---|---|---|
+| a: front normal, primeiras 60 | 135–194 | 60 × 401 |
+| a: front normal, 61ª | 195 | 429 |
+| b: front só XFF fictício | 196 | 429 |
+| b: front só X-Solar-Client-IP fictício | 197 | 429 |
+| c: API direta, próprio fictício novo | 198 | 401 |
+| d: front normal após janela | 199 | 401 |
+
+**(a)+(b) = 5,982 segundos**, menos de 45 s. O driver verifica esse limite durante a coorte e após cada forja. A última chamada ao front começou **mais de 142 segundos** depois da forja própria e retornou 401.
+
+Isso cumpre a comparação relativa de buckets indicada pelo Maestro: as forjas isoladas via front não abriram outra partição; o próprio fictício novo na API direta ficou em partição separada; o front voltou a permitir após a janela. Substitui a comparação de IP, sem obter seu valor. Não houve arquivo de IP, consulta externa, leitura de logs, redeploy ou mudança de produção/IAM.
+
+Comandos executados, ambos código **0**; parser: zero erros:
+
+```powershell
+$s26Driver='C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-26/.maestri/roles/7eef81c0-93a7-4a6c-9639-cc23e6e924e0/s26-comparar-isolado-20261002.ps1'
+pwsh -NoProfile -File $s26Driver -Fase Bucket
+# Aguardar pelo menos 120 s desde a conclusao da coorte.
+pwsh -NoProfile -File $s26Driver -Fase Janela
+```
+
+Fonte integral e 65 respostas no mesmo JSON, campos `FonteDriverComparacaoIsolada` e `ComparacaoRelativaIsolada`. A evidência da rodada inicial permanece separada e intacta. Os dois helpers adicionais de texto foram removidos por nomes exatos. Nenhuma publicação ou chamada Gemini/SMTP; permanece a parada para revisão do Maestro.
+
+A conferência local da cópia da fonte detectou somente um LF final adicional criado por `apply_patch`. A cópia no JSON foi corrigida para preservar o arquivo completo; conferência final da fonte e dos 199 status passou. Nenhuma prova HTTP foi repetida por esse ajuste.
