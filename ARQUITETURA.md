@@ -53,7 +53,7 @@ Os slots não ficam presos a datas de migration. Depois de aplicar o schema, a r
 
 `mensagens.imoveis_sugeridos` é `jsonb` e guarda o **snapshot** do que a Lia mostrou naquele turno, não o id para reconsultar — o motivo é texto escrito sobre aquele lead e a base pode mudar (S-36). A coluna carrega três estados distinguíveis, e a distinção é semântica: **nulo** em fala do lead, lista **vazia** em fala da Lia sem sugestão, lista preenchida quando houve. Quem ler a coluna não pode colapsar nulo e vazio.
 
-A trava por conversa (`TravaDeConversas`, um `SemaphoreSlim`) impede que duas mensagens simultâneas leiam o mesmo histórico e uma atualização de perfil se perca. **Ela só vale dentro de um processo** — com mais de uma instância da API a proteção some sem erro e sem log. O deploy do S-26 tem que subir com instância única enquanto for assim.
+A trava por conversa (`TravaDeConversas`, um `SemaphoreSlim`) impede que duas mensagens simultâneas leiam o mesmo histórico e uma atualização de perfil se perca. **Ela só vale dentro de um processo** — com mais de uma instância da API a proteção some sem erro e sem log. Por isso a API publicada pelo S-26 roda com `max-instances=1`, e escalar exige trocar a trava antes.
 
 ## O índice vetorial dos imóveis (S-14)
 
@@ -152,6 +152,14 @@ Um segundo `BackgroundService` na API, o `ServicoDeExpurgo`, elimina o lead cujo
 **Último contato é a última mensagem com papel `lead`, somando todas as conversas dele.** Fala da Lia, incluindo o follow-up, e encaminhamento não estendem o prazo. Lead sem mensagem conta pela menor data entre `Lead.CriadoEm` e `Conversa.CriadaEm`.
 
 **Não existe segunda regra de exclusão.** A rotina chama `ConversaRepositorio.ExcluirLeadAsync`, a mesma cascata do S-29, sob `TravaDeConversas.TravarMultiplasAsync`, e revalida a elegibilidade depois de obter a trava — mensagem que chega durante a espera salva o lead. Quem mudar a exclusão muda o expurgo junto. A conta de login nunca é expurgada. O log de expurgo grava só a contagem e o horário: registro de eliminação com identidade recriaria o dado que a eliminação apagou.
+
+## O deploy (S-26)
+
+Os três serviços rodam no Cloud Run (gen2), no projeto `solar-ai-cloud`, em `southamerica-east1`, com Postgres 16 no Cloud SQL. **Só o front é público.** O nginx do front serve o SPA e repassa `/api`, `/conversas`, `/turn`, `/encaminhamentos` e `/health` para a API, com o token de identidade da conta de serviço do front. OpenAPI e Swagger devolvem 404 no próprio nginx, e a API só os expõe em Development. **A API é privada**, e só a conta do front a invoca. **O agente é privado**, e só a conta da API o invoca. A fronteira de confiança entre os serviços é o IAM, não a rede.
+
+**O IP do cliente chega à API num header próprio.** O nginx normaliza o IP, confiando em um único salto (o proxy do Google), e **sobrescreve** `X-Solar-Client-IP`. A API ignora o `X-Forwarded-For` e só aceita esse header quando o peer é o proxy do Cloud Run, com `ForwardLimit=1` (`ProxyTrust`, em `ConfiancaDeProxies.cs`). O IP de saída do front vem de um pool compartilhado do Google e não serve para allow-list. O porquê está em [ESTADO.md](ESTADO.md), na linha de 02/10.
+
+Segredos (conexão do banco, SMTP, chave da Gemini, chave de privacidade e senha inicial do supervisor) ficam no Secret Manager e entram por `--set-secrets`, nunca em imagem ou repositório. O e-mail sai por SMTP do Gmail. A API roda com `max-instances=1`, uma instância mínima e CPU contínua, porque o follow-up e o expurgo rodam em background. Front e agente escalam a zero. O deploy é manual, por scripts PowerShell em `solar-ai-docs/deploy/S-26/`; pipeline automático é o escopo do S-27 e do S-28.
 
 ## Regras que não mudam
 

@@ -85,3 +85,4 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 
 - [[Decisao - Prefixo api separa painel do SPA]] — o namespace da API do painel não disputa mais a rota de página /painel (S-43).
 - [[Decisao - Login unico com tres papeis e sessao de 30 dias]] — cliente, corretor e supervisor entram pela mesma porta; a sessão expira e tem saída (S-44).
+- [[Decisao - Front publico e API privada por IAM no Cloud Run]] — só o front é público; o IP do cliente chega à API num header que o nginx sobrescreve (S-26).
