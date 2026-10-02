@@ -1,0 +1,497 @@
+{
+  "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+  "DataLocal": "2026-10-01",
+  "Timezone": "America/Sao_Paulo",
+  "Autorizacao": "Deploy privado e provas secao 9; parada em falha, sem publicar ou Gemini",
+  "Preflight": {
+    "Utc": "2026-10-02T00:14:50.1128608Z",
+    "Segredos": [
+      {
+        "Nome": "solar-postgres-connection-string",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      },
+      {
+        "Nome": "solar-smtp-usuario",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      },
+      {
+        "Nome": "solar-smtp-senha-app",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      },
+      {
+        "Nome": "solar-smtp-remetente",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      },
+      {
+        "Nome": "solar-semente-senha-supervisor",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      },
+      {
+        "Nome": "solar-chave-privacidade",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      },
+      {
+        "Nome": "solar-gemini-api-key",
+        "Quantidade": 1,
+        "Versao": "1",
+        "Estado": "ENABLED"
+      }
+    ],
+    "UsuarioSql": "solar_app",
+    "UsuarioSqlExiste": true,
+    "NumeroProjeto": "935010665676",
+    "Ownership": 12,
+    "CloudRunAusentes": 3,
+    "Preflight": true
+  },
+  "Deploy": {
+    "InicioUtc": "2026-10-02T00:21:52.3039119Z",
+    "FimUtc": "2026-10-02T00:28:05.6316774Z",
+    "Estado": "Concluida; provas pendentes",
+    "OperacaoFalha": null,
+    "Publicacao": false,
+    "Gemini": 0,
+    "SMTP": 0
+  },
+  "Metadados": {
+    "InicioUtc": "2026-10-02T00:31:59.8585724Z",
+    "Estado": "Concluida",
+    "Servicos": [
+      {
+        "Nome": "solar-agente",
+        "Revisao": "solar-agente-00001-p77",
+        "Ready": true,
+        "DigestIndice": "sha256:9b4192d0b3a4068f639898f8d2b5bf17c288abfc8202020ddc700c006ce14c96",
+        "DigestLinuxAmd64": "sha256:9c9c1b29ea2837cb03d975dcff77d5553e2b166f83a92c3f57667fc28821ed66",
+        "Gen2": true,
+        "Min": 0,
+        "Max": 1,
+        "CPUContinua": false,
+        "AmbienteConferido": true,
+        "ReferenciasSegredos": 1,
+        "Versoes": "1",
+        "IAMConferido": true,
+        "Privado": true,
+        "StatusUrl": "https://solar-agente-4or3sjeksq-rj.a.run.app"
+      },
+      {
+        "Nome": "solar-api",
+        "Revisao": "solar-api-00001-7w8",
+        "Ready": true,
+        "DigestIndice": "sha256:04e395ad894c3732a0c1abecacd3f462b20f6ca1022843e8726db35d60ecf05a",
+        "DigestLinuxAmd64": "sha256:2bc26e8018a896c78bc290dabf282e5c1eeaffe71662d7f0b513f09d30aebd59",
+        "Gen2": true,
+        "Min": 1,
+        "Max": 1,
+        "CPUContinua": true,
+        "AmbienteConferido": true,
+        "ReferenciasSegredos": 6,
+        "Versoes": "1",
+        "IAMConferido": true,
+        "Privado": true,
+        "StatusUrl": "https://solar-api-4or3sjeksq-rj.a.run.app"
+      },
+      {
+        "Nome": "solar-front",
+        "Revisao": "solar-front-00001-vbt",
+        "Ready": true,
+        "DigestIndice": "sha256:16347dc45c22f638df38c3920c2ba45eb4dc3f320fb71b0fd9bc8343ba032ffe",
+        "DigestLinuxAmd64": "sha256:6fb1585e4eaa3cbfebf3df33b68b770d49e5d9eb27a14ade9204071c2b992c46",
+        "Gen2": true,
+        "Min": 0,
+        "Max": 1,
+        "CPUContinua": false,
+        "AmbienteConferido": true,
+        "ReferenciasSegredos": 0,
+        "Versoes": "1",
+        "IAMConferido": true,
+        "Privado": true,
+        "StatusUrl": "https://solar-front-4or3sjeksq-rj.a.run.app"
+      }
+    ],
+    "Falha": null,
+    "FimUtc": "2026-10-02T00:32:40.0462958Z"
+  },
+  "HTTP": {
+    "InicioUtc": "2026-10-02T00:37:19.1258293Z",
+    "Estado": "Bloqueada; parar",
+    "Provas": [
+      {
+        "Nome": "IAM anonimo 403 nos tres servicos",
+        "Passou": true
+      },
+      {
+        "Nome": "API agente e health via front up com SHAs corretos",
+        "Passou": true
+      },
+      {
+        "Nome": "front autenticado sessao da aplicacao 401 sem cookie",
+        "Passou": true
+      },
+      {
+        "Nome": "helper interno e Swagger/OpenAPI API 404",
+        "Passou": true
+      },
+      {
+        "Nome": "CORS somente origem aprovada",
+        "Passou": true
+      },
+      {
+        "Nome": "IP da requisicao propria obtido em memoria sem persistir valor",
+        "Passou": true
+      },
+      {
+        "Nome": "API IP sintetico A 60x401 e 61=429",
+        "Passou": true
+      },
+      {
+        "Nome": "peer API corresponde ao unico KnownProxy 169.254.169.126 por aceitacao de IP A/B",
+        "Passou": true
+      },
+      {
+        "Nome": "API peer sem header 60x401 e 61=429",
+        "Passou": true
+      }
+    ],
+    "Requisicoes": 138,
+    "Falha": "Prova falhou: invalido multiplo ausente e XFF ficam no bucket do peer",
+    "Publicacao": false,
+    "Gemini": 0,
+    "SMTP": 0,
+    "FimUtc": "2026-10-02T00:37:44.1162541Z"
+  },
+  "Bloqueio": {
+    "Etapa": "Primeira comparacao entre bucket sem header e header proprio explicito do peer",
+    "Esperado": 429,
+    "Observado": "Nao foi 429; codigo exato nao retido pelo driver",
+    "RequestNumero": 138,
+    "HeaderSintetico": "X-Solar-Client-IP: 169.254.169.126",
+    "PeerObservacao": "Inferencia por aceitação A/B e KnownProxy unico; nenhum valor bruto do socket observado",
+    "ForjasViaFront": "Nao executadas depois da falha",
+    "HeaderIntacto": "Nao comprovado em runtime",
+    "Causa": "Nao determinada",
+    "Repeticao": false,
+    "NuvemDepoisDaFalha": false
+  },
+  "CacheAgente": {
+    "ValidadoLocalSemRede": true,
+    "Modelo": "gemini-embedding-001",
+    "Imoveis": 80,
+    "Vetores": 80
+  },
+  "EntradasNaoSecretas": {
+    "Nome": "Deploy",
+    "Contexto": {
+      "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+      "Projeto": "solar-ai-cloud",
+      "Regiao": "southamerica-east1",
+      "Gcloud": "C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd",
+      "Raiz": "C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-26",
+      "Registro": "solar-s26-3bdd7f92",
+      "Instancia": "solar-s26-3bdd7f92",
+      "Banco": "solar",
+      "UsuarioSql": "solar_app",
+      "Marca": "s26-execucao=3bdd7f92-dda2-492e-a399-2e209a1e6238",
+      "Contas": {
+        "Front": "s26-front-3bdd7f92",
+        "Api": "s26-api-3bdd7f92",
+        "Agente": "s26-agente-3bdd7f92"
+      },
+      "SegredosApi": [
+        "solar-postgres-connection-string",
+        "solar-smtp-usuario",
+        "solar-smtp-senha-app",
+        "solar-smtp-remetente",
+        "solar-semente-senha-supervisor",
+        "solar-chave-privacidade"
+      ],
+      "SegredosAgente": [
+        "solar-gemini-api-key"
+      ]
+    },
+    "Recursos": [
+      {
+        "Tipo": "Registro",
+        "Nome": "solar-s26-3bdd7f92",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Sql",
+        "Nome": "solar-s26-3bdd7f92",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Conta",
+        "Nome": "s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Conta",
+        "Nome": "s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Conta",
+        "Nome": "s26-agente-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-postgres-connection-string",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-smtp-usuario",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-smtp-senha-app",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-smtp-remetente",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-semente-senha-supervisor",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-chave-privacidade",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Segredo",
+        "Nome": "solar-gemini-api-key",
+        "Modo": "Owned"
+      },
+      {
+        "Tipo": "Run",
+        "Nome": "solar-agente",
+        "Modo": "OwnedOrAbsent"
+      },
+      {
+        "Tipo": "Run",
+        "Nome": "solar-api",
+        "Modo": "OwnedOrAbsent"
+      },
+      {
+        "Tipo": "Run",
+        "Nome": "solar-front",
+        "Modo": "OwnedOrAbsent"
+      }
+    ],
+    "Verificacoes": [
+      {
+        "Tipo": "Projeto"
+      },
+      {
+        "Tipo": "Apis"
+      },
+      {
+        "Tipo": "NumeroProjeto",
+        "Numero": "935010665676"
+      },
+      {
+        "Tipo": "Iam"
+      }
+    ],
+    "Acoes": [
+      {
+        "Id": "deploy-Agente",
+        "Tipo": "Comando",
+        "Programa": "C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd",
+        "Argumentos": [
+          "run",
+          "deploy",
+          "solar-agente",
+          "--region=southamerica-east1",
+          "--image=southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-agente:56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+          "--service-account=s26-agente-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+          "--port=8000",
+          "--cpu=1",
+          "--memory=512Mi",
+          "--max-instances=1",
+          "--execution-environment=gen2",
+          "--no-allow-unauthenticated",
+          "--invoker-iam-check",
+          "--labels=s26-execucao=3bdd7f92-dda2-492e-a399-2e209a1e6238",
+          "--cpu-throttling",
+          "--min-instances=0",
+          "--set-secrets=GEMINI_API_KEY=solar-gemini-api-key:1",
+          "--project=solar-ai-cloud",
+          "--quiet",
+          "--format=json"
+        ],
+        "Ambiente": {
+          "SOLAR_ENV": "production",
+          "SOLAR_VERSION": "56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+          "GEMINI_MODEL": "gemini-3.5-flash-lite",
+          "GEMINI_EMBEDDING_MODEL": "gemini-embedding-001"
+        }
+      },
+      {
+        "Id": "deploy-Api",
+        "Tipo": "Comando",
+        "Programa": "C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd",
+        "Argumentos": [
+          "run",
+          "deploy",
+          "solar-api",
+          "--region=southamerica-east1",
+          "--image=southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-api:87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+          "--service-account=s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+          "--port=8080",
+          "--cpu=1",
+          "--memory=512Mi",
+          "--max-instances=1",
+          "--execution-environment=gen2",
+          "--no-allow-unauthenticated",
+          "--invoker-iam-check",
+          "--labels=s26-execucao=3bdd7f92-dda2-492e-a399-2e209a1e6238",
+          "--no-cpu-throttling",
+          "--min-instances=1",
+          "--set-cloudsql-instances=solar-ai-cloud:southamerica-east1:solar-s26-3bdd7f92",
+          "--set-secrets=ConnectionStrings__Postgres=solar-postgres-connection-string:1,Email__Smtp__Usuario=solar-smtp-usuario:1,Email__Smtp__SenhaApp=solar-smtp-senha-app:1,Email__Smtp__Remetente=solar-smtp-remetente:1,Semente__SenhaSupervisor=solar-semente-senha-supervisor:1,Seguranca__ChavePrivacidade=solar-chave-privacidade:1",
+          "--project=solar-ai-cloud",
+          "--quiet",
+          "--format=json"
+        ],
+        "Ambiente": {
+          "ASPNETCORE_ENVIRONMENT": "Production",
+          "ASPNETCORE_HTTP_PORTS": "8080",
+          "Agente__BaseUrl": "https://solar-agente-935010665676.southamerica-east1.run.app",
+          "Agente__Autenticacao__Ativa": "true",
+          "Cors__Origens__0": "https://solar-front-935010665676.southamerica-east1.run.app",
+          "Painel__UrlBaseDoFront": "https://solar-front-935010665676.southamerica-east1.run.app",
+          "ProxyTrust__ForwardedForHeaderName": "X-Solar-Client-IP",
+          "ProxyTrust__KnownProxies__0": "169.254.169.126",
+          "ProxyTrust__ForwardLimit": "1",
+          "SOLAR_VERSION": "87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+          "Email__Smtp__Host": "smtp.gmail.com",
+          "Email__Smtp__Porta": "587",
+          "Email__Smtp__StartTls": "true"
+        }
+      },
+      {
+        "Id": "deploy-Front",
+        "Tipo": "Comando",
+        "Programa": "C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd",
+        "Argumentos": [
+          "run",
+          "deploy",
+          "solar-front",
+          "--region=southamerica-east1",
+          "--image=southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-front:af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+          "--service-account=s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+          "--port=8080",
+          "--cpu=1",
+          "--memory=512Mi",
+          "--max-instances=1",
+          "--execution-environment=gen2",
+          "--no-allow-unauthenticated",
+          "--invoker-iam-check",
+          "--labels=s26-execucao=3bdd7f92-dda2-492e-a399-2e209a1e6238",
+          "--cpu-throttling",
+          "--min-instances=0",
+          "--clear-secrets",
+          "--project=solar-ai-cloud",
+          "--quiet",
+          "--format=json"
+        ],
+        "Ambiente": {
+          "FRONT_AUTH_MODE": "iam",
+          "FRONT_API_URL": "https://solar-api-935010665676.southamerica-east1.run.app",
+          "FRONT_TRUSTED_PROXY_CIDRS": "169.254.169.126/32",
+          "FRONT_TRUSTED_HOPS": "1",
+          "SOLAR_VERSION": "af366c0672c625b9fbe01cfe1832d343f4a6f6d3"
+        }
+      },
+      {
+        "Id": "invoker-solar-agente",
+        "Tipo": "Comando",
+        "Programa": "C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd",
+        "Argumentos": [
+          "run",
+          "services",
+          "add-iam-policy-binding",
+          "solar-agente",
+          "--region=southamerica-east1",
+          "--role=roles/run.invoker",
+          "--member=serviceAccount:s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+          "--condition=None",
+          "--project=solar-ai-cloud",
+          "--quiet",
+          "--format=json"
+        ]
+      },
+      {
+        "Id": "invoker-solar-api",
+        "Tipo": "Comando",
+        "Programa": "C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd",
+        "Argumentos": [
+          "run",
+          "services",
+          "add-iam-policy-binding",
+          "solar-api",
+          "--region=southamerica-east1",
+          "--role=roles/run.invoker",
+          "--member=serviceAccount:s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com",
+          "--condition=None",
+          "--project=solar-ai-cloud",
+          "--quiet",
+          "--format=json"
+        ]
+      }
+    ],
+    "VerificacoesFinais": [
+      {
+        "Tipo": "UrlPublicada",
+        "Servico": "solar-agente",
+        "Url": "https://solar-agente-935010665676.southamerica-east1.run.app"
+      },
+      {
+        "Tipo": "UrlPublicada",
+        "Servico": "solar-api",
+        "Url": "https://solar-api-935010665676.southamerica-east1.run.app"
+      },
+      {
+        "Tipo": "UrlPublicada",
+        "Servico": "solar-front",
+        "Url": "https://solar-front-935010665676.southamerica-east1.run.app"
+      }
+    ],
+    "EsperaIam": {
+      "OrigemFront": "https://solar-front-935010665676.southamerica-east1.run.app",
+      "Metodo": "GET",
+      "Caminho": "/api/sessao",
+      "IntervaloSegundos": 60,
+      "MaximoTentativas": 10,
+      "PrazoSegundos": 600,
+      "MinimoDesdeBindingAgenteSegundos": 300,
+      "ProvaAgentePendente": true
+    }
+  },
+  "FonteProvaHTTP": "$ErrorActionPreference='Stop'\n. 'C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-26/solar-ai-docs/deploy/S-26/Planos.ps1'\n$s26Pasta='C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-26/.maestri/roles/7eef81c0-93a7-4a6c-9639-cc23e6e924e0'\n$s26File=$s26Pasta+'/s26-provas-http-20261001.json'\n$s26Result=[ordered]@{InicioUtc=[datetime]::UtcNow.ToString('o');Estado='Em andamento';Provas=@();Requisicoes=0;Falha=$null;Publicacao=$false;Gemini=0;SMTP=0}\n$s26Token=$null;$s26Client=$null;$s26OperatorIP=$null\nfunction Check-S26([bool]$OK,[string]$Name){if(-not $OK){throw ('Prova falhou: '+$Name)}}\nfunction Record-S26([string]$Name){$s26Result.Provas += [ordered]@{Nome=$Name;Passou=$true};Write-Output ('OK '+$Name)}\nfunction Request-S26([string]$Origin,[string]$Path,[hashtable]$Headers=@{},[switch]$Anon,[string]$Method='GET'){\n if($Origin -cnotin @($s26Front,$s26Api,$s26Agente) -or $Path -notmatch '\\A/'){throw 'Destino fora do escopo'}\n $request=[Net.Http.HttpRequestMessage]::new([Net.Http.HttpMethod]::new($Method),$Origin+$Path);$response=$null\n try{\n  if(-not $Anon){[void]$request.Headers.TryAddWithoutValidation('X-Serverless-Authorization','Bearer '+$s26Token)}\n  foreach($key in $Headers.Keys){[void]$request.Headers.TryAddWithoutValidation($key,[string[]]@($Headers[$key]))}\n  $response=$s26Client.SendAsync($request).GetAwaiter().GetResult();$s26Result.Requisicoes++\n  $body=$response.Content.ReadAsStringAsync().GetAwaiter().GetResult()\n  if([Text.Encoding]::UTF8.GetByteCount($body) -gt 8192){throw 'Resposta excede limite'}\n  $originHeader=if($response.Headers.Contains('Access-Control-Allow-Origin')){[string]::Join(',', $response.Headers.GetValues('Access-Control-Allow-Origin'))}else{$null}\n  return [pscustomobject]@{Status=[int]$response.StatusCode;Body=$body;Cors=$originHeader;Cookie=$response.Headers.Contains('Set-Cookie')}\n }finally{if($response){$response.Dispose()};$request.Dispose()}\n}\nfunction Bucket-S26([string]$Origin,[hashtable]$Headers,[string]$Name){\n $clock=[Diagnostics.Stopwatch]::StartNew()\n for($i=1;$i -le 60;$i++){Check-S26 ((Request-S26 $Origin '/api/painel/leads' $Headers).Status -eq 401) ($Name+' permite '+$i);Check-S26 ($clock.Elapsed.TotalSeconds -lt 45) ($Name+' janela temporal')}\n Check-S26 ((Request-S26 $Origin '/api/painel/leads' $Headers).Status -eq 429) ($Name+' limita 61')\n Record-S26 ($Name+' 60x401 e 61=429')\n}\ntry{\n $meta=Get-Content -Raw -LiteralPath ($s26Pasta+'/s26-provas-metadados-20261001.json')|ConvertFrom-Json\n Check-S26 ($meta.Estado -ceq 'Concluida') 'metadados antes de HTTP'\n $pre=Get-Content -Raw -LiteralPath ($s26Pasta+'/s26-deploy-preflight-20261001.json')|ConvertFrom-Json\n $s26Front='https://solar-front-'+$pre.NumeroProjeto+'.southamerica-east1.run.app'\n $s26Api='https://solar-api-'+$pre.NumeroProjeto+'.southamerica-east1.run.app'\n $s26Agente='https://solar-agente-'+$pre.NumeroProjeto+'.southamerica-east1.run.app'\n $s26Ctx=New-S26Contexto\n $handler=[Net.Http.HttpClientHandler]::new();$handler.AllowAutoRedirect=$false;$handler.UseCookies=$false;$handler.UseProxy=$false\n $s26Client=[Net.Http.HttpClient]::new($handler);$s26Client.Timeout=[TimeSpan]::FromSeconds(20);$s26Client.MaxResponseContentBufferSize=8192\n foreach($origin in @($s26Front,$s26Api,$s26Agente)){Check-S26 ((Request-S26 $origin '/health' -Anon).Status -eq 403) 'IAM nega anonimo'}\n Record-S26 'IAM anonimo 403 nos tres servicos'\n $s26Token=Invoke-S26TokenSonda -Programa $s26Ctx.Gcloud -Argumentos @('auth','print-identity-token',('--project='+$s26Ctx.Projeto),'--quiet') -TimeoutSegundos 20 -LimiteUtc ([datetime]::UtcNow.AddSeconds(20))\n foreach($item in @(@($s26Api,'87c491bf88d7ba94be284cdf08ab1ae4efa17724'),@($s26Agente,'56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8'),@($s26Front,'87c491bf88d7ba94be284cdf08ab1ae4efa17724'))){$r=Request-S26 $item[0] '/health';Check-S26 ($r.Status -eq 200) 'health 200';$health=$r.Body|ConvertFrom-Json;Check-S26 ($health.status -ceq 'up' -and $health.version -ceq $item[1]) 'health up e SHA'}\n Record-S26 'API agente e health via front up com SHAs corretos'\n $r=Request-S26 $s26Front '/api/sessao';Check-S26 ($r.Status -eq 401 -and ($r.Body|ConvertFrom-Json).codigo -ceq 'sessao_invalida' -and -not $r.Cookie) 'sessao sem cookie'\n Record-S26 'front autenticado sessao da aplicacao 401 sem cookie'\n Check-S26 ((Request-S26 $s26Front '/_solar_identity').Status -eq 404) 'helper interno inacessivel'\n foreach($path in @('/swagger/index.html','/swagger/v1/swagger.json','/openapi/v1.json')){Check-S26 ((Request-S26 $s26Api $path).Status -eq 404) 'Swagger/OpenAPI API desligados'}\n Record-S26 'helper interno e Swagger/OpenAPI API 404'\n $r=Request-S26 $s26Api '/health' @{Origin=$s26Front};Check-S26 ($r.Status -eq 200 -and $r.Cors -ceq $s26Front) 'CORS origem aprovada'\n $r=Request-S26 $s26Api '/health' @{Origin='https://s26-invalido.example'};Check-S26 ($r.Status -eq 200 -and $null -eq $r.Cors) 'CORS origem alheia'\n Record-S26 'CORS somente origem aprovada'\n $trace=[guid]::NewGuid().ToString('N')\n Check-S26 ((Request-S26 $s26Front '/health' @{'X-Cloud-Trace-Context'=($trace+'/0;o=1')}).Status -eq 200) 'amostra propria de IP'\n $filter='resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"solar-front\" AND trace=\"projects/'+$s26Ctx.Projeto+'/traces/'+$trace+'\"'\n $until=[datetime]::UtcNow.AddSeconds(45)\n do{\n  $logs=(Invoke-S26Transporte (New-S26Gcloud $s26Ctx 'ip-proprio-somente-memoria' @('logging','read',$filter,'--limit=5','--freshness=15m')) $null)|ConvertFrom-Json\n  $ips=@($logs|Where-Object {$_.httpRequest.status -eq 200 -and $null -ne $_.httpRequest.remoteIp}|ForEach-Object {$_.httpRequest.remoteIp}|Select-Object -Unique)\n  if($ips.Count -eq 1){$parsed=$null;Check-S26 ([Net.IPAddress]::TryParse([string]$ips[0],[ref]$parsed)) 'IP proprio valido';$s26OperatorIP=$parsed.ToString();break}\n  Check-S26 ($ips.Count -eq 0 -and [datetime]::UtcNow -lt $until) 'amostra propria de IP disponivel';Start-Sleep -Seconds 5\n }while($true)\n Record-S26 'IP da requisicao propria obtido em memoria sem persistir valor'\n Bucket-S26 $s26Api @{'X-Solar-Client-IP'='203.0.113.41'} 'API IP sintetico A'\n Check-S26 ((Request-S26 $s26Api '/api/painel/leads' @{'X-Solar-Client-IP'='203.0.113.42'}).Status -eq 401) 'bucket B separado de A'\n Record-S26 'peer API corresponde ao unico KnownProxy 169.254.169.126 por aceitacao de IP A/B'\n Bucket-S26 $s26Api @{} 'API peer sem header'\n foreach($headers in @(@{'X-Solar-Client-IP'='169.254.169.126'},@{'X-Solar-Client-IP'='invalido'},@{'X-Solar-Client-IP'='203.0.113. 50'},@{'X-Solar-Client-IP'='203.0.113.50, 203.0.113.51'},@{'X-Solar-Client-IP'=@('203.0.113.50','203.0.113.51')},@{'X-Forwarded-For'='203.0.113.99'})){Check-S26 ((Request-S26 $s26Api '/api/painel/leads' $headers).Status -eq 429) 'invalido multiplo ausente e XFF ficam no bucket do peer'}\n Check-S26 ((Request-S26 $s26Api '/api/painel/leads' @{'X-Solar-Client-IP'='2001:db8::26';'X-Forwarded-For'='203.0.113.41'}).Status -eq 401) 'IPv6 proprio aceito e XFF ignorado'\n Record-S26 'fallback para peer e IPv6 validado sem 400; XFF ignorado'\n Bucket-S26 $s26Front @{} 'front IP normalizado'\n foreach($headers in @(@{'X-Forwarded-For'='203.0.113.81';'X-Solar-Client-IP'='203.0.113.82'},@{'X-Forwarded-For'='203.0.113.83, 198.51.100.84';'X-Solar-Client-IP'='invalido'},@{'X-Forwarded-For'=@('203.0.113.85','203.0.113.86');'X-Solar-Client-IP'=@('203.0.113.87','203.0.113.88')})){Check-S26 ((Request-S26 $s26Front '/api/painel/leads' $headers).Status -eq 429) 'forja no front nao troca bucket'}\n Check-S26 ((Request-S26 $s26Api '/api/painel/leads' @{'X-Solar-Client-IP'=$s26OperatorIP}).Status -eq 429) 'header normalizado intacto no mesmo bucket API'\n Check-S26 ((Request-S26 $s26Api '/api/painel/leads' @{'X-Solar-Client-IP'='203.0.113.90'}).Status -eq 401) 'controle final bucket independente'\n Record-S26 'XFF e X-Solar forjados sem efeito; IP normalizado intacto por bucket compartilhado front API'\n $s26Result.Estado='Concluida'\n}catch{\n $s26Result.Estado='Bloqueada; parar'\n if($_.Exception.Message.StartsWith('Prova falhou: ')){$s26Result.Falha=$_.Exception.Message}else{$s26Result.Falha='Falha sanitizada na prova HTTP'}\n}finally{\n $s26Token=$null;$s26OperatorIP=$null;$logs=$null;$ips=$null;$r=$null;$health=$null\n if($s26Client){$s26Client.Dispose()}\n $s26Result.FimUtc=[datetime]::UtcNow.ToString('o');[IO.File]::WriteAllText($s26File,($s26Result|ConvertTo-Json -Depth 7),[Text.UTF8Encoding]::new($false))\n}\n$s26Result|ConvertTo-Json -Depth 7\nif($s26Result.Estado -cne 'Concluida'){exit 1}\n",
+  "Publicacao": false,
+  "GeminiSolicitado": 0,
+  "SMTPSolicitado": 0,
+  "UtcRelatorio": "2026-10-02T00:43:17.9385695Z"
+}

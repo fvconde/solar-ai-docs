@@ -1,0 +1,2820 @@
+{
+  "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+  "DataLocal": "2026-10-02",
+  "Timezone": "America/Sao_Paulo",
+  "Estado": "Aceite funcional encerrado; desvio do teto registrado",
+  "SHAs": {
+    "API": "87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+    "Front": "af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+    "Agente": "56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+    "DocsBaseAntesDoAceite": "f40bd80af4808dd1ba5a6fa48291799c24cf6099"
+  },
+  "Publicacao": {
+    "InicioUtc": "2026-10-02T01:34:09.5515031Z",
+    "Estado": "Concluida",
+    "Antes": [
+      {
+        "Servico": "solar-agente",
+        "Utc": "2026-10-02T01:34:20.5561287Z",
+        "Revisao": "solar-agente-00001-p77",
+        "Ready": true,
+        "Trafego100": true,
+        "Ownership": true,
+        "Regiao": "southamerica-east1",
+        "Invokers": [
+          "serviceAccount:s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"
+        ],
+        "AllUsers": false,
+        "Url": "https://solar-agente-4or3sjeksq-rj.a.run.app"
+      },
+      {
+        "Servico": "solar-api",
+        "Utc": "2026-10-02T01:34:26.0984964Z",
+        "Revisao": "solar-api-00001-7w8",
+        "Ready": true,
+        "Trafego100": true,
+        "Ownership": true,
+        "Regiao": "southamerica-east1",
+        "Invokers": [
+          "serviceAccount:s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"
+        ],
+        "AllUsers": false,
+        "Url": "https://solar-api-4or3sjeksq-rj.a.run.app"
+      },
+      {
+        "Servico": "solar-front",
+        "Utc": "2026-10-02T01:34:32.0119235Z",
+        "Revisao": "solar-front-00001-vbt",
+        "Ready": true,
+        "Trafego100": true,
+        "Ownership": true,
+        "Regiao": "southamerica-east1",
+        "Invokers": [],
+        "AllUsers": false,
+        "Url": "https://solar-front-4or3sjeksq-rj.a.run.app"
+      }
+    ],
+    "Depois": [
+      {
+        "Servico": "solar-agente",
+        "Utc": "2026-10-02T01:34:40.0546942Z",
+        "Revisao": "solar-agente-00001-p77",
+        "Ready": true,
+        "Trafego100": true,
+        "Ownership": true,
+        "Regiao": "southamerica-east1",
+        "Invokers": [
+          "serviceAccount:s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"
+        ],
+        "AllUsers": false,
+        "Url": "https://solar-agente-4or3sjeksq-rj.a.run.app"
+      },
+      {
+        "Servico": "solar-api",
+        "Utc": "2026-10-02T01:34:46.7512299Z",
+        "Revisao": "solar-api-00001-7w8",
+        "Ready": true,
+        "Trafego100": true,
+        "Ownership": true,
+        "Regiao": "southamerica-east1",
+        "Invokers": [
+          "serviceAccount:s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"
+        ],
+        "AllUsers": false,
+        "Url": "https://solar-api-4or3sjeksq-rj.a.run.app"
+      },
+      {
+        "Servico": "solar-front",
+        "Utc": "2026-10-02T01:34:52.3813104Z",
+        "Revisao": "solar-front-00001-vbt",
+        "Ready": true,
+        "Trafego100": true,
+        "Ownership": true,
+        "Regiao": "southamerica-east1",
+        "Invokers": [
+          "allUsers"
+        ],
+        "AllUsers": true,
+        "Url": "https://solar-front-4or3sjeksq-rj.a.run.app"
+      }
+    ],
+    "BindingAplicado": true,
+    "ComandoBinding": [
+      "run",
+      "services",
+      "add-iam-policy-binding",
+      "solar-front",
+      "--member=allUsers",
+      "--role=roles/run.invoker",
+      "--condition=None",
+      "--region=southamerica-east1",
+      "--project=solar-ai-cloud",
+      "--quiet",
+      "--format=json"
+    ],
+    "Falha": null,
+    "DeployExecutado": false,
+    "Gemini": 0,
+    "SMTP": 0,
+    "BindingUtc": "2026-10-02T01:34:34.5964455Z",
+    "FimUtc": "2026-10-02T01:34:52.3813503Z"
+  },
+  "ProvasPublicas": {
+    "InicioUtc": "2026-10-02T01:40:52.2208755Z",
+    "Estado": "Concluida",
+    "Chamadas": [
+      {
+        "Numero": 1,
+        "Caso": "front publico health",
+        "InicioUtc": "2026-10-02T01:40:52.281919Z",
+        "Status": 200,
+        "Esperado": 200,
+        "Conforme": true,
+        "DuracaoMs": 1170.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 2,
+        "Caso": "API direta anonima privada",
+        "InicioUtc": "2026-10-02T01:40:53.5325857Z",
+        "Status": 403,
+        "Esperado": 403,
+        "Conforme": true,
+        "DuracaoMs": 429.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 3,
+        "Caso": "agente direto anonimo privado",
+        "InicioUtc": "2026-10-02T01:40:53.9650786Z",
+        "Status": 403,
+        "Esperado": 403,
+        "Conforme": true,
+        "DuracaoMs": 391.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 4,
+        "Caso": "helper interno inacessivel",
+        "InicioUtc": "2026-10-02T01:40:54.357593Z",
+        "Status": 404,
+        "Esperado": 404,
+        "Conforme": true,
+        "DuracaoMs": 17,
+        "SemToken": true
+      },
+      {
+        "Numero": 5,
+        "Caso": "SPA painel HTML",
+        "InicioUtc": "2026-10-02T01:40:54.3762088Z",
+        "Status": 200,
+        "Esperado": 200,
+        "Conforme": true,
+        "DuracaoMs": 23.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 6,
+        "Caso": "SPA painel reload HTTP",
+        "InicioUtc": "2026-10-02T01:40:54.4047323Z",
+        "Status": 200,
+        "Esperado": 200,
+        "Conforme": true,
+        "DuracaoMs": 30.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 7,
+        "Caso": "painel anonimo permite 1",
+        "InicioUtc": "2026-10-02T01:40:54.4371102Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 88.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 8,
+        "Caso": "painel anonimo permite 2",
+        "InicioUtc": "2026-10-02T01:40:54.5774604Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 98.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 9,
+        "Caso": "painel anonimo permite 3",
+        "InicioUtc": "2026-10-02T01:40:54.6782765Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 85.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 10,
+        "Caso": "painel anonimo permite 4",
+        "InicioUtc": "2026-10-02T01:40:54.7649928Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 88.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 11,
+        "Caso": "painel anonimo permite 5",
+        "InicioUtc": "2026-10-02T01:40:54.8552927Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 86.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 12,
+        "Caso": "painel anonimo permite 6",
+        "InicioUtc": "2026-10-02T01:40:54.9434266Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 96.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 13,
+        "Caso": "painel anonimo permite 7",
+        "InicioUtc": "2026-10-02T01:40:55.0415549Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 96.3,
+        "SemToken": true
+      },
+      {
+        "Numero": 14,
+        "Caso": "painel anonimo permite 8",
+        "InicioUtc": "2026-10-02T01:40:55.1393799Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 82,
+        "SemToken": true
+      },
+      {
+        "Numero": 15,
+        "Caso": "painel anonimo permite 9",
+        "InicioUtc": "2026-10-02T01:40:55.2230609Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 79.5,
+        "SemToken": true
+      },
+      {
+        "Numero": 16,
+        "Caso": "painel anonimo permite 10",
+        "InicioUtc": "2026-10-02T01:40:55.3045407Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 93,
+        "SemToken": true
+      },
+      {
+        "Numero": 17,
+        "Caso": "painel anonimo permite 11",
+        "InicioUtc": "2026-10-02T01:40:55.3992961Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 80,
+        "SemToken": true
+      },
+      {
+        "Numero": 18,
+        "Caso": "painel anonimo permite 12",
+        "InicioUtc": "2026-10-02T01:40:55.4813294Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 87.3,
+        "SemToken": true
+      },
+      {
+        "Numero": 19,
+        "Caso": "painel anonimo permite 13",
+        "InicioUtc": "2026-10-02T01:40:55.5706094Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 95.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 20,
+        "Caso": "painel anonimo permite 14",
+        "InicioUtc": "2026-10-02T01:40:55.6677495Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 104.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 21,
+        "Caso": "painel anonimo permite 15",
+        "InicioUtc": "2026-10-02T01:40:55.7745645Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 82.5,
+        "SemToken": true
+      },
+      {
+        "Numero": 22,
+        "Caso": "painel anonimo permite 16",
+        "InicioUtc": "2026-10-02T01:40:55.858974Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 84.5,
+        "SemToken": true
+      },
+      {
+        "Numero": 23,
+        "Caso": "painel anonimo permite 17",
+        "InicioUtc": "2026-10-02T01:40:55.9448082Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 81.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 24,
+        "Caso": "painel anonimo permite 18",
+        "InicioUtc": "2026-10-02T01:40:56.0276277Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 95.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 25,
+        "Caso": "painel anonimo permite 19",
+        "InicioUtc": "2026-10-02T01:40:56.1242229Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 80,
+        "SemToken": true
+      },
+      {
+        "Numero": 26,
+        "Caso": "painel anonimo permite 20",
+        "InicioUtc": "2026-10-02T01:40:56.205994Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 97.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 27,
+        "Caso": "painel anonimo permite 21",
+        "InicioUtc": "2026-10-02T01:40:56.3051665Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 88.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 28,
+        "Caso": "painel anonimo permite 22",
+        "InicioUtc": "2026-10-02T01:40:56.3953201Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 82.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 29,
+        "Caso": "painel anonimo permite 23",
+        "InicioUtc": "2026-10-02T01:40:56.4793608Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 83,
+        "SemToken": true
+      },
+      {
+        "Numero": 30,
+        "Caso": "painel anonimo permite 24",
+        "InicioUtc": "2026-10-02T01:40:56.5641125Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 83.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 31,
+        "Caso": "painel anonimo permite 25",
+        "InicioUtc": "2026-10-02T01:40:56.6495958Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 82.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 32,
+        "Caso": "painel anonimo permite 26",
+        "InicioUtc": "2026-10-02T01:40:56.7347962Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 91.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 33,
+        "Caso": "painel anonimo permite 27",
+        "InicioUtc": "2026-10-02T01:40:56.8281086Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 92.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 34,
+        "Caso": "painel anonimo permite 28",
+        "InicioUtc": "2026-10-02T01:40:56.9229127Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 85.3,
+        "SemToken": true
+      },
+      {
+        "Numero": 35,
+        "Caso": "painel anonimo permite 29",
+        "InicioUtc": "2026-10-02T01:40:57.0098298Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 78.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 36,
+        "Caso": "painel anonimo permite 30",
+        "InicioUtc": "2026-10-02T01:40:57.090021Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 95.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 37,
+        "Caso": "painel anonimo permite 31",
+        "InicioUtc": "2026-10-02T01:40:57.1870619Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 85.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 38,
+        "Caso": "painel anonimo permite 32",
+        "InicioUtc": "2026-10-02T01:40:57.2739344Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 83.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 39,
+        "Caso": "painel anonimo permite 33",
+        "InicioUtc": "2026-10-02T01:40:57.3589683Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 87.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 40,
+        "Caso": "painel anonimo permite 34",
+        "InicioUtc": "2026-10-02T01:40:57.4482381Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 91.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 41,
+        "Caso": "painel anonimo permite 35",
+        "InicioUtc": "2026-10-02T01:40:57.5414941Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 84.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 42,
+        "Caso": "painel anonimo permite 36",
+        "InicioUtc": "2026-10-02T01:40:57.6273225Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 85.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 43,
+        "Caso": "painel anonimo permite 37",
+        "InicioUtc": "2026-10-02T01:40:57.7145369Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 81.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 44,
+        "Caso": "painel anonimo permite 38",
+        "InicioUtc": "2026-10-02T01:40:57.7979965Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 89.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 45,
+        "Caso": "painel anonimo permite 39",
+        "InicioUtc": "2026-10-02T01:40:57.8896094Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 86.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 46,
+        "Caso": "painel anonimo permite 40",
+        "InicioUtc": "2026-10-02T01:40:57.9777578Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 95.5,
+        "SemToken": true
+      },
+      {
+        "Numero": 47,
+        "Caso": "painel anonimo permite 41",
+        "InicioUtc": "2026-10-02T01:40:58.0749153Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 82.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 48,
+        "Caso": "painel anonimo permite 42",
+        "InicioUtc": "2026-10-02T01:40:58.1591542Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 87.4,
+        "SemToken": true
+      },
+      {
+        "Numero": 49,
+        "Caso": "painel anonimo permite 43",
+        "InicioUtc": "2026-10-02T01:40:58.2479652Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 87.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 50,
+        "Caso": "painel anonimo permite 44",
+        "InicioUtc": "2026-10-02T01:40:58.3373335Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 87.3,
+        "SemToken": true
+      },
+      {
+        "Numero": 51,
+        "Caso": "painel anonimo permite 45",
+        "InicioUtc": "2026-10-02T01:40:58.4260492Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 112.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 52,
+        "Caso": "painel anonimo permite 46",
+        "InicioUtc": "2026-10-02T01:40:58.5411045Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 101.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 53,
+        "Caso": "painel anonimo permite 47",
+        "InicioUtc": "2026-10-02T01:40:58.6434528Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 89.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 54,
+        "Caso": "painel anonimo permite 48",
+        "InicioUtc": "2026-10-02T01:40:58.734686Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 79.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 55,
+        "Caso": "painel anonimo permite 49",
+        "InicioUtc": "2026-10-02T01:40:58.8154516Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 93.5,
+        "SemToken": true
+      },
+      {
+        "Numero": 56,
+        "Caso": "painel anonimo permite 50",
+        "InicioUtc": "2026-10-02T01:40:58.9101741Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 93.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 57,
+        "Caso": "painel anonimo permite 51",
+        "InicioUtc": "2026-10-02T01:40:59.0053487Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 85.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 58,
+        "Caso": "painel anonimo permite 52",
+        "InicioUtc": "2026-10-02T01:40:59.0922717Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 82.9,
+        "SemToken": true
+      },
+      {
+        "Numero": 59,
+        "Caso": "painel anonimo permite 53",
+        "InicioUtc": "2026-10-02T01:40:59.1762856Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 81.6,
+        "SemToken": true
+      },
+      {
+        "Numero": 60,
+        "Caso": "painel anonimo permite 54",
+        "InicioUtc": "2026-10-02T01:40:59.2594132Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 79.1,
+        "SemToken": true
+      },
+      {
+        "Numero": 61,
+        "Caso": "painel anonimo permite 55",
+        "InicioUtc": "2026-10-02T01:40:59.3397174Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 89.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 62,
+        "Caso": "painel anonimo permite 56",
+        "InicioUtc": "2026-10-02T01:40:59.4304472Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 84.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 63,
+        "Caso": "painel anonimo permite 57",
+        "InicioUtc": "2026-10-02T01:40:59.5167061Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 79.5,
+        "SemToken": true
+      },
+      {
+        "Numero": 64,
+        "Caso": "painel anonimo permite 58",
+        "InicioUtc": "2026-10-02T01:40:59.5973584Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 86.2,
+        "SemToken": true
+      },
+      {
+        "Numero": 65,
+        "Caso": "painel anonimo permite 59",
+        "InicioUtc": "2026-10-02T01:40:59.6848015Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 109.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 66,
+        "Caso": "painel anonimo permite 60",
+        "InicioUtc": "2026-10-02T01:40:59.7961723Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 84.3,
+        "SemToken": true
+      },
+      {
+        "Numero": 67,
+        "Caso": "painel publico limita61",
+        "InicioUtc": "2026-10-02T01:40:59.8824898Z",
+        "Status": 429,
+        "Esperado": 429,
+        "Conforme": true,
+        "DuracaoMs": 87.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 68,
+        "Caso": "publico XFF sozinho forjado",
+        "InicioUtc": "2026-10-02T01:40:59.9715624Z",
+        "Status": 429,
+        "Esperado": 429,
+        "Conforme": true,
+        "DuracaoMs": 93.7,
+        "SemToken": true
+      },
+      {
+        "Numero": 69,
+        "Caso": "publico X-Solar sozinho forjado",
+        "InicioUtc": "2026-10-02T01:41:00.0665627Z",
+        "Status": 429,
+        "Esperado": 429,
+        "Conforme": true,
+        "DuracaoMs": 85.8,
+        "SemToken": true
+      },
+      {
+        "Numero": 70,
+        "Caso": "publico front normal apos janela",
+        "InicioUtc": "2026-10-02T01:43:47.5557589Z",
+        "Status": 401,
+        "Esperado": 401,
+        "Conforme": true,
+        "DuracaoMs": 277.7,
+        "SemToken": true
+      }
+    ],
+    "Provas": [
+      "front publico health up SHA API aprovado",
+      "SPA /painel index.html e reload HTTP; navegacao JS pendente",
+      "front publico60x401/61=429 e forjas isoladas429",
+      "front publico volta401 apos janela"
+    ],
+    "Requisicoes": 70,
+    "Falha": null,
+    "SemToken": true,
+    "SemCookie": true,
+    "Gemini": 0,
+    "SMTP": 0,
+    "PainelAnonimoSemDados": true,
+    "DuracaoCoorteSegundos": 5.717,
+    "RetomarAposUtc": "2026-10-02T01:43:00.154551Z",
+    "FimUtc": "2026-10-02T01:43:47.8749319Z"
+  },
+  "Consumo": {
+    "Fonte": "Confirmacao do usuario encaminhada na ordem final do Maestro",
+    "Causa": "Usuario enviou as 40 mensagens /turn testando a Lia",
+    "UsoExterno": false,
+    "ConsumoAutomatico": false,
+    "Tipo": "Desvio de processo",
+    "Teto": 20,
+    "Total": 51,
+    "Excedente": 31,
+    "Geracoes": 43,
+    "Embeddings": 8,
+    "StatusHTTP": 200,
+    "CustoFinanceiroDoExcedente": "Sem custo financeiro, conforme o Maestro; Gemini free tier",
+    "RiscoCotaDiaria": "Sem risco para a cota diaria, conforme o Maestro",
+    "FaturaConsultada": false,
+    "TurnosLider": 0
+  },
+  "AceiteUsuario": {
+    "Fonte": "Maestro apos teste no proprio navegador",
+    "LiaRespondeu": true,
+    "F5PainelFuncionou": true,
+    "TesteSupervisorNoProprioNavegador": true,
+    "EmailRedefinicaoRecebido": true,
+    "GmailDedicado": true,
+    "LinkRedefinicaoClicado": false,
+    "EnderecoOuSenhaCompartilhados": false
+  },
+  "ColetaHistoricaSanitizada": {
+    "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+    "InicioConsultaUtc": "2026-10-02T03:03:55.5242145Z",
+    "JanelaInicioUtc": "2026-10-02T01:34:34.5964455Z",
+    "JanelaFimUtc": "2026-10-02T03:03:55.5191273Z",
+    "Estado": "Bloqueada; parar",
+    "LinhaBaseGemini": 0,
+    "TurnosLider": 0,
+    "Teto": 20,
+    "Gemini": [
+      {
+        "Utc": "2026-10-02T01:47:03.284161Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:47:03.717689Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:47:53.000861Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:01.290527Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:08.225111Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:08.609113Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:09.433662Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:24.085732Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:30.565243Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:37.041830Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:48:42.203519Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:49:48.397845Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:49:49.382392Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:49:59.431414Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:50:14.699590Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:50:23.227121Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:51:18.257514Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:51:19.189154Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:51:28.663266Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:51:37.549349Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:52:07.200805Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:52:22.420826Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:54:20.269417Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:54:35.415923Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:54:50.976151Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:55:07.534550Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:56:02.395256Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T01:56:05.344144Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:25:18.413353Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:25:31.606Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:25:51.658067Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:26:17.431319Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:26:17.795421Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:26:23.664554Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:27:00.929036Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:27:01.947672Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:27:12.118969Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:27:15.344689Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:27:24.366313Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:27:31.911683Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:32:21.289993Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:32:28.750990Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:32:43.881733Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:33:17.062852Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:33:40.289956Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:33:40.644697Z",
+        "Tipo": "Embedding",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:33:41.448718Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:34:02.675342Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:34:14.951841Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:34:25.521170Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      },
+      {
+        "Utc": "2026-10-02T02:34:32.571623Z",
+        "Tipo": "Geracao",
+        "Status": 200
+      }
+    ],
+    "Agente": [
+      {
+        "Utc": "2026-10-02T01:46:54.520219Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "8.534609204s"
+      },
+      {
+        "Utc": "2026-10-02T01:46:56.574272Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.144488605s"
+      },
+      {
+        "Utc": "2026-10-02T01:47:51.600796Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.385714967s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:00.015423Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.279346911s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:07.200743Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "2.233887099s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:23.156631Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "0.928958134s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:29.566996Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.000392927s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:36.188Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "0.855480447s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:41.187711Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.018893250s"
+      },
+      {
+        "Utc": "2026-10-02T01:49:48.000666Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.367670378s"
+      },
+      {
+        "Utc": "2026-10-02T01:49:58.444396Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "0.987093844s"
+      },
+      {
+        "Utc": "2026-10-02T01:50:13.668102Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.037754350s"
+      },
+      {
+        "Utc": "2026-10-02T01:50:22.227629Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.001530223s"
+      },
+      {
+        "Utc": "2026-10-02T01:51:17.880190Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.295528677s"
+      },
+      {
+        "Utc": "2026-10-02T01:51:27.531776Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.134311001s"
+      },
+      {
+        "Utc": "2026-10-02T01:51:36.498982Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.054293737s"
+      },
+      {
+        "Utc": "2026-10-02T01:52:05.926496Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.265543814s"
+      },
+      {
+        "Utc": "2026-10-02T01:52:21.377439Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.040422982s"
+      },
+      {
+        "Utc": "2026-10-02T01:54:19.133431Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.121375255s"
+      },
+      {
+        "Utc": "2026-10-02T01:54:34.162120Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.251931122s"
+      },
+      {
+        "Utc": "2026-10-02T01:54:49.832164Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.142522246s"
+      },
+      {
+        "Utc": "2026-10-02T01:55:06.461137Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.073456829s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:01.389352Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "0.995114472s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:03.791621Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.556423841s"
+      },
+      {
+        "Utc": "2026-10-02T02:25:13.913154Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "4.270804373s"
+      },
+      {
+        "Utc": "2026-10-02T02:25:30.181418Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.423097743s"
+      },
+      {
+        "Utc": "2026-10-02T02:25:50.354382Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.301202216s"
+      },
+      {
+        "Utc": "2026-10-02T02:26:16.378335Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "7.284456002s"
+      },
+      {
+        "Utc": "2026-10-02T02:27:00.574379Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.366042056s"
+      },
+      {
+        "Utc": "2026-10-02T02:27:11.781172Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "3.561136365s"
+      },
+      {
+        "Utc": "2026-10-02T02:27:24.016428Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "7.890172195s"
+      },
+      {
+        "Utc": "2026-10-02T02:32:19.991367Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.287627476s"
+      },
+      {
+        "Utc": "2026-10-02T02:32:27.241367Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.513130195s"
+      },
+      {
+        "Utc": "2026-10-02T02:32:42.979368Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "0.903575642s"
+      },
+      {
+        "Utc": "2026-10-02T02:33:15.791697Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.270276864s"
+      },
+      {
+        "Utc": "2026-10-02T02:33:38.719934Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "2.725938289s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:01.654046Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.018322284s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:13.463100Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.487077531s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:24.275890Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.245108089s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:31.430764Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "1.144464576s"
+      }
+    ],
+    "API": [
+      {
+        "Utc": "2026-10-02T01:40:57.766185Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001752248s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:57.916061Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001835828s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.003065Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001686654s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.092831Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001614928s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.180984Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001791798s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.267621Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001589124s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.378013Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001703843s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.461801Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001576739s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.542740Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001430496s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.634023Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001472957s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.720094Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001449664s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.808992Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001401281s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:58.906041Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001285574s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.009859Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.002398617s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.097333Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001399313s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.184008Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001351414s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.266328Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001555486s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.362797Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001410198s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.444839Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001450922s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.542678Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001398188s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.634477Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001450529s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.718056Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001215098s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.802135Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001425555s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.888021Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001382708s"
+      },
+      {
+        "Utc": "2026-10-02T01:40:59.972142Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001316494s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.066671Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001787136s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.161054Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001392431s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.248462Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001543828s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.329862Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001536800s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.424806Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001803379s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.512935Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001312361s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.596064Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001318181s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.682344Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001378720s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.779807Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001430976s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.866180Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001349062s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:00.952603Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001707866s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.037617Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001352073s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.128226Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001556647s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.216206Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001549072s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.313659Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001557379s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.397126Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001454921s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.486802Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001555153s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.573783Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001438354s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.664771Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001428952s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.779173Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001516178s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.882451Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001445919s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:01.972680Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001739816s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.055131Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001348717s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.147608Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001605673s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.243438Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001354688s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.330997Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001444161s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.415930Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001634192s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.498642Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001440231s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.580008Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001341703s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.665297Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001401217s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.753824Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001430046s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.837632Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001525664s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:02.923650Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001232082s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:03.033814Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001350417s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:03.121556Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001533355s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:03.210015Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 429,
+        "Duracao": "0.001443704s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:03.307394Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 429,
+        "Duracao": "0.001228147s"
+      },
+      {
+        "Utc": "2026-10-02T01:41:03.389190Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 429,
+        "Duracao": "0.001261314s"
+      },
+      {
+        "Utc": "2026-10-02T01:43:51.038008Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001824442s"
+      },
+      {
+        "Utc": "2026-10-02T01:44:41.969322Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001558790s"
+      },
+      {
+        "Utc": "2026-10-02T01:45:16.987250Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001902259s"
+      },
+      {
+        "Utc": "2026-10-02T01:45:38.846401Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001593338s"
+      },
+      {
+        "Utc": "2026-10-02T01:45:42.508368Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001947385s"
+      },
+      {
+        "Utc": "2026-10-02T01:46:16.065335Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.151007920s"
+      },
+      {
+        "Utc": "2026-10-02T01:46:53.978911Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "9.399767826s"
+      },
+      {
+        "Utc": "2026-10-02T01:46:55.941830Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.020411468s"
+      },
+      {
+        "Utc": "2026-10-02T01:46:56.347920Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "7.401060732s"
+      },
+      {
+        "Utc": "2026-10-02T01:47:51.429348Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.595386480s"
+      },
+      {
+        "Utc": "2026-10-02T01:47:59.850609Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.464296016s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:07.038115Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "2.417216142s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:22.988171Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.120478393s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:29.397329Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.191715601s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:36.025571Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.039383878s"
+      },
+      {
+        "Utc": "2026-10-02T01:48:41.031010Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.246478407s"
+      },
+      {
+        "Utc": "2026-10-02T01:49:47.781511Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.624225289s"
+      },
+      {
+        "Utc": "2026-10-02T01:49:58.272632Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.186718903s"
+      },
+      {
+        "Utc": "2026-10-02T01:50:13.503942Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.232143658s"
+      },
+      {
+        "Utc": "2026-10-02T01:50:22.063163Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.190157372s"
+      },
+      {
+        "Utc": "2026-10-02T01:51:17.654454Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.560023736s"
+      },
+      {
+        "Utc": "2026-10-02T01:51:27.368257Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.322495185s"
+      },
+      {
+        "Utc": "2026-10-02T01:51:36.336793Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.244907732s"
+      },
+      {
+        "Utc": "2026-10-02T01:52:05.757479Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.471380394s"
+      },
+      {
+        "Utc": "2026-10-02T01:52:21.216249Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.236761401s"
+      },
+      {
+        "Utc": "2026-10-02T01:54:18.740140Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.552188070s"
+      },
+      {
+        "Utc": "2026-10-02T01:54:34.003232Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.435267091s"
+      },
+      {
+        "Utc": "2026-10-02T01:54:49.675047Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.323527508s"
+      },
+      {
+        "Utc": "2026-10-02T01:55:06.239968Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.321715932s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:01.228553Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.190114059s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:03.635919Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.735363801s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:18.900953Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.016594507s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:29.178324Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.018059928s"
+      },
+      {
+        "Utc": "2026-10-02T01:56:39.378155Z",
+        "Rota": "/api/conta",
+        "Metodo": "DELETE",
+        "Status": 204,
+        "Duracao": "0.175928500s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:17.464873Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.030569810s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:25.073899Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.018927415s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:25.936697Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.053664287s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:26.776690Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.024266900s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:27.605311Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.021319196s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:28.271655Z",
+        "Rota": "/api/painel/leads",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.021787365s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:37.226871Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.016207398s"
+      },
+      {
+        "Utc": "2026-10-02T02:00:58.184280Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.014303483s"
+      },
+      {
+        "Utc": "2026-10-02T02:01:14.624654Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.048126833s"
+      },
+      {
+        "Utc": "2026-10-02T02:01:58.086273Z",
+        "Rota": "/api/conta",
+        "Metodo": "PATCH",
+        "Status": 200,
+        "Duracao": "0.214337970s"
+      },
+      {
+        "Utc": "2026-10-02T02:02:32.263949Z",
+        "Rota": "/api/sessao",
+        "Metodo": "DELETE",
+        "Status": 204,
+        "Duracao": "0.030583540s"
+      },
+      {
+        "Utc": "2026-10-02T02:03:01.190336Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001505714s"
+      },
+      {
+        "Utc": "2026-10-02T02:05:58.101872Z",
+        "Rota": "/api/conta",
+        "Metodo": "GET",
+        "Status": 200,
+        "Duracao": "0.016406556s"
+      },
+      {
+        "Utc": "2026-10-02T02:18:58.500059Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001636009s"
+      },
+      {
+        "Utc": "2026-10-02T02:25:13.552032Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "4.897253094s"
+      },
+      {
+        "Utc": "2026-10-02T02:25:30.019499Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.609965243s"
+      },
+      {
+        "Utc": "2026-10-02T02:25:50.200603Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.478357581s"
+      },
+      {
+        "Utc": "2026-10-02T02:26:16.222608Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "7.467567107s"
+      },
+      {
+        "Utc": "2026-10-02T02:27:00.416940Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.553860537s"
+      },
+      {
+        "Utc": "2026-10-02T02:27:11.623396Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "3.741228471s"
+      },
+      {
+        "Utc": "2026-10-02T02:27:23.802762Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "8.131621480s"
+      },
+      {
+        "Utc": "2026-10-02T02:29:59.524137Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001760757s"
+      },
+      {
+        "Utc": "2026-10-02T02:31:13.031646Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001506348s"
+      },
+      {
+        "Utc": "2026-10-02T02:31:15.620432Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001625093s"
+      },
+      {
+        "Utc": "2026-10-02T02:31:17.097121Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001505224s"
+      },
+      {
+        "Utc": "2026-10-02T02:32:19.562656Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.750976675s"
+      },
+      {
+        "Utc": "2026-10-02T02:32:27.086394Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.688134133s"
+      },
+      {
+        "Utc": "2026-10-02T02:32:42.825482Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.081302030s"
+      },
+      {
+        "Utc": "2026-10-02T02:33:15.636215Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.447768390s"
+      },
+      {
+        "Utc": "2026-10-02T02:33:38.566475Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "2.902931584s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:01.497409Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.202966587s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:13.309511Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.672730302s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:24.044027Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.499316417s"
+      },
+      {
+        "Utc": "2026-10-02T02:34:31.282704Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "1.322444407s"
+      },
+      {
+        "Utc": "2026-10-02T02:51:15.855796Z",
+        "Rota": "/api/sessao",
+        "Metodo": "GET",
+        "Status": 401,
+        "Duracao": "0.001558261s"
+      },
+      {
+        "Utc": "2026-10-02T02:53:43.545398Z",
+        "Rota": "/api/sessao",
+        "Metodo": "DELETE",
+        "Status": 204,
+        "Duracao": "0.023018006s"
+      }
+    ],
+    "Consultas": [
+      {
+        "Nome": "contar-gemini-e-agente",
+        "Filtro": "resource.type=\"cloud_run_revision\" AND resource.labels.location=\"southamerica-east1\" AND timestamp>=\"2026-10-02T01:34:34.5964455Z\" AND timestamp<=\"2026-10-02T03:03:55.5191273Z\" AND resource.labels.service_name=\"solar-agente\" AND resource.labels.revision_name=\"solar-agente-00001-p77\" AND (logName:\"run.googleapis.com%2Frequests\" OR textPayload:\"HTTP Request: POST https://generativelanguage.googleapis.com/\")",
+        "Projecao": "json(timestamp,httpRequest.status,httpRequest.requestMethod,httpRequest.requestUrl,httpRequest.latency,textPayload,insertId)",
+        "RegistrosRecebidos": 92,
+        "Utc": "2026-10-02T03:03:58.5006887Z"
+      },
+      {
+        "Nome": "api-status-horarios",
+        "Filtro": "resource.type=\"cloud_run_revision\" AND resource.labels.location=\"southamerica-east1\" AND timestamp>=\"2026-10-02T01:34:34.5964455Z\" AND timestamp<=\"2026-10-02T03:03:55.5191273Z\" AND resource.labels.service_name=\"solar-api\" AND resource.labels.revision_name=\"solar-api-00001-7w8\" AND logName:\"run.googleapis.com%2Frequests\"",
+        "Projecao": "json(timestamp,httpRequest.status,httpRequest.requestMethod,httpRequest.requestUrl,httpRequest.latency,insertId)",
+        "RegistrosRecebidos": 524,
+        "Utc": "2026-10-02T03:04:02.2984193Z"
+      }
+    ],
+    "Falha": "Conferencia falhou: teto20",
+    "ConteudoPersistido": false,
+    "TotalGemini": 51,
+    "Geracoes": 43,
+    "Embeddings": 8,
+    "Restante": -31,
+    "PrimeiraRespostaAgente": [
+      {
+        "Utc": "2026-10-02T01:46:54.520219Z",
+        "Rota": "/turn",
+        "Status": 200,
+        "Duracao": "8.534609204s"
+      }
+    ],
+    "PrimeiraRespostaAPI": [
+      {
+        "Utc": "2026-10-02T01:46:53.978911Z",
+        "Rota": "/conversas/{id}/mensagens",
+        "Metodo": "POST",
+        "Status": 200,
+        "Duracao": "9.399767826s"
+      }
+    ],
+    "FimConsultaUtc": "2026-10-02T03:04:02.5558863Z"
+  },
+  "AuditoriaRequisicoes": {
+    "InicioUtc": "2026-10-02T01:34:00Z",
+    "FimUtc": "2026-10-02T03:22:19.4899245Z",
+    "ColetaFimUtc": "2026-10-02T03:22:22.0387972Z",
+    "Filtro": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"solar-agente\" AND resource.labels.location=\"southamerica-east1\" AND logName:\"run.googleapis.com%2Frequests\" AND timestamp>=\"2026-10-02T01:34:00Z\" AND timestamp<=\"2026-10-02T03:22:19.4899245Z\"",
+    "Projecao": "json[transforms](timestamp,httpRequest.requestUrl.sub('https://.*?[.]run[.]app','').sub('[?].*$',''),httpRequest.status)",
+    "Requisicoes": [
+      {
+        "Timestamp": "2026-10-02T01:40:57.397562Z",
+        "Caminho": "/health",
+        "Status": 403
+      },
+      {
+        "Timestamp": "2026-10-02T01:46:54.520219Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:46:56.574272Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:47:51.600796Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:48:00.015423Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:48:07.200743Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:48:23.156631Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:48:29.566996Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:48:36.188Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:48:41.187711Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:49:48.000666Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:49:58.444396Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:50:13.668102Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:50:22.227629Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:51:17.880190Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:51:27.531776Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:51:36.498982Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:52:05.926496Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:52:21.377439Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:54:19.133431Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:54:34.162120Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:54:49.832164Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:55:06.461137Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:56:01.389352Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T01:56:03.791621Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:25:13.913154Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:25:30.181418Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:25:50.354382Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:26:16.378335Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:27:00.574379Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:27:11.781172Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:27:24.016428Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:32:19.991367Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:32:27.241367Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:32:42.979368Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:33:15.791697Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:33:38.719934Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:34:01.654046Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:34:13.463100Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:34:24.275890Z",
+        "Caminho": "/turn",
+        "Status": 200
+      },
+      {
+        "Timestamp": "2026-10-02T02:34:31.430764Z",
+        "Caminho": "/turn",
+        "Status": 200
+      }
+    ],
+    "CorteUtc": "2026-10-02T03:03:55Z",
+    "Total": 41,
+    "Turn": 40,
+    "Health": 1,
+    "Resumo": 0,
+    "ReengajarSeparado": 0,
+    "AposCorte": 0,
+    "ReengajamentoEmTurn": "Indistinguivel pelos campos autorizados",
+    "AgrupamentoPorMinuto": [
+      {
+        "minute": "2026-10-02T01:40:00Z",
+        "turn": 0,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 1,
+        "other": 0,
+        "g": 0,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:46:00Z",
+        "turn": 2,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 0,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:47:00Z",
+        "turn": 1,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:48:00Z",
+        "turn": 6,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 7,
+        "e": 1
+      },
+      {
+        "minute": "2026-10-02T01:49:00Z",
+        "turn": 2,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 2,
+        "e": 1
+      },
+      {
+        "minute": "2026-10-02T01:50:00Z",
+        "turn": 2,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 2,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:51:00Z",
+        "turn": 3,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 1
+      },
+      {
+        "minute": "2026-10-02T01:52:00Z",
+        "turn": 2,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 2,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:54:00Z",
+        "turn": 3,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:55:00Z",
+        "turn": 1,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 1,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T01:56:00Z",
+        "turn": 2,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 2,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T02:25:00Z",
+        "turn": 3,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T02:26:00Z",
+        "turn": 1,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 2,
+        "e": 1
+      },
+      {
+        "minute": "2026-10-02T02:27:00Z",
+        "turn": 3,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 3
+      },
+      {
+        "minute": "2026-10-02T02:32:00Z",
+        "turn": 3,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 0
+      },
+      {
+        "minute": "2026-10-02T02:33:00Z",
+        "turn": 2,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 3,
+        "e": 1
+      },
+      {
+        "minute": "2026-10-02T02:34:00Z",
+        "turn": 4,
+        "resumo": 0,
+        "reengajar": 0,
+        "health": 0,
+        "other": 0,
+        "g": 4,
+        "e": 0
+      }
+    ]
+  },
+  "Criterios": {
+    "Criterio10Funcional": "Atendido com provas e aceite do usuario",
+    "Teto20": "Nao atendido; desvio de processo confirmado e registrado",
+    "Criterio11": "Consolidado no relatorio e registro"
+  },
+  "Limites": [
+    "Estado Bloqueada e Falha do teto no coletor preservados como evidencia historica; decisao final em Consumo e Criterios",
+    "Peer 169.254.169.126 inferido pelas provas; nao houve leitura bruta do socket",
+    "Link de redefinicao nao clicado; troca de senha nao concluida/provada",
+    "Autoria das 40 mensagens vem da confirmacao do usuario, nao de logs",
+    "Infraestrutura continua paga/ativa; fatura nao apurada",
+    "Retries sem resposta HTTP nao quantificaveis; 51 respostas SDK contadas individualmente, todas 200",
+    "Sem novo turno/Gemini/SMTP, redeploy, IAM ou teardown nesta finalizacao"
+  ],
+  "PublicacaoGit": {
+    "Branch": "feature/S-26",
+    "Base": "develop",
+    "Titulo": "S-26 · Deploy dos três serviços e Postgres gerenciado",
+    "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+    "CommitAceiteDocs": "aba5370c23a92fad39c6d283bd3ad537eb32bfa3",
+    "MergeExecutado": false,
+    "Repositorios": [
+      {
+        "Repositorio": "solar-ai-api",
+        "URL": "https://github.com/fvconde/solar-ai-api/pull/16",
+        "Numero": 16,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      },
+      {
+        "Repositorio": "solar-ai-front",
+        "URL": "https://github.com/fvconde/solar-ai-front/pull/13",
+        "Numero": 13,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      },
+      {
+        "Repositorio": "solar-ai",
+        "URL": "https://github.com/fvconde/solar-ai/pull/9",
+        "Numero": 9,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      },
+      {
+        "Repositorio": "solar-ai-docs",
+        "URL": "https://github.com/fvconde/solar-ai-docs/pull/18",
+        "Numero": 18,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "aba5370c23a92fad39c6d283bd3ad537eb32bfa3",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      }
+    ],
+    "Nota": "A publicacao das URLs acrescenta commit documental posterior em docs; a ponta acompanha o PR, sem auto-referencia de SHA no proprio commit."
+  }
+}

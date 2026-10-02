@@ -1,0 +1,71 @@
+{
+  "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+  "RegistroUtc": "2026-10-02T01:46:51.1353527Z",
+  "Timezone": "America/Sao_Paulo",
+  "GeminiLinhaDeBase": 0,
+  "TurnosEnviadosPeloLider": 0,
+  "FonteContagem": "Linha de base 0 informada pelo Maestro; lider nao enviou nenhum turno. Conferencia do provedor pendente do aviso de conclusao.",
+  "TetoGlobalGemini": 20,
+  "TurnosDoLiderCancelados": true,
+  "TesteNoNavegadorDoUsuario": true,
+  "Estado": "Aguardar aviso do Maestro; nao enviar turnos",
+  "JanelaContagemInicioUtc": "2026-10-02T01:34:34.5964455Z",
+  "PublicacaoBindingConcluida": true,
+  "Revisoes": [
+    {
+      "Servico": "solar-agente",
+      "Utc": "2026-10-02T01:34:40.0546942Z",
+      "Revisao": "solar-agente-00001-p77",
+      "Ready": true,
+      "Trafego100": true,
+      "Ownership": true,
+      "Regiao": "southamerica-east1",
+      "Invokers": [
+        "serviceAccount:s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"
+      ],
+      "AllUsers": false,
+      "Url": "https://solar-agente-4or3sjeksq-rj.a.run.app"
+    },
+    {
+      "Servico": "solar-api",
+      "Utc": "2026-10-02T01:34:46.7512299Z",
+      "Revisao": "solar-api-00001-7w8",
+      "Ready": true,
+      "Trafego100": true,
+      "Ownership": true,
+      "Regiao": "southamerica-east1",
+      "Invokers": [
+        "serviceAccount:s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"
+      ],
+      "AllUsers": false,
+      "Url": "https://solar-api-4or3sjeksq-rj.a.run.app"
+    },
+    {
+      "Servico": "solar-front",
+      "Utc": "2026-10-02T01:34:52.3813104Z",
+      "Revisao": "solar-front-00001-vbt",
+      "Ready": true,
+      "Trafego100": true,
+      "Ownership": true,
+      "Regiao": "southamerica-east1",
+      "Invokers": [
+        "allUsers"
+      ],
+      "AllUsers": true,
+      "Url": "https://solar-front-4or3sjeksq-rj.a.run.app"
+    }
+  ],
+  "HTTPPublico": {
+    "Estado": "Concluida",
+    "Chamadas": 70,
+    "Falhas": 0,
+    "DuracaoCoorteSegundos": 5.717
+  },
+  "DepoisDoAviso": [
+    "Contar chamadas reais Gemini por metadados sanitizados sem conteudo/token/PII",
+    "Conferir primeira resposta API->agente somente por status e horario",
+    "Gravar relatorio final do aceite e enviar caminho ao Maestro"
+  ],
+  "BranchesPublicadas": false,
+  "PRCriada": false
+}
