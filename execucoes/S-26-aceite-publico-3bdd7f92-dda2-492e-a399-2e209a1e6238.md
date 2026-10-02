@@ -121,4 +121,11 @@ Referência do runbook **30/09/2026**,730h/mês: API CPU/memória USD59,9184; SQ
 
 Ordem final explícita: publicar feature/S-26 nos quatro repositórios alterados e abrir **um PR por repositório contra develop**, título **S-26 · Deploy dos três serviços e Postgres gerenciado**, UUID no corpo. **Sem merge**. Bases remotas consultadas, inventário de PRs existente vazio. Diff do card não altera contrato, migration, consentimento, ESTADO.md, ARQUITETURA.md ou arquivos reservados ao S-39.
 
-PRs: criação pendente nesta primeira gravação; URLs serão acrescentadas após retorno do GitHub.
+Commit do aceite/docs: **aba5370c23a92fad39c6d283bd3ad537eb32bfa3**. Quatro pushes concluídos; quatro PRs **OPEN**, não draft, destino **develop**, título exato e UUID no corpo conferidos por gh. Todos MERGEABLE/CLEAN no retrato dessa conferência; isso não representa aprovação nem merge. As URLs são acrescentadas em commit documental posterior; a ponta de docs será esse commit e o PR acompanha a atualização.
+
+| Repositório | PR contra develop | SHA no momento da criação |
+|---|---|---|
+| solar-ai-api | [#16](https://github.com/fvconde/solar-ai-api/pull/16) | 87c491bf88d7ba94be284cdf08ab1ae4efa17724 |
+| solar-ai-front | [#13](https://github.com/fvconde/solar-ai-front/pull/13) | af366c0672c625b9fbe01cfe1832d343f4a6f6d3 |
+| solar-ai | [#9](https://github.com/fvconde/solar-ai/pull/9) | 56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8 |
+| solar-ai-docs | [#18](https://github.com/fvconde/solar-ai-docs/pull/18) | aba5370c23a92fad39c6d283bd3ad537eb32bfa3 |

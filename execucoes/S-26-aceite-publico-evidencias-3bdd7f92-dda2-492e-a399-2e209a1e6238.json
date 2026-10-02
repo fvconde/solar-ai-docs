@@ -2757,5 +2757,64 @@
     "Infraestrutura continua paga/ativa; fatura nao apurada",
     "Retries sem resposta HTTP nao quantificaveis; 51 respostas SDK contadas individualmente, todas 200",
     "Sem novo turno/Gemini/SMTP, redeploy, IAM ou teardown nesta finalizacao"
-  ]
+  ],
+  "PublicacaoGit": {
+    "Branch": "feature/S-26",
+    "Base": "develop",
+    "Titulo": "S-26 · Deploy dos três serviços e Postgres gerenciado",
+    "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+    "CommitAceiteDocs": "aba5370c23a92fad39c6d283bd3ad537eb32bfa3",
+    "MergeExecutado": false,
+    "Repositorios": [
+      {
+        "Repositorio": "solar-ai-api",
+        "URL": "https://github.com/fvconde/solar-ai-api/pull/16",
+        "Numero": 16,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      },
+      {
+        "Repositorio": "solar-ai-front",
+        "URL": "https://github.com/fvconde/solar-ai-front/pull/13",
+        "Numero": 13,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      },
+      {
+        "Repositorio": "solar-ai",
+        "URL": "https://github.com/fvconde/solar-ai/pull/9",
+        "Numero": 9,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      },
+      {
+        "Repositorio": "solar-ai-docs",
+        "URL": "https://github.com/fvconde/solar-ai-docs/pull/18",
+        "Numero": 18,
+        "Estado": "OPEN",
+        "HeadNaCriacao": "aba5370c23a92fad39c6d283bd3ad537eb32bfa3",
+        "Base": "develop",
+        "UUIDNoCorpo": true,
+        "Draft": false,
+        "MergeableObservado": "MERGEABLE",
+        "MergeStateStatusObservado": "CLEAN"
+      }
+    ],
+    "Nota": "A publicacao das URLs acrescenta commit documental posterior em docs; a ponta acompanha o PR, sem auto-referencia de SHA no proprio commit."
+  }
 }
