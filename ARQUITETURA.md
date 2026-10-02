@@ -143,7 +143,15 @@ Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No
 
 O free tier da Gemini usa o conteúdo enviado para treino, e o desenvolvimento roda nele. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o **único controle real** sobre o que sai daqui. **Desde 11/09 o texto de consentimento do S-33 descreve o regime alvo**, o tier pago, e não o de desenvolvimento: o aviso curto e a página `/privacidade` afirmam, de forma alinhada, que as mensagens não são usadas pelo provedor para treinar ou melhorar modelos. Isso é decisão de produto registrada, não descrição do estado atual — adotar o tier pago é pré-condição para a declaração ser verdadeira em uso real. O README do hub, entregue pelo S-30, usa essas mesmas palavras; os entregáveis não divergem.
 
-**Retenção e eliminação moram no README do hub, e só lá (S-30).** O prazo declarado é de 12 meses contados do último contato, e o pedido de eliminação do titular chega pelo corretor ou pelo atendimento humano, que aciona os endpoints protegidos por `X-Chave-Privacidade`. Aqui fica apenas o fato técnico que o README também declara: **não existe rotina de expurgo automático nem TTL no banco** — a eliminação é sob demanda, e a automação é roadmap. Citar daqui, nunca reescrever: texto de conformidade escrito em dois lugares diverge em um.
+**Retenção e eliminação moram no README do hub, e só lá (S-30).** O prazo declarado é de 12 meses contados do último contato, e o pedido de eliminação do titular chega pelo corretor ou pelo atendimento humano, que aciona os endpoints protegidos por `X-Chave-Privacidade`. Aqui fica apenas o fato técnico: **desde o S-39 o prazo é cumprido por rotina** — ver a seção do expurgo abaixo — e o pedido do titular continua sendo atendido sob demanda. Citar daqui, nunca reescrever: texto de conformidade escrito em dois lugares diverge em um.
+
+## O expurgo por retenção (S-39)
+
+Um segundo `BackgroundService` na API, o `ServicoDeExpurgo`, elimina o lead cujo último contato passou do prazo. Mesmo formato do follow-up: configuração em `Expurgo`, padrão de produção no `appsettings.json` (12 meses de prazo, primeira varredura 5 min depois do boot, depois uma por dia) e valores de demonstração só no `appsettings.Development.json`. **O padrão do arquivo base nunca é o valor da demo**, e aqui isso pesa mais que no follow-up: um prazo de demonstração no arquivo base apagaria a base inteira na primeira varredura. Um teste lê o arquivo base e falha se isso acontecer.
+
+**Último contato é a última mensagem com papel `lead`, somando todas as conversas dele.** Fala da Lia, incluindo o follow-up, e encaminhamento não estendem o prazo. Lead sem mensagem conta pela menor data entre `Lead.CriadoEm` e `Conversa.CriadaEm`.
+
+**Não existe segunda regra de exclusão.** A rotina chama `ConversaRepositorio.ExcluirLeadAsync`, a mesma cascata do S-29, sob `TravaDeConversas.TravarMultiplasAsync`, e revalida a elegibilidade depois de obter a trava — mensagem que chega durante a espera salva o lead. Quem mudar a exclusão muda o expurgo junto. A conta de login nunca é expurgada. O log de expurgo grava só a contagem e o horário: registro de eliminação com identidade recriaria o dado que a eliminação apagou.
 
 ## Regras que não mudam
 
