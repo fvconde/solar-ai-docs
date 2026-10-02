@@ -6,10 +6,10 @@ Este documento completa a preparação local do critério 8 e documenta as quatr
 
 ## 1. Preparação e planos offline
 
-Use PowerShell 7 ou Windows PowerShell 5.1. Os caminhos abaixo são absolutos; não use o diretório inicial de `.maestri/roles` como raiz dos repositórios.
+Use PowerShell 7 ou Windows PowerShell 5.1. A raiz é a pasta que contém os quatro repositórios lado a lado. Os scripts a calculam a partir da própria localização (três níveis acima de `deploy/S-26`), então valem tanto no checkout principal quanto num worktree de card. As imagens são construídas a partir dos repositórios dessa raiz, que precisam estar limpos e no SHA que o plano pede.
 
 ```powershell
-$raiz = 'C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-26'
+$raiz = 'C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar'
 $docs = Join-Path $raiz 'solar-ai-docs'
 $scripts = Join-Path $docs 'deploy/S-26'
 $execucao = '3bdd7f92-dda2-492e-a399-2e209a1e6238'

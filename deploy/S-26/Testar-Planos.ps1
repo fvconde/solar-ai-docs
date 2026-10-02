@@ -144,6 +144,12 @@ Caso 'owned exige label exata e mesma regiao' {
     Recusa { Assert-S26Dono $ctx $r @{region=$ctx.Regiao;settings=@{userLabels=@{}}} }
     Recusa { Assert-S26Dono $ctx $r @{region='us-central1';settings=@{userLabels=@{'s26-execucao'=$ctx.Execucao}}} }
 }
+Caso 'raiz e a pasta que contem os quatro repositorios' {
+    Exigir ($ctx.Raiz -notmatch '\\' -and -not $ctx.Raiz.EndsWith('/'))
+    foreach ($pasta in @('solar-ai', 'solar-ai-api', 'solar-ai-front', 'solar-ai-docs')) {
+        Exigir (Test-Path -LiteralPath ($ctx.Raiz + '/' + $pasta) -PathType Container)
+    }
+}
 Caso 'imagens SHAfull, contexts absolutos e checks dos tres repos' {
     Exigir (@($imagens.Verificacoes | Where-Object Tipo -eq 'Git').Count -eq 3)
     foreach ($a in @($imagens.Acoes | Where-Object Id -like 'build-*')) {

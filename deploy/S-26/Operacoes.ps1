@@ -9,7 +9,7 @@ function New-S26Contexto {
         Projeto = 'solar-ai-cloud'
         Regiao = 'southamerica-east1'
         Gcloud = 'C:/Users/felip/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd'
-        Raiz = 'C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-26'
+        Raiz = ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..')).TrimEnd('\', '/') -replace '\\', '/')
         Registro = 'solar-s26-3bdd7f92'
         Instancia = 'solar-s26-3bdd7f92'
         Banco = 'solar'
