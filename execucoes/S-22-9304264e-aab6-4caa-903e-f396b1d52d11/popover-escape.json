@@ -1,0 +1,28 @@
+{
+  "escape": {
+    "abertos": 0,
+    "ativo": "Como é calculado: Privacidade"
+  },
+  "aberto": {
+    "abertos": [
+      {
+        "texto": "Recorte atual de Meus leads: última distribuição de cada lead; só conversas atualmente atribuídas a você e reservas da sua agenda. Consentimento registrado por lead distinto de todo o recorte, sem janela de dias. Retenção configurada: 12 meses. Último contato é a última mensagem do lead em todas as suas conversas; mensagens automáticas não renovam o prazo. Sem mensagem do lead, usa a menor data entre a primeira conversa e a criação do lead; sem conversa, a criação do lead. O expurgo inclui o limite do prazo. Vencem nos próximos 30 dias inclui os limites a partir de agora; próximo vencimento considera prazos ainda não vencidos.",
+        "rect": {
+          "x": 103.5,
+          "y": 308.4375,
+          "width": 256,
+          "height": 327.125,
+          "top": 308.4375,
+          "right": 359.5,
+          "bottom": 635.5625,
+          "left": 103.5
+        }
+      }
+    ],
+    "ativo": "Como é calculado: Privacidade",
+    "viewport": [
+      1440,
+      900
+    ]
+  }
+}
