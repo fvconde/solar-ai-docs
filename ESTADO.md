@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 02/10/2026 (S-39 e S-26 integrados; a janela de dois cards está encerrada)
+**Última atualização:** 04/10/2026 (S-22 integrado; S-38 segue em execução, esperando a direção visual da exclusão)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -115,8 +115,31 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **29/09** — **O aviso de privacidade continua descrevendo o tier pago**, decidido pelo usuário depois de ser avisado da divergência: o front já está pronto para o uso geral, que será feito com a chave do tier pago. Custo aceito: enquanto a URL pública do S-26 rodar no free tier, o aviso afirma um regime que ainda não vale. O risco continua em **Riscos abertos**.
 - **29/09** — **E-mail do S-26 por SMTP do Gmail, com conta dedicada e senha de app no Secret Manager**, porque o Google Cloud não tem serviço próprio de envio transacional. As contas semeadas usam `@solar.local`, que não recebe e-mail, então a senha inicial do supervisor vem de um segredo no deploy. Ele entra, troca o e-mail para um real e aprova os corretores pelo fluxo do S-44.
 - **02/10** — **Só o front é público; API e agente ficam privados por IAM, e o IP do cliente chega à API num header que o nginx sobrescreve (S-26, desenho aprovado pelo usuário em 01/10).** Só a conta de serviço do front invoca a API, e só a da API invoca o agente. A API ignora o `X-Forwarded-For` e lê `X-Solar-Client-IP` apenas quando o peer é o proxy do Cloud Run (`169.254.169.126`, gen2), com um salto. Motivo: o diagnóstico na nuvem real mostrou que o IP de saída do front sai de um pool compartilhado do Google, então nenhuma allow-list de rede identifica o front, e quem identifica é o IAM. Custo aceito: os owners do projeto também invocam API e agente; e se o peer mudar num deploy futuro, a regra é parar, não ampliar a lista. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Front%20publico%20e%20API%20privada%20por%20IAM%20no%20Cloud%20Run.md)
+- **03/10** — **O S-22 virou a Entrega 1 das métricas, e o registro de etapas virou o S-45**, decidido pelo usuário ao aprovar o design. A Entrega 1 não tem migration, não muda a Lia nem o `/turn`. O S-45 é Could e cortável e só começa depois do S-38 integrado, porque as duas migrations conflitariam no snapshot do EF. **Regras de dados fechadas:**
+  - a regra dos dados essenciais fica só na Lia, e a API nunca copia os critérios por trilha;
+  - a base é única: conversas iniciadas no período;
+  - "horários confirmados" são as conversas do período com reserva confirmada, e as reservas dos próximos 7 dias ficam à parte;
+  - o score tem faixas só do painel: 0–39 frio, 40–69 morno, 70–100 quente, e "sem avaliação" à parte;
+  - conversa antiga não ganha data inventada.
+
+  O recorte da fila e o último contato viraram código compartilhado (`RegrasDaFilaDeLeads` e `ConsultaDeUltimoContato`), que a fila, o expurgo e as métricas consomem juntos. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Metricas%20do%20painel%20sem%20copiar%20regras%20da%20Lia.md)
 
 ## Feito
+
+- **04/10 — S-22 integrado: o painel tem métricas.** Em `develop`: `solar-ai-api` `e91df90` (PR #17), `solar-ai-front` `5dea926` (PR #14) e `solar-ai-docs` `cf02bc6` (PR #19). `solar-ai` não foi tocado. Sem migration, sem mudança no `/turn` e zero chamadas ao Gemini. O card rodou em dupla de Codex: o líder (GPT-6.1-Sol xhigh) avaliou cada entrega do implementador (GPT-6.1-Sol high). Houve duas devoluções internas e uma rodada de ajustes do aval visual do usuário.
+
+  **O que entrou:**
+  - **API:** `GET /api/painel/metricas?dias=30` em `ConsultaDeMetricasDoPainel`, com a mesma sessão e o mesmo recorte da fila. Cliente recebe 403, e corretor em análise recebe tudo zerado.
+  - **Números da faixa:** conversas iniciadas, leads por intenção, horários confirmados com as reservas dos próximos 7 dias e, para o supervisor, a distribuição por corretor.
+  - **"Mais métricas":** operação, privacidade (retenção pelo último contato), score, regiões e imóveis mais sugeridos, este último lido do snapshot `mensagens.imoveis_sugeridos`.
+  - **Front:** faixa no topo do painel com estados vazio, carregando e erro, versão para até 860 px e uma única rolagem para o bloco inteiro. Não usa biblioteca de gráficos.
+  - **Aval visual:** a "Visão geral" passou a ser a primeira aba do supervisor. A aba de entrada continua sendo a do `filtroInicial` da API, "Sem corretor elegível", por decisão do usuário.
+
+  **Validação combinada em `develop`:** API **237/237** com Postgres descartável, antes 216. Front **265/265 SUCCESS**, antes 219. O build passa, com aviso de bundle inicial de 507,77 kB para um orçamento de 500 kB. É aviso novo, não erro. O aviso do `painel.scss` já existia.
+
+  **O que a janela ensinou:**
+  1. **Design aprovado antes do briefing evita retrabalho, mas só quando o briefing é revisto depois do design.** O briefing original do S-22 mandava espelhar em SQL uma regra que vive no Python. Como nenhum commit tinha sido feito, a revisão custou zero.
+  2. **Extrair a regra antes de reusá-la.** O recorte da fila e o último contato saíram em refatoração pura, num commit separado da funcionalidade nova. Assim o diff do expurgo provou que o comportamento dele não mudou.
 
 - **02/10 — S-26 integrado: o Solar tem URL pública.** Front em https://solar-front-935010665676.southamerica-east1.run.app, aberto a qualquer pessoa; API e agente privados no Cloud Run, com Postgres 16 no Cloud SQL, no projeto `solar-ai-cloud` em `southamerica-east1`. `develop` nos quatro repositórios: `solar-ai-api` `fa759ef` (PR #16), `solar-ai-front` `19cc8ba` (PR #13), `solar-ai` `c558c9b` (PR #9) e `solar-ai-docs` `5daa9b8` (PR #18). Sem migration e sem mudança no `/turn`. As quatro configurações que o card exigia estão publicadas e provadas na URL: `max-instances=1` na API, CORS só da origem do front, `SOLAR_VERSION` com o SHA exato e o painel protegido por sessão. O Swagger e o OpenAPI devolvem 404 em produção.
 
@@ -291,6 +314,15 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **11/09 — Achado de ferramenta no S-33: preset do Maestri não diz qual modelo roda.** `maestri preset list` devolve só nomes; o modelo aparece na barra de status **depois** de recrutar. O `Antigravity` saiu como Gemini 3.8 Flash e foi trocado por Codex `gpt-5.6-sol` com esforço `high`, porque o card tinha migration e a classe de erro do `PK_Leads` virando `p_k_leads` já aconteceu uma vez aqui. Regra que fica: recrutar, ler o modelo, e só então confirmar o executor. Segundo achado: a cota de 5h do executor estourou com o trabalho pronto e sem commit — o fechamento usou o mesmo precedente do S-34, commit criado pelo orquestrador com a autoria do executor no corpo da mensagem. Terceiro: o escalonamento de permissão do Codex **resolve** o worktree somente-leitura do achado anterior, então os commits da entrega saram com a assinatura do próprio executor.
 
 ## Próximo
+**Integração concluída (04/10): o S-22 está em `develop`, e o S-38 segue em execução.**
+- **O que destravou:** recalculado contra o board ao vivo, o S-22 tem um único dependente. O **S-45 · Registro de etapas das conversas e avanço no painel** (Could, 8h, cortável) **continua bloqueado** pelo S-38, que também é dependência dele. **Nenhum Must saiu do bloqueio.**
+- **Estado do S-38:**
+  - o backend está pronto na branch, sem PR;
+  - a tela do chat e a `/privacidade` esperam o aval do usuário sobre o design "Apagar meus dados" (direção A);
+  - está em aberto uma proposta que amplia o escopo, com recuperação de posse por link enviado por e-mail para conversas antigas, e ela ainda não foi decidida.
+- **Para o S-45:** ele deve estender `ConsultaDeMetricasDoPainel` e `ContratoMetricasPainel` em vez de duplicá-los.
+- **Até o congelamento de 09/10:** os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
+
 **Integração concluída (02/10): o S-26 também está em `develop`, e a janela S-26 e S-39 está encerrada.** O deploy está no ar e é o que a demo vai usar. Recalculado card a card contra o board ao vivo, o S-26 tinha três dependentes: **S-27 · Pipeline CI/CD no solar-ai-api** (Could, 3h) está **elegível**, porque dependia só dele; **S-35 · pgvector** (Could, 12h) está **elegível**, porque S-14 e S-15 já estavam integrados; **S-28** continua esperando o S-27. **Nenhum Must saiu do bloqueio.** Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10. Até o congelamento de 09/10, a escolha entre S-27, S-38, S-22, S-25 e S-35 é do usuário. Atenção ao S-27: o critério fala em push na `main`, e o fluxo do projeto integra em `develop`. Decidir isso antes de reservar.
 
 **Como mexer no deploy:** os scripts e o passo a passo estão em `solar-ai-docs/deploy/S-26/README.md`. Os `Dockerfile` ficam em cada repositório, e o nginx do front em `solar-ai-front/deploy/`. O deploy é manual, com PowerShell e o `gcloud` autenticado na conta do usuário. A raiz dos repositórios é calculada pelo próprio script, três níveis acima de `deploy/S-26`, então vale tanto no checkout principal quanto num worktree de card. Ela deixou de estar fixa no worktree do S-26 em 02/10, depois da limpeza, e um teste do `Testar-Planos` confere que ela contém os quatro repositórios.

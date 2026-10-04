@@ -1,0 +1,10 @@
+{
+  "turn": 0,
+  "postgresTesteRemovido": true,
+  "agentePost": 0,
+  "geminiLogs": 0,
+  "containersStackRestantes": 0,
+  "outrosContainersPreservados": true,
+  "apiPostResumo": 0,
+  "porta4322Livre": true
+}
