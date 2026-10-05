@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 05/10/2026 (S-22 e S-38 integrados; a janela de dois cards está encerrada)
+**Última atualização:** 05/10/2026 (S-45 integrado; a janela do registro de etapas está encerrada)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -125,8 +125,43 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
   O recorte da fila e o último contato viraram código compartilhado (`RegrasDaFilaDeLeads` e `ConsultaDeUltimoContato`), que a fila, o expurgo e as métricas consomem juntos. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Metricas%20do%20painel%20sem%20copiar%20regras%20da%20Lia.md)
 - **02/10** — **O titular prova a posse da conversa pela sessão do navegador, decidido pelo usuário ao abrir o S-38.** A conversa anônima recebe no consentimento uma chave aleatória num cookie `HttpOnly`, e o banco guarda só o hash dela. Conversa com conta exige o login do dono. Ficaram de fora o código por e-mail ou SMS e emitir chave para conversa antiga, porque quem tivesse só o UUID poderia pegá-la. A decisão de 12/09 (canal humano) continua valendo para o que este canal não alcança. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Apagar%20conversa%20com%20posse%20da%20sessao.md)
 - **04/10** — **"Apagar conversa" apaga só a conversa escolhida, num fluxo simples, decidido pelo usuário ao aprovar o design do S-38.** O botão fica no rodapé do composer e abre um modal curto, sem caixa de seleção, e-mail ou código. O lead só sai junto quando aquela era a única conversa dele, e a ação nunca apaga outra conversa, nem da mesma conta. Isso revê a regra de 02/10 do S-38, que apagava o lead inteiro quando todas as conversas eram da conta dona. A proposta de recuperar a posse por e-mail para conversa antiga foi descartada nesta feature, e o legado sem chave fica para uma decisão de migração separada. **A versão do aviso de privacidade fica em 2026-09-11**, porque o texto novo só descreve um direito a mais; trocar a versão obrigaria todos a aceitar de novo. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Apagar%20conversa%20com%20posse%20da%20sessao.md)
+- **05/10** — **O avanço das conversas lê marcos imutáveis, e o início do registro é gravado pela própria migration (S-45).** Cinco datas em `conversas` são gravadas uma vez e nunca reescritas: intenção, dados essenciais, encaminhamento, corretor atribuído e primeiro follow-up. O começo do registro, `registro_metricas.historico_desde`, é o `now()` do banco quando a migration roda, e não um valor de configuração. Assim, cada ambiente guarda o próprio começo sem segredo nem passo manual no deploy, e nenhuma conversa antiga ganha data inventada. Os dados essenciais chegam pela **terceira emenda do `/turn`**: o campo `essenciaisCompletos`, calculado por `lacunas_essenciais`, nunca pelo modelo. Com ele, o espelho foi a 7 tipos e 46 campos. Custo aceito: o histórico começa vazio em cada deploy, e agente e API precisam subir juntos. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Marcos%20imutaveis%20e%20inicio%20do%20registro%20gravado%20pela%20migration.md)
 
 ## Feito
+
+- **05/10 — S-45 integrado: o painel mostra o avanço das conversas.** Em `develop`: `solar-ai` `f99adcb` (PR #10), `solar-ai-api` `3956b29` (PR #19), `solar-ai-front` `7c03526` (PR #16) e `solar-ai-docs` `903791a` (PR #21). Uma migration aditiva, `20261005132141_RegistrarEtapasDasConversas`, e a terceira emenda do `/turn` (`essenciaisCompletos`, 7 tipos e 46 campos).
+
+  **Quem executou:**
+  - **Líder:** o Codex (GPT-6.1-Sol high) até a tarefa 3. Quando a cota de 5 horas do Codex acabou, o usuário trocou o líder pelo Claude Code (Opus 5.5 high).
+  - **Implementador:** o Antigravity (Gemini 3.8 Flash), escolhido pelo usuário no lugar do Codex Luna.
+  - **Devoluções:** sete do líder ao implementador, a última vinda do teste de ponta a ponta, e nenhuma do Maestro.
+
+  **O que entrou:**
+  - **Lia:** `essenciaisCompletos` em toda resposta, inclusive no follow-up. O valor sai do código da régua e não entra no schema enviado ao Gemini.
+  - **API:**
+    - os cinco marcos gravados uma vez, no mesmo `SaveChanges` do turno, da atribuição ou do primeiro follow-up;
+    - `registro_metricas`, com o início do registro;
+    - `GET /api/painel/metricas` estendido com o avanço (6 barras para o supervisor e 2 para o corretor), os dados essenciais, o tempo mediano com a série de 7 dias e o follow-up pela janela configurável `Metricas:JanelaRespostaFollowUpDias`, padrão 7.
+  - **Front:**
+    - o gráfico "Avanço das conversas no chat", acessível pelo teclado e sem biblioteca;
+    - os cards de dados essenciais, tempo e follow-up;
+    - o aviso de histórico parcial;
+    - o mini gráfico até 860 px e o tema escuro.
+
+  **Validação combinada em `develop`:** pytest **267**, antes 257. API **314/314** com Postgres descartável, antes 270. Front **350/350 SUCCESS**, antes 318. O build passa com 528,68 kB e os mesmos dois avisos de orçamento que já existiam. O teste de ponta a ponta rodou no stack isolado `solar-s45`:
+  - a Lia levou uma conversa real de intenção a horário confirmado em 3 turnos;
+  - o resto foi semeado no banco;
+  - redistribuir pelos dois caminhos do código não mudou nenhuma barra nem a mediana;
+  - os números da API bateram com SQL direto, para o supervisor e para o corretor.
+
+  Foram **3 de 10** chamadas ao Gemini.
+
+  **O que a janela ensinou:**
+  1. **O teste no navegador pegou o que 350 testes de unidade não pegaram.** Um `display: flex` na classe da caixa de detalhe anulava o `display: none` que o navegador aplica a um `[popover]` fechado, e a caixa aparecia fechada na tela.
+  2. **A cota do Codex acaba no meio do card, e o líder pode ser trocado sem perder trabalho.** A troca funcionou porque cada etapa estava commitada e o registro de execução contava tarefa a tarefa o que estava aceito. O briefing ganhou um adendo de retomada escrito a partir do disco.
+  3. **Um agente lê pergunta na tela como se fosse aprovação.** O líder antigo leu no terminal do Maestro a pergunta "troco o líder?" e suspendeu o próprio trabalho como se a troca já estivesse aprovada. Decisão em aberto não aparece como fato na tela dos recrutas.
+  4. **O modo automático de um recruta Claude Code recusa comandos destrutivos do e2e**, como `docker rm` e `down -v`. O contorno aprovado pelo usuário foi uma lista estreita no `settings.local.json` da pasta de papel do líder, apagada no fim da janela.
+  5. **O `rtk` nunca tinha sido instalado.** O hook global falhava em toda sessão, mas o aviso só aparecia na tela dos recrutas. Agora o binário oficial v0.51.0 mora em `~/.local/bin`.
 
 - **05/10 — S-38 integrado: o titular apaga a própria conversa.** Em `develop`: `solar-ai-api` `516a025` (PR #18), `solar-ai-front` `2f59a9f` (PR #15) e `solar-ai-docs` `b8ee3da` (PR #20). `solar-ai` não foi tocado. Uma migration aditiva, `20261002234115_AdicionarChaveExclusaoConversa` (`conversas.chave_exclusao_hash`, bytea nullable), e nenhuma mudança no `/turn`. O líder foi o Codex (GPT-6.1-Sol xhigh). Os implementadores foram o Codex S-38 Impl (GPT-6.1-Sol high) no backend inicial e, desde 04/10, o Antigravity (Gemini 3.8 Flash), porque a cota do Codex chegou a 75%. Houve uma devolução do Maestro, para tirar do README um parágrafo provisório.
 
@@ -336,7 +371,18 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **11/09 — Achado de ferramenta no S-33: preset do Maestri não diz qual modelo roda.** `maestri preset list` devolve só nomes; o modelo aparece na barra de status **depois** de recrutar. O `Antigravity` saiu como Gemini 3.8 Flash e foi trocado por Codex `gpt-5.6-sol` com esforço `high`, porque o card tinha migration e a classe de erro do `PK_Leads` virando `p_k_leads` já aconteceu uma vez aqui. Regra que fica: recrutar, ler o modelo, e só então confirmar o executor. Segundo achado: a cota de 5h do executor estourou com o trabalho pronto e sem commit — o fechamento usou o mesmo precedente do S-34, commit criado pelo orquestrador com a autoria do executor no corpo da mensagem. Terceiro: o escalonamento de permissão do Codex **resolve** o worktree somente-leitura do achado anterior, então os commits da entrega saram com a assinatura do próprio executor.
 
 ## Próximo
-**Integração concluída (05/10): o S-38 está em `develop`, e a janela S-38 e S-22 está encerrada.**
+**Integração concluída (05/10): o S-45 está em `develop`, e a janela do registro de etapas está encerrada.**
+- **O que destravou:** recalculado contra o board ao vivo, o S-45 tem um único dependente. O **S-46 · Redistribuição não devolve a conversa ao corretor que exclui a própria conta** (Could, 1h30, cortável) **está elegível**, porque o S-44 e o S-45 estão integrados. Ele nasceu do teste de ponta a ponta do S-45: quando um corretor exclui a própria conta, `RedistribuirAsync` pode escolhê-lo de novo, e a conversa fica sem corretor. **Nenhum Must saiu do bloqueio.**
+- **Até o congelamento de 09/10:** os candidatos são S-46, S-27, S-25 e S-35, e a escolha é do usuário. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
+- **Deploy:**
+  - o Cloud Run ainda roda a `develop` anterior ao S-38;
+  - ao republicar, `solar-ai` e `solar-ai-api` precisam subir juntos, porque o agente antigo sem `essenciaisCompletos` faria a API registrar "essenciais incompletos" em silêncio;
+  - a migration roda no boot e grava `historico_desde` no instante desse deploy, então o gráfico da URL pública começa vazio e mostra o aviso de histórico parcial.
+- **Pendências herdadas do S-45:**
+  - o teste `AutenticacaoPainelPostgresTeste.Postgres_reset_consume_token_revoga_sessoes_anteriores_e_cria_nova_sessao` falha de vez em quando, provavelmente por empate de `CriadaEm`;
+  - foco e Tab do gráfico estão provados no Karma, mas não no navegador.
+
+~~**Integração concluída (05/10): o S-38 está em `develop`, e a janela S-38 e S-22 está encerrada.**~~ — **o S-45 foi integrado no mesmo dia**; ver a entrada acima.
 - **O que destravou:** recalculado contra o board ao vivo, o S-38 tem um único dependente. O **S-45 · Registro de etapas das conversas e avanço no painel** (Could, 8h, cortável) **está elegível**, porque o S-22 e o S-38 estão integrados. **Nenhum Must saiu do bloqueio.**
 - **Até o congelamento de 09/10:** os candidatos são S-45, S-27, S-25 e S-35, e a escolha é do usuário. O S-45 mexe nos quatro repositórios, no `/turn` e numa migration, então cabe com folga apertada. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
 - **Pendências herdadas do S-38:**

@@ -27,7 +27,7 @@ Duas cópias de uma regra divergem em silêncio, e quem lê o painel acreditaria
 
 ## Custo aceito
 
-- **O que o painel não mostra:** avanço no funil, taxa de dados essenciais e follow-up ficam de fora até o S-45, que pode ser cortado.
+- **O que o painel não mostra:** avanço no funil, taxa de dados essenciais e follow-up ficam de fora até o S-45, que pode ser cortado. *Atualização de 05/10: o S-45 foi integrado, e o painel passou a mostrar os três. Ver [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]].*
 - **Agregações em memória:** são feitas na API, sem benchmark. Isso basta para o volume da demo.
 - **Bundle do front:** o pacote inicial passou do orçamento de aviso de 500 kB, mas ainda não é erro.
 

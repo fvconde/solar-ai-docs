@@ -88,3 +88,4 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 - [[Decisao - Front publico e API privada por IAM no Cloud Run]] — só o front é público; o IP do cliente chega à API num header que o nginx sobrescreve (S-26).
 - [[Decisao - Metricas do painel sem copiar regras da Lia]] — métricas do painel na API com uma regra em um lugar; o registro de etapas ficou para o S-45 (S-22).
 - [[Decisao - Apagar conversa com posse da sessao]] — o titular apaga só a conversa escolhida, provando a posse pela sessão (S-38).
+- [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]] — cinco marcos gravados uma vez por conversa e o início do registro no próprio banco; essenciais vêm da Lia pelo `/turn` (S-45).
