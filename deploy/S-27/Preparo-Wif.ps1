@@ -79,7 +79,8 @@ function New-S27PlanoPreparoWif([string]$NumeroProjeto = '') {
             '--location=global',
             '--issuer-uri=https://token.actions.githubusercontent.com',
             '--attribute-mapping=google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.ref=assertion.ref',
-            ('--attribute-condition=' + $c.CondicaoWif)
+            ('--attribute-condition=' + $c.CondicaoWif),
+            ('--description=' + $c.Marca)
         )),
         (New-S26Gcloud $c 'criar-sa-pipeline' @(
             'iam','service-accounts','create',$c.ContaPipeline,
@@ -153,14 +154,20 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
     } catch {
         throw "JSON invalido ao consultar projeto: $($_.Exception.Message)"
     }
-    if ([string]$proj.projectNumber -cne $NumeroProjeto) {
-        throw "Numero real do projeto ($($proj.projectNumber)) diverge do NumeroProjeto fornecido ($NumeroProjeto)."
+    $projNum = [string](Get-S26Campo $proj 'projectNumber')
+    if ($projNum -cne $NumeroProjeto) {
+        throw "Numero real do projeto ($projNum) diverge do NumeroProjeto fornecido ($NumeroProjeto)."
     }
 
     # 2. Conferir APIs ativas (incluindo sts.googleapis.com)
     $apisAtivasBrutas = Get-S27InventarioJson $Contexto 'preflight-apis' @('services','list','--enabled','--format=json') $Executor
     $apisAtivas = @($apisAtivasBrutas | ForEach-Object {
-        if ($_.config -and $_.config.name) { $_.config.name } else { $_.name }
+        $cfg = Get-S26Campo $_ 'config'
+        if ($cfg -and (Get-S26Campo $cfg 'name')) {
+            [string](Get-S26Campo $cfg 'name')
+        } else {
+            [string](Get-S26Campo $_ 'name')
+        }
     })
     $obrigatorias = @(
         'iam.googleapis.com',
@@ -180,7 +187,7 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
     # 3. Conferir pre-requisitos do S-26 via inventarios list
     $registros = Get-S27InventarioJson $Contexto 'preflight-check-registro' @('artifacts','repositories','list',('--location=' + $Contexto.Regiao),'--format=json') $Executor
     $regEncontrado = $registros | Where-Object {
-        $n = if ($_.name) { [string]$_.name } else { '' }
+        $n = [string](Get-S26Campo $_ 'name')
         $n -eq $Contexto.Registro -or $n.EndsWith('/' + $Contexto.Registro)
     }
     if (-not $regEncontrado) {
@@ -189,7 +196,12 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
 
     $servicosRun = Get-S27InventarioJson $Contexto 'preflight-check-run' @('run','services','list',('--region=' + $Contexto.Regiao),'--format=json') $Executor
     $runEncontrado = $servicosRun | Where-Object {
-        $n = if ($_.metadata -and $_.metadata.name) { [string]$_.metadata.name } elseif ($_.name) { [string]$_.name } else { '' }
+        $meta = Get-S26Campo $_ 'metadata'
+        $n = if ($meta -and (Get-S26Campo $meta 'name')) {
+            [string](Get-S26Campo $meta 'name')
+        } else {
+            [string](Get-S26Campo $_ 'name')
+        }
         $n -eq $Contexto.ServicoApi -or $n.EndsWith('/' + $Contexto.ServicoApi)
     }
     if (-not $runEncontrado) {
@@ -198,84 +210,106 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
 
     # 4. Conferir Service Accounts (API S-26 e Pipeline S-27)
     $contas = Get-S27InventarioJson $Contexto 'preflight-check-sa' @('iam','service-accounts','list','--format=json') $Executor
-    $saApiEncontrada = $contas | Where-Object { [string]$_.email -eq $Contexto.ContaApi }
+    $saApiEncontrada = $contas | Where-Object { [string](Get-S26Campo $_ 'email') -eq $Contexto.ContaApi }
     if (-not $saApiEncontrada) {
         throw "Pre-requisito ausente: Conta de servico da API '$($Contexto.ContaApi)' do S-26 nao encontrada."
     }
+    $saApiDisabled = [bool](Get-S26Campo $saApiEncontrada 'disabled')
+    if ($saApiDisabled) {
+        throw "Conta de servico da API '$($Contexto.ContaApi)' esta desabilitada."
+    }
 
-    $saPipeEncontrada = $contas | Where-Object { [string]$_.email -eq $Contexto.EmailPipeline }
+    $saPipeEncontrada = $contas | Where-Object { [string](Get-S26Campo $_ 'email') -eq $Contexto.EmailPipeline }
     $saPipeExiste = $false
     if ($saPipeEncontrada) {
-        if ($saPipeEncontrada.disabled -eq $true) {
+        $saPipeDisabled = [bool](Get-S26Campo $saPipeEncontrada 'disabled')
+        if ($saPipeDisabled) {
             throw "Conta de servico do pipeline '$($Contexto.EmailPipeline)' esta desabilitada."
         }
-        if ([string]$saPipeEncontrada.description -cne $Contexto.Marca) {
+        $saPipeDesc = [string](Get-S26Campo $saPipeEncontrada 'description')
+        if ($saPipeDesc -cne $Contexto.Marca) {
             throw "Conta de servico do pipeline '$($Contexto.EmailPipeline)' ja existe com descricao/ownership divergente."
         }
         $saPipeExiste = $true
     }
 
-    # 5. Conferir Workload Identity Pools
-    $pools = Get-S27InventarioJson $Contexto 'preflight-check-pool' @('iam','workload-identity-pools','list','--location=global','--format=json') $Executor
+    # 5. Conferir Workload Identity Pools com --show-deleted
+    $pools = Get-S27InventarioJson $Contexto 'preflight-check-pool' @('iam','workload-identity-pools','list','--location=global','--show-deleted','--format=json') $Executor
     $poolEncontrado = $pools | Where-Object {
-        $n = if ($_.name) { [string]$_.name } else { '' }
+        $n = [string](Get-S26Campo $_ 'name')
         $n.EndsWith('/workloadIdentityPools/' + $Contexto.PoolId) -or $n -eq $Contexto.PoolId
     }
     $poolExiste = $false
     if ($poolEncontrado) {
-        if ([string]$poolEncontrado.state -cne 'ACTIVE') {
-            throw "Workload Identity Pool '$($Contexto.PoolId)' existe com estado incompativel ($($poolEncontrado.state))."
+        $poolState = [string](Get-S26Campo $poolEncontrado 'state')
+        if ($poolState -cne 'ACTIVE') {
+            throw "Workload Identity Pool '$($Contexto.PoolId)' existe com estado incompativel ($poolState)."
         }
-        if ([string]$poolEncontrado.description -cne $Contexto.Marca) {
+        $poolDisabled = [bool](Get-S26Campo $poolEncontrado 'disabled')
+        if ($poolDisabled) {
+            throw "Workload Identity Pool '$($Contexto.PoolId)' esta desabilitado (disabled=true)."
+        }
+        $poolDesc = [string](Get-S26Campo $poolEncontrado 'description')
+        if ($poolDesc -cne $Contexto.Marca) {
             throw "Workload Identity Pool '$($Contexto.PoolId)' ja existe com ownership divergente."
         }
         $poolExiste = $true
     }
 
-    # 6. Conferir Workload Identity Providers (apenas se pool existe)
+    # 6. Conferir Workload Identity Providers (apenas se pool existe) com --show-deleted
     $providerExiste = $false
     if ($poolExiste) {
-        $providers = Get-S27InventarioJson $Contexto 'preflight-check-provider' @('iam','workload-identity-pools','providers','list',('--workload-identity-pool=' + $Contexto.PoolId),'--location=global','--format=json') $Executor
+        $providers = Get-S27InventarioJson $Contexto 'preflight-check-provider' @('iam','workload-identity-pools','providers','list',('--workload-identity-pool=' + $Contexto.PoolId),'--location=global','--show-deleted','--format=json') $Executor
 
         foreach ($prov in $providers) {
-            $pName = if ($prov.name) { [string]$prov.name } else { '' }
+            $pName = [string](Get-S26Campo $prov 'name')
             if (-not ($pName.EndsWith('/providers/' + $Contexto.ProviderId) -or $pName -eq $Contexto.ProviderId)) {
                 throw "Workload Identity Pool '$($Contexto.PoolId)' contem provedor terceiro inesperado: '$pName'."
             }
         }
 
         $provEncontrado = $providers | Where-Object {
-            $n = if ($_.name) { [string]$_.name } else { '' }
+            $n = [string](Get-S26Campo $_ 'name')
             $n.EndsWith('/providers/' + $Contexto.ProviderId) -or $n -eq $Contexto.ProviderId
         }
 
         if ($provEncontrado) {
-            if ([string]$provEncontrado.state -cne 'ACTIVE') {
-                throw "Provedor WIF '$($Contexto.ProviderId)' existe com estado incompativel ($($provEncontrado.state))."
+            $provState = [string](Get-S26Campo $provEncontrado 'state')
+            if ($provState -cne 'ACTIVE') {
+                throw "Provedor WIF '$($Contexto.ProviderId)' existe com estado incompativel ($provState)."
             }
-            if ([string]$provEncontrado.issuerUri -cne 'https://token.actions.githubusercontent.com') {
-                throw "Provedor WIF '$($Contexto.ProviderId)' possui issuerUri divergente ($($provEncontrado.issuerUri))."
+            $provDisabled = [bool](Get-S26Campo $provEncontrado 'disabled')
+            if ($provDisabled) {
+                throw "Provedor WIF '$($Contexto.ProviderId)' esta desabilitado (disabled=true)."
             }
-            if ([string]$provEncontrado.attributeCondition -cne $Contexto.CondicaoWif) {
+            $provDesc = [string](Get-S26Campo $provEncontrado 'description')
+            if ($provDesc -cne $Contexto.Marca) {
+                throw "Provedor WIF '$($Contexto.ProviderId)' ja existe com description/ownership divergente."
+            }
+
+            $oidc = Get-S26Campo $provEncontrado 'oidc'
+            if ($null -eq $oidc) {
+                throw "Provedor WIF '$($Contexto.ProviderId)' nao possui configuracao OIDC."
+            }
+            $issuer = [string](Get-S26Campo $oidc 'issuerUri')
+            if ($issuer -cne 'https://token.actions.githubusercontent.com') {
+                throw "Provedor WIF '$($Contexto.ProviderId)' possui issuerUri divergente ($issuer)."
+            }
+
+            $cond = [string](Get-S26Campo $provEncontrado 'attributeCondition')
+            if ($cond -cne $Contexto.CondicaoWif) {
                 throw "Provedor WIF '$($Contexto.ProviderId)' ja existe com attributeCondition divergente da obrigatoria."
             }
 
-            $mapping = $provEncontrado.attributeMapping
-            $temSubject = $false
-            $temRepo = $false
-            $temRef = $false
-            if ($mapping) {
-                if ($mapping -is [Collections.IDictionary]) {
-                    $temSubject = ($mapping['google.subject'] -eq 'assertion.sub')
-                    $temRepo = ($mapping['attribute.repository'] -eq 'assertion.repository')
-                    $temRef = ($mapping['attribute.ref'] -eq 'assertion.ref')
-                } else {
-                    $temSubject = ($mapping.'google.subject' -eq 'assertion.sub')
-                    $temRepo = ($mapping.'attribute.repository' -eq 'assertion.repository')
-                    $temRef = ($mapping.'attribute.ref' -eq 'assertion.ref')
-                }
+            $mapping = Get-S26Campo $provEncontrado 'attributeMapping'
+            if ($null -eq $mapping) {
+                throw "Provedor WIF '$($Contexto.ProviderId)' nao possui attributeMapping."
             }
-            if (-not ($temSubject -and $temRepo -and $temRef)) {
+            $temSubject = ([string](Get-S26Campo $mapping 'google.subject') -eq 'assertion.sub')
+            $temRepo = ([string](Get-S26Campo $mapping 'attribute.repository') -eq 'assertion.repository')
+            $temRef = ([string](Get-S26Campo $mapping 'attribute.ref') -eq 'assertion.ref')
+            $temActor = ([string](Get-S26Campo $mapping 'attribute.actor') -eq 'assertion.actor')
+            if (-not ($temSubject -and $temRepo -and $temRef -and $temActor)) {
                 throw "Provedor WIF '$($Contexto.ProviderId)' possui attributeMapping incompleto ou divergente."
             }
             $providerExiste = $true

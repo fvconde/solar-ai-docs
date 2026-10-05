@@ -43,18 +43,25 @@ $script:simularSaApiAusente = $false
 
 $script:simularPoolExiste = $false
 $script:simularPoolDivergente = $false
-$script:simularPoolEstadoInvalido = $false
+$script:simularPoolDisabled = $false
+$script:simularPoolDeleted = $false
+$script:simularPoolOmitirDisabled = $true
 
 $script:simularProviderExiste = $false
-$script:simularProviderDivergente = $false
+$script:simularProviderDivergenteCond = $false
+$script:simularProviderDivergenteDesc = $false
 $script:simularProviderTerceiro = $false
-$script:simularProviderEstadoInvalido = $false
+$script:simularProviderDisabled = $false
+$script:simularProviderDeleted = $false
 $script:simularProviderIssuerInvalido = $false
+$script:simularProviderOidcAusente = $false
 $script:simularProviderMappingInvalido = $false
+$script:simularProviderOmitirDisabled = $true
 
 $script:simularSaPipeExiste = $false
 $script:simularSaPipeDivergente = $false
 $script:simularSaPipeDisabled = $false
+$script:simularSaPipeOmitirDisabled = $true
 
 $script:respostaEspecialPorId = @{}
 
@@ -92,12 +99,19 @@ $fake = {
         'preflight-check-sa' {
             $lista = New-Object 'System.Collections.Generic.List[object]'
             if (-not $script:simularSaApiAusente) {
-                $lista.Add([ordered]@{ email = "s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"; description = "s26-execucao=3bdd7f92"; disabled = $false })
+                # SA da API padrao com disabled omitido
+                $lista.Add([ordered]@{ email = "s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"; description = "s26-execucao=3bdd7f92" })
             }
             if ($script:simularSaPipeExiste) {
                 $desc = if ($script:simularSaPipeDivergente) { 'outro-dono' } else { 's27-execucao=df312134-114c-4742-80c3-01ac29034216' }
-                $dis = [bool]$script:simularSaPipeDisabled
-                $lista.Add([ordered]@{ email = "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"; description = $desc; disabled = $dis })
+                $item = [ordered]@{
+                    email = "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"
+                    description = $desc
+                }
+                if (-not $script:simularSaPipeOmitirDisabled -or $script:simularSaPipeDisabled) {
+                    $item['disabled'] = [bool]$script:simularSaPipeDisabled
+                }
+                $lista.Add($item)
             }
             $json = ConvertTo-Json -InputObject $lista.ToArray() -Depth 5
             if (-not $json.TrimStart().StartsWith('[')) { $json = '[' + "`n" + $json + "`n" + ']' }
@@ -106,12 +120,16 @@ $fake = {
         'preflight-check-pool' {
             if ($script:simularPoolExiste) {
                 $desc = if ($script:simularPoolDivergente) { 'outro-dono' } else { 's27-execucao=df312134-114c-4742-80c3-01ac29034216' }
-                $st = if ($script:simularPoolEstadoInvalido) { 'DELETED' } else { 'ACTIVE' }
-                $lista = @([ordered]@{
+                $st = if ($script:simularPoolDeleted) { 'DELETED' } else { 'ACTIVE' }
+                $item = [ordered]@{
                     name = "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134"
                     description = $desc
                     state = $st
-                })
+                }
+                if (-not $script:simularPoolOmitirDisabled -or $script:simularPoolDisabled) {
+                    $item['disabled'] = [bool]$script:simularPoolDisabled
+                }
+                $lista = @($item)
                 $json = ConvertTo-Json -InputObject $lista -Depth 5
                 if (-not $json.TrimStart().StartsWith('[')) { $json = '[' + "`n" + $json + "`n" + ']' }
                 return $json
@@ -121,8 +139,9 @@ $fake = {
         'preflight-check-provider' {
             if ($script:simularProviderExiste) {
                 $lista = New-Object 'System.Collections.Generic.List[object]'
-                $cond = if ($script:simularProviderDivergente) { "assertion.repository == 'outro/repo'" } else { "assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'" }
-                $st = if ($script:simularProviderEstadoInvalido) { 'DISABLED' } else { 'ACTIVE' }
+                $desc = if ($script:simularProviderDivergenteDesc) { 'outro-dono' } else { 's27-execucao=df312134-114c-4742-80c3-01ac29034216' }
+                $cond = if ($script:simularProviderDivergenteCond) { "assertion.repository == 'outro/repo'" } else { "assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'" }
+                $st = if ($script:simularProviderDeleted) { 'DELETED' } else { 'ACTIVE' }
                 $iss = if ($script:simularProviderIssuerInvalido) { 'https://token.invalido.com' } else { 'https://token.actions.githubusercontent.com' }
                 $map = if ($script:simularProviderMappingInvalido) { @{ 'google.subject' = 'assertion.sub' } } else {
                     [ordered]@{
@@ -133,13 +152,23 @@ $fake = {
                     }
                 }
 
-                $lista.Add([ordered]@{
+                $item = [ordered]@{
                     name = "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134/providers/github-df312134"
+                    description = $desc
                     state = $st
-                    issuerUri = $iss
                     attributeCondition = $cond
                     attributeMapping = $map
-                })
+                }
+                if (-not $script:simularProviderOmitirDisabled -or $script:simularProviderDisabled) {
+                    $item['disabled'] = [bool]$script:simularProviderDisabled
+                }
+                if (-not $script:simularProviderOidcAusente) {
+                    $item['oidc'] = [ordered]@{
+                        issuerUri = $iss
+                    }
+                }
+
+                $lista.Add($item)
 
                 if ($script:simularProviderTerceiro) {
                     $lista.Add([ordered]@{
@@ -171,18 +200,25 @@ function Reset-Mocks {
 
     $script:simularPoolExiste = $false
     $script:simularPoolDivergente = $false
-    $script:simularPoolEstadoInvalido = $false
+    $script:simularPoolDisabled = $false
+    $script:simularPoolDeleted = $false
+    $script:simularPoolOmitirDisabled = $true
 
     $script:simularProviderExiste = $false
-    $script:simularProviderDivergente = $false
+    $script:simularProviderDivergenteCond = $false
+    $script:simularProviderDivergenteDesc = $false
     $script:simularProviderTerceiro = $false
-    $script:simularProviderEstadoInvalido = $false
+    $script:simularProviderDisabled = $false
+    $script:simularProviderDeleted = $false
     $script:simularProviderIssuerInvalido = $false
+    $script:simularProviderOidcAusente = $false
     $script:simularProviderMappingInvalido = $false
+    $script:simularProviderOmitirDisabled = $true
 
     $script:simularSaPipeExiste = $false
     $script:simularSaPipeDivergente = $false
     $script:simularSaPipeDisabled = $false
+    $script:simularSaPipeOmitirDisabled = $true
 
     $script:respostaEspecialPorId = @{}
 }
@@ -195,15 +231,15 @@ Caso 'Plano padrao nao invoca executor e nao chama gcloud' {
     Exigir ($res.Acoes.Count -eq 7) 'Plano deve conter exatamente 7 acoes de mutacao.'
 }
 
-Caso 'Condicao WIF no provedor e exata e chega intacta ao transporte' {
+Caso 'Condicao WIF no provedor e exata e chega intacta ao transporte nativo' {
     Reset-Mocks
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     $acaoProv = $p.Acoes | Where-Object Id -eq 'criar-provider'
     Exigir ($null -ne $acaoProv) 'Acao criar-provider deve existir.'
     $condEsperada = "--attribute-condition=assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'"
     Exigir ($acaoProv.Argumentos -contains $condEsperada) 'Condicao WIF literal deve conter && e aspas simples intactas.'
+    Exigir ($acaoProv.Argumentos -contains ('--description=' + $p.Contexto.Marca)) 'Acao criar-provider deve incluir description com a Marca da execucao.'
 
-    # Provar que chega intacta ao executor durante a execucao
     Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake | Out-Null
     $chamadaProv = $script:chamadas | Where-Object Id -eq 'criar-provider'
     Exigir ($null -ne $chamadaProv) 'Acao criar-provider deve ser despachada para o transporte.'
@@ -256,15 +292,23 @@ Caso 'Inclusao de sts.googleapis.com nas APIs obrigatorias do preflight' {
     Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'sts.googleapis.com'
 }
 
-Caso 'Execucao completa com sucesso chama preflight e todas as mutacoes' {
+Caso 'Consultas de pools e providers utilizam --show-deleted' {
     Reset-Mocks
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
-    $res = Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake
-    Exigir ($script:chamadas.Count -ge 12) 'Devem ocorrer consultas de preflight e acoes de criacao/binding.'
-    Exigir ($script:chamadas[0].Id -eq 'preflight-numero-projeto') 'Primeira chamada deve ser a verificacao do NumeroProjeto.'
+    Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake | Out-Null
+    $poolQuery = $script:chamadas | Where-Object Id -eq 'preflight-check-pool'
+    Exigir ($poolQuery.Argumentos -contains '--show-deleted') 'Consulta de pools deve incluir --show-deleted.'
 }
 
-Caso 'Idempotencia: reexecucao propria pula criacao de recursos ja existentes' {
+Caso 'Execucao completa com sucesso lida com propriedades opcionais ausentes no protobuf/JSON' {
+    Reset-Mocks
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    # Default: disabled omitido na SA, pool e provider
+    $res = Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake
+    Exigir ($script:chamadas.Count -ge 12) 'Devem ocorrer consultas de preflight e acoes de criacao/binding sem PropertyNotFoundException.'
+}
+
+Caso 'Idempotencia: reexecucao propria com esquema REST pula criacao de recursos existentes' {
     Reset-Mocks
     $script:simularPoolExiste = $true
     $script:simularProviderExiste = $true
@@ -331,15 +375,74 @@ Caso 'Falha de consulta com JSON malformado bloqueia antes de qualquer mutacao' 
     }
 }
 
-Caso 'Provedor WIF existente com condicao divergente falha preflight' {
+Caso 'Pool com state ACTIVE mas disabled=true bloqueia mutacoes' {
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularPoolDisabled = $true
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitado'
+    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+    Exigir ($mutacoes.Count -eq 0) 'Pool desabilitado deve bloquear antes de mutacoes.'
+}
+
+Caso 'Pool com state DELETED bloqueia mutacoes' {
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularPoolDeleted = $true
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'estado incompativel'
+    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+    Exigir ($mutacoes.Count -eq 0) 'Pool deletado deve bloquear antes de mutacoes.'
+}
+
+Caso 'Provider com state ACTIVE mas disabled=true bloqueia mutacoes' {
     Reset-Mocks
     $script:simularPoolExiste = $true
     $script:simularProviderExiste = $true
-    $script:simularProviderDivergente = $true
+    $script:simularProviderDisabled = $true
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'divergente'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitado'
     $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer com condicao divergente.'
+    Exigir ($mutacoes.Count -eq 0) 'Provider desabilitado deve bloquear antes de mutacoes.'
+}
+
+Caso 'Provider com state DELETED bloqueia mutacoes' {
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
+    $script:simularProviderDeleted = $true
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'estado incompativel'
+    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+    Exigir ($mutacoes.Count -eq 0) 'Provider deletado deve bloquear antes de mutacoes.'
+}
+
+Caso 'Provider com description divergente (foreign) bloqueia mutacoes' {
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
+    $script:simularProviderDivergenteDesc = $true
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'description/ownership divergente'
+    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+    Exigir ($mutacoes.Count -eq 0) 'Provider com descricao estranha deve bloquear mutacoes.'
+}
+
+Caso 'Provider com condicao ou issuerUri divergente bloqueia mutacoes' {
+    # 1. Condicao divergente
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
+    $script:simularProviderDivergenteCond = $true
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'divergente da obrigatoria'
+
+    # 2. IssuerUri divergente
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
+    $script:simularProviderIssuerInvalido = $true
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'issuerUri divergente'
 }
 
 Caso 'Provedor terceiro no pool bloqueia execucao' {
@@ -351,33 +454,6 @@ Caso 'Provedor terceiro no pool bloqueia execucao' {
     Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'provedor terceiro inesperado'
     $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
     Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se houver provedor terceiro no pool.'
-}
-
-Caso 'Recurso existente com ownership, estado ou SA desabilitada falha preflight' {
-    # 1. Pool com ownership divergente
-    Reset-Mocks
-    $script:simularPoolExiste = $true
-    $script:simularPoolDivergente = $true
-    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership divergente'
-
-    # 2. Pool em estado incompativel
-    Reset-Mocks
-    $script:simularPoolExiste = $true
-    $script:simularPoolEstadoInvalido = $true
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'estado incompativel'
-
-    # 3. SA do pipeline desabilitada
-    Reset-Mocks
-    $script:simularSaPipeExiste = $true
-    $script:simularSaPipeDisabled = $true
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitada'
-
-    # 4. SA do pipeline com ownership divergente
-    Reset-Mocks
-    $script:simularSaPipeExiste = $true
-    $script:simularSaPipeDivergente = $true
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership divergente'
 }
 
 Caso 'Falha em comando interrompe execucao imediatamente (fail-closed)' {
