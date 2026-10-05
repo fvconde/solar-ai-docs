@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 05/10/2026 (S-45)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 05/10/2026 (S-46)
 
 ---
 
@@ -85,6 +85,8 @@ A base simulada é `solar-ai/data/imoveis.json`: 80 imóveis com campos estrutur
 O desfecho passa a desfechar. Quando o turno volta com `agendar_reuniao` ou `direcionar_especialista`, a API escolhe um corretor, grava **uma** linha em `encaminhamentos` — índice único em `conversa_id`, então encaminhar duas vezes não duplica — e devolve o nome ao front.
 
 **A escolha é pura e determinística**, em `Encaminhamentos/EscolhaDeCorretor.cs`: sem banco, sem relógio, mesma entrada e mesma saída. Ordem da regra: especialidade compatível com a trilha (`investimento` → investimento; `compra` e `aluguel` → moradia) → região do lead entre as regiões do corretor → menor carga aberta → desempate por quem está há mais tempo sem receber lead. Sem elegível, a linha sai com `corretor_id` nulo e status `aguardando`, e a conversa segue.
+
+**A redistribuição nunca devolve a conversa a quem está saindo (S-46).** `EncaminhamentoRepositorio.RedistribuirAsync` roda quando o corretor exclui a própria conta e quando o supervisor recusa um cadastro. Ele desatribui as conversas do corretor e escolhe de novo pela mesma regra, mas a consulta de candidatos exclui o corretor de origem. Sem outro elegível, a conversa fica com `corretor_id` nulo e status `aguardando`, e a conta é removida normalmente. O primeiro instante de atribuição (`corretor_atribuido_em`) não muda.
 
 **Região ausente não exclui ninguém.** Não saber onde o lead quer morar não é o mesmo que saber que ninguém atende ali. Já uma região que não casa com corretor nenhum cai em `aguardando`.
 

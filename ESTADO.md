@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 05/10/2026 (S-45 integrado; a janela do registro de etapas está encerrada)
+**Última atualização:** 05/10/2026 (S-46 integrado; a janela da redistribuição está encerrada)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -128,6 +128,16 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **05/10** — **O avanço das conversas lê marcos imutáveis, e o início do registro é gravado pela própria migration (S-45).** Cinco datas em `conversas` são gravadas uma vez e nunca reescritas: intenção, dados essenciais, encaminhamento, corretor atribuído e primeiro follow-up. O começo do registro, `registro_metricas.historico_desde`, é o `now()` do banco quando a migration roda, e não um valor de configuração. Assim, cada ambiente guarda o próprio começo sem segredo nem passo manual no deploy, e nenhuma conversa antiga ganha data inventada. Os dados essenciais chegam pela **terceira emenda do `/turn`**: o campo `essenciaisCompletos`, calculado por `lacunas_essenciais`, nunca pelo modelo. Com ele, o espelho foi a 7 tipos e 46 campos. Custo aceito: o histórico começa vazio em cada deploy, e agente e API precisam subir juntos. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Marcos%20imutaveis%20e%20inicio%20do%20registro%20gravado%20pela%20migration.md)
 
 ## Feito
+
+- **05/10 — S-46 integrado: a redistribuição não devolve mais a conversa ao corretor que exclui a própria conta.** Em `develop`: `solar-ai-api` `8a18238` (PR #20) e `solar-ai-docs` `444f8f4` (PR #22). `CandidatosAsync` recebe o corretor de origem e o deixa de fora da consulta. Com outro elegível, a conversa vai para ele; sem nenhum, fica `aguardando`, e a conta é removida normalmente. Sem migration, sem `/turn` e com o snapshot idêntico. O primeiro instante de atribuição do S-45 e as barras do avanço não mudam.
+
+  **Quem executou:** o Codex (GPT-6.1-Sol high) liderou e o Antigravity (Gemini 3.8 Flash high) implementou, com três tarefas e nenhuma devolução, nem do líder nem do Maestro. Nenhuma chamada ao Gemini.
+
+  **Validação:** o Maestro rodou a suíte da API no head do PR, **318/318** contra um Postgres descartável, e confirmou que os quatro testes novos passam. Também rodou os três testes da reprodução no commit anterior à correção, e os três falharam. A árvore em `develop` é idêntica ao head validado.
+
+  **O que a janela ensinou:**
+  1. **A previsão do Maestro errou, e o teste vermelho corrigiu antes do código.** Pela FK `Restrict`, o Maestro previu um `500` com rollback. O Postgres mostrou `204` e uma conversa sem corretor, mas ainda `atribuido`, como o card original dizia. Por que a coluna ficou nula com `Restrict` não foi investigado. · [contexto](Solar%20Brain/20%20-%20Bugs/Bug%20-%20redistribuicao%20reescolhia%20o%20corretor%20que%20saia.md)
+  2. **O teste de recuperação de senha é instável.** `AutenticacaoPainelPostgresTeste.Postgres_reset_consume_token_revoga_sessoes_anteriores_e_cria_nova_sessao` falhou na linha de base e passou em todas as repetições, sem mudança de código. A suspeita é o empate de `CriadaEm` na ordenação, e ele não foi corrigido.
 
 - **05/10 — S-45 integrado: o painel mostra o avanço das conversas.** Em `develop`: `solar-ai` `f99adcb` (PR #10), `solar-ai-api` `3956b29` (PR #19), `solar-ai-front` `7c03526` (PR #16) e `solar-ai-docs` `903791a` (PR #21). Uma migration aditiva, `20261005132141_RegistrarEtapasDasConversas`, e a terceira emenda do `/turn` (`essenciaisCompletos`, 7 tipos e 46 campos).
 
@@ -371,9 +381,14 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **11/09 — Achado de ferramenta no S-33: preset do Maestri não diz qual modelo roda.** `maestri preset list` devolve só nomes; o modelo aparece na barra de status **depois** de recrutar. O `Antigravity` saiu como Gemini 3.8 Flash e foi trocado por Codex `gpt-5.6-sol` com esforço `high`, porque o card tinha migration e a classe de erro do `PK_Leads` virando `p_k_leads` já aconteceu uma vez aqui. Regra que fica: recrutar, ler o modelo, e só então confirmar o executor. Segundo achado: a cota de 5h do executor estourou com o trabalho pronto e sem commit — o fechamento usou o mesmo precedente do S-34, commit criado pelo orquestrador com a autoria do executor no corpo da mensagem. Terceiro: o escalonamento de permissão do Codex **resolve** o worktree somente-leitura do achado anterior, então os commits da entrega saram com a assinatura do próprio executor.
 
 ## Próximo
-**Integração concluída (05/10): o S-45 está em `develop`, e a janela do registro de etapas está encerrada.**
-- **O que destravou:** recalculado contra o board ao vivo, o S-45 tem um único dependente. O **S-46 · Redistribuição não devolve a conversa ao corretor que exclui a própria conta** (Could, 1h30, cortável) **está elegível**, porque o S-44 e o S-45 estão integrados. Ele nasceu do teste de ponta a ponta do S-45: quando um corretor exclui a própria conta, `RedistribuirAsync` pode escolhê-lo de novo, e a conversa fica sem corretor. **Nenhum Must saiu do bloqueio.**
-- **Até o congelamento de 09/10:** os candidatos são S-46, S-27, S-25 e S-35, e a escolha é do usuário. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
+**Integração concluída (05/10): o S-46 está em `develop`, e a janela da redistribuição está encerrada.**
+- **O que destravou:** recalculado contra o board ao vivo, nenhum card depende do S-46. **Nenhum Must saiu do bloqueio.**
+- **Até o congelamento de 09/10:** os candidatos são S-27, S-25 e S-35, e a escolha é do usuário. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
+- **Deploy:** o S-46 só muda a API e pode subir junto com o S-45, sem passo novo.
+
+~~**Integração concluída (05/10): o S-45 está em `develop`, e a janela do registro de etapas está encerrada.**~~ — **o S-46 foi integrado no mesmo dia**; ver a entrada acima. Deploy e pendências abaixo continuam valendo.
+- ~~**O que destravou:** o S-46 ficou elegível.~~ Feito.
+- ~~**Até o congelamento de 09/10:** os candidatos eram S-46, S-27, S-25 e S-35.~~
 - **Deploy:**
   - o Cloud Run ainda roda a `develop` anterior ao S-38;
   - ao republicar, `solar-ai` e `solar-ai-api` precisam subir juntos, porque o agente antigo sem `essenciaisCompletos` faria a API registrar "essenciais incompletos" em silêncio;

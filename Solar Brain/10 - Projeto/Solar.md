@@ -64,6 +64,7 @@ Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o c
 - [[Bug - turno real vira 504 sob cota por minuto]] — a suíte satura o minuto e a conversa seguinte estoura o timeout; risco direto para a gravação do vídeo
 - [[Bug - falha ao retomar apagava a conversa]] — um `catch` vazio no front transformava falha de rede em perda permanente de conversa, sem sintoma
 - [[Bug - HasData com colecao primitiva derruba o boot]] — o log do boot dizia "Banco indisponivel" e o banco estava de pé; o erro era do modelo do EF
+- [[Bug - redistribuicao reescolhia o corretor que saia]] — o corretor que excluía a conta recebia a conversa de volta, e ela ficava sem ninguém (S-46)
 
 ## Gestão
 

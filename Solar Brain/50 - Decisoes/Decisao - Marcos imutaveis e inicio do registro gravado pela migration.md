@@ -27,7 +27,7 @@ Com a data no banco, cada ambiente guarda o seu próprio começo real: a máquin
 - **O histórico começa vazio.** Logo depois do deploy, o gráfico só conta conversas novas, e o painel mostra o aviso "Histórico de avanço disponível desde DD/MM".
 - **A intenção vale por lead.** `intencao_em` lê a intenção do lead fundido, então um lead que já tinha intenção em outra conversa marca a etapa no primeiro turno da conversa nova.
 - **Agente e API sobem juntos.** Um agente antigo, sem o campo novo, faz a API entender "essenciais incompletos" sem erro.
-- **Fica um bug antigo, fora deste card.** A redistribuição pode devolver a conversa ao corretor que exclui a própria conta. Isso virou o S-46 e não altera nenhum marco.
+- **Fica um bug antigo, fora deste card.** A redistribuição pode devolver a conversa ao corretor que exclui a própria conta. Isso virou o S-46 e não altera nenhum marco. *Atualização de 05/10: o S-46 foi integrado e corrigiu o bug. Ver [[Bug - redistribuicao reescolhia o corretor que saia]].*
 
 ## Relacionadas
 
