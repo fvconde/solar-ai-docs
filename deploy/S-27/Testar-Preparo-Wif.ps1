@@ -35,13 +35,28 @@ function Recusa([scriptblock]$Teste, [string]$Trecho = '') {
 $script:chamadas = New-Object 'System.Collections.Generic.List[object]'
 $script:falharNoId = $null
 $script:projNumeroSimulado = '123456789012'
-$script:apisAtivasSimuladas = @('iam.googleapis.com', 'iamcredentials.googleapis.com', 'cloudresourcemanager.googleapis.com', 'artifactregistry.googleapis.com', 'run.googleapis.com')
+$script:apisAtivasSimuladas = @('iam.googleapis.com', 'iamcredentials.googleapis.com', 'cloudresourcemanager.googleapis.com', 'artifactregistry.googleapis.com', 'run.googleapis.com', 'sts.googleapis.com')
+
 $script:simularRegistroAusente = $false
 $script:simularRunAusente = $false
 $script:simularSaApiAusente = $false
+
+$script:simularPoolExiste = $false
 $script:simularPoolDivergente = $false
+$script:simularPoolEstadoInvalido = $false
+
+$script:simularProviderExiste = $false
 $script:simularProviderDivergente = $false
+$script:simularProviderTerceiro = $false
+$script:simularProviderEstadoInvalido = $false
+$script:simularProviderIssuerInvalido = $false
+$script:simularProviderMappingInvalido = $false
+
+$script:simularSaPipeExiste = $false
 $script:simularSaPipeDivergente = $false
+$script:simularSaPipeDisabled = $false
+
+$script:respostaEspecialPorId = @{}
 
 $fake = {
     param($a)
@@ -49,6 +64,12 @@ $fake = {
 
     if ($null -ne $script:falharNoId -and $a.Id -eq $script:falharNoId) {
         throw "Erro simulado na operacao $($a.Id)"
+    }
+
+    if ($script:respostaEspecialPorId.ContainsKey($a.Id)) {
+        $esp = $script:respostaEspecialPorId[$a.Id]
+        if ($esp -is [scriptblock]) { return (& $esp $a) }
+        return $esp
     }
 
     switch ($a.Id) {
@@ -61,34 +82,76 @@ $fake = {
             }) -Depth 5
         }
         'preflight-check-registro' {
-            if ($script:simularRegistroAusente) { throw 'NotFound' }
-            return '{"name":"solar-s26-3bdd7f92"}'
+            if ($script:simularRegistroAusente) { return '[]' }
+            return '[{"name":"solar-s26-3bdd7f92"}]'
         }
         'preflight-check-run' {
-            if ($script:simularRunAusente) { throw 'NotFound' }
-            return '{"metadata":{"name":"solar-api"}}'
+            if ($script:simularRunAusente) { return '[]' }
+            return '[{"metadata":{"name":"solar-api"}}]'
         }
-        'preflight-check-sa-api' {
-            if ($script:simularSaApiAusente) { throw 'NotFound' }
-            return '{"email":"s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"}'
+        'preflight-check-sa' {
+            $lista = New-Object 'System.Collections.Generic.List[object]'
+            if (-not $script:simularSaApiAusente) {
+                $lista.Add([ordered]@{ email = "s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"; description = "s26-execucao=3bdd7f92"; disabled = $false })
+            }
+            if ($script:simularSaPipeExiste) {
+                $desc = if ($script:simularSaPipeDivergente) { 'outro-dono' } else { 's27-execucao=df312134-114c-4742-80c3-01ac29034216' }
+                $dis = [bool]$script:simularSaPipeDisabled
+                $lista.Add([ordered]@{ email = "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"; description = $desc; disabled = $dis })
+            }
+            $json = ConvertTo-Json -InputObject $lista.ToArray() -Depth 5
+            if (-not $json.TrimStart().StartsWith('[')) { $json = '[' + "`n" + $json + "`n" + ']' }
+            return $json
         }
         'preflight-check-pool' {
-            if ($script:simularPoolDivergente) {
-                return '{"name":"solar-s27-df312134","description":"dono-estranho"}'
+            if ($script:simularPoolExiste) {
+                $desc = if ($script:simularPoolDivergente) { 'outro-dono' } else { 's27-execucao=df312134-114c-4742-80c3-01ac29034216' }
+                $st = if ($script:simularPoolEstadoInvalido) { 'DELETED' } else { 'ACTIVE' }
+                $lista = @([ordered]@{
+                    name = "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134"
+                    description = $desc
+                    state = $st
+                })
+                $json = ConvertTo-Json -InputObject $lista -Depth 5
+                if (-not $json.TrimStart().StartsWith('[')) { $json = '[' + "`n" + $json + "`n" + ']' }
+                return $json
             }
-            throw 'NotFound'
+            return '[]'
         }
         'preflight-check-provider' {
-            if ($script:simularProviderDivergente) {
-                return '{"name":"github-df312134","attributeCondition":"condicao-invalida"}'
+            if ($script:simularProviderExiste) {
+                $lista = New-Object 'System.Collections.Generic.List[object]'
+                $cond = if ($script:simularProviderDivergente) { "assertion.repository == 'outro/repo'" } else { "assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'" }
+                $st = if ($script:simularProviderEstadoInvalido) { 'DISABLED' } else { 'ACTIVE' }
+                $iss = if ($script:simularProviderIssuerInvalido) { 'https://token.invalido.com' } else { 'https://token.actions.githubusercontent.com' }
+                $map = if ($script:simularProviderMappingInvalido) { @{ 'google.subject' = 'assertion.sub' } } else {
+                    [ordered]@{
+                        'google.subject' = 'assertion.sub'
+                        'attribute.actor' = 'assertion.actor'
+                        'attribute.repository' = 'assertion.repository'
+                        'attribute.ref' = 'assertion.ref'
+                    }
+                }
+
+                $lista.Add([ordered]@{
+                    name = "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134/providers/github-df312134"
+                    state = $st
+                    issuerUri = $iss
+                    attributeCondition = $cond
+                    attributeMapping = $map
+                })
+
+                if ($script:simularProviderTerceiro) {
+                    $lista.Add([ordered]@{
+                        name = "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134/providers/provider-estranho"
+                        state = 'ACTIVE'
+                    })
+                }
+                $json = ConvertTo-Json -InputObject $lista.ToArray() -Depth 5
+                if (-not $json.TrimStart().StartsWith('[')) { $json = '[' + "`n" + $json + "`n" + ']' }
+                return $json
             }
-            throw 'NotFound'
-        }
-        'preflight-check-sa-pipeline' {
-            if ($script:simularSaPipeDivergente) {
-                return '{"email":"s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com","description":"dono-estranho"}'
-            }
-            throw 'NotFound'
+            return '[]'
         }
         default {
             return '{}'
@@ -100,13 +163,28 @@ function Reset-Mocks {
     $script:chamadas.Clear()
     $script:falharNoId = $null
     $script:projNumeroSimulado = '123456789012'
-    $script:apisAtivasSimuladas = @('iam.googleapis.com', 'iamcredentials.googleapis.com', 'cloudresourcemanager.googleapis.com', 'artifactregistry.googleapis.com', 'run.googleapis.com')
+    $script:apisAtivasSimuladas = @('iam.googleapis.com', 'iamcredentials.googleapis.com', 'cloudresourcemanager.googleapis.com', 'artifactregistry.googleapis.com', 'run.googleapis.com', 'sts.googleapis.com')
+
     $script:simularRegistroAusente = $false
     $script:simularRunAusente = $false
     $script:simularSaApiAusente = $false
+
+    $script:simularPoolExiste = $false
     $script:simularPoolDivergente = $false
+    $script:simularPoolEstadoInvalido = $false
+
+    $script:simularProviderExiste = $false
     $script:simularProviderDivergente = $false
+    $script:simularProviderTerceiro = $false
+    $script:simularProviderEstadoInvalido = $false
+    $script:simularProviderIssuerInvalido = $false
+    $script:simularProviderMappingInvalido = $false
+
+    $script:simularSaPipeExiste = $false
     $script:simularSaPipeDivergente = $false
+    $script:simularSaPipeDisabled = $false
+
+    $script:respostaEspecialPorId = @{}
 }
 
 Caso 'Plano padrao nao invoca executor e nao chama gcloud' {
@@ -117,14 +195,19 @@ Caso 'Plano padrao nao invoca executor e nao chama gcloud' {
     Exigir ($res.Acoes.Count -eq 7) 'Plano deve conter exatamente 7 acoes de mutacao.'
 }
 
-Caso 'Condicao WIF no provedor e exata' {
+Caso 'Condicao WIF no provedor e exata e chega intacta ao transporte' {
     Reset-Mocks
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     $acaoProv = $p.Acoes | Where-Object Id -eq 'criar-provider'
     Exigir ($null -ne $acaoProv) 'Acao criar-provider deve existir.'
     $condEsperada = "--attribute-condition=assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'"
-    Exigir ($acaoProv.Argumentos -contains $condEsperada) 'Condicao WIF deve exigir repository fvconde/solar-ai-api E ref refs/heads/main.'
-    Exigir ($acaoProv.Argumentos -contains '--issuer-uri=https://token.actions.githubusercontent.com') 'Issuer URI deve ser do GitHub Actions.'
+    Exigir ($acaoProv.Argumentos -contains $condEsperada) 'Condicao WIF literal deve conter && e aspas simples intactas.'
+
+    # Provar que chega intacta ao executor durante a execucao
+    Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake | Out-Null
+    $chamadaProv = $script:chamadas | Where-Object Id -eq 'criar-provider'
+    Exigir ($null -ne $chamadaProv) 'Acao criar-provider deve ser despachada para o transporte.'
+    Exigir ($chamadaProv.Argumentos -contains $condEsperada) 'O transporte deve receber o argumento com && e aspas inalterados.'
 }
 
 Caso 'Comandos e argumentos esperados para criacao e bindings' {
@@ -143,39 +226,58 @@ Caso 'IAM nos recursos certos com menor privilegio' {
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     $c = $p.Contexto
 
-    # 1. Workload Identity User no pipeline SA
     $bWif = $p.Acoes | Where-Object Id -eq 'binding-workload-identity'
     Exigir ($bWif.Argumentos -contains $c.EmailPipeline) 'WorkloadIdentityUser deve vincular na SA do pipeline.'
     Exigir ($bWif.Argumentos -contains '--role=roles/iam.workloadIdentityUser') 'Papel deve ser roles/iam.workloadIdentityUser.'
     Exigir ($bWif.Argumentos -contains ('--member=principalSet://iam.googleapis.com/projects/123456789012/locations/global/workloadIdentityPools/' + $c.PoolId + '/attribute.repository/' + $c.RepositorioGit)) 'PrincipalSet deve restringir ao repositorio do card.'
 
-    # 2. Artifact Registry writer no registro S26
     $bReg = $p.Acoes | Where-Object Id -eq 'binding-artifact-registry'
     Exigir ($bReg.Argumentos -contains $c.Registro) 'Writer deve apontar para o registro S26.'
     Exigir ($bReg.Argumentos -contains ('--location=' + $c.Regiao)) 'Localizacao deve ser a regiao do registro.'
     Exigir ($bReg.Argumentos -contains '--role=roles/artifactregistry.writer') 'Papel deve ser roles/artifactregistry.writer.'
     Exigir ($bReg.Argumentos -contains ('--member=serviceAccount:' + $c.EmailPipeline)) 'Membro deve ser a SA do pipeline.'
 
-    # 3. run.developer apenas solar-api
     $bRun = $p.Acoes | Where-Object Id -eq 'binding-run-developer'
     Exigir ($bRun.Argumentos -contains $c.ServicoApi) 'Run.developer deve ser restrito ao servico solar-api.'
     Exigir ($bRun.Argumentos -contains ('--region=' + $c.Regiao)) 'Regiao deve ser southamerica-east1.'
     Exigir ($bRun.Argumentos -contains '--role=roles/run.developer') 'Papel deve ser roles/run.developer.'
     Exigir ($bRun.Argumentos -contains ('--member=serviceAccount:' + $c.EmailPipeline)) 'Membro deve ser a SA do pipeline.'
 
-    # 4. serviceAccountUser apenas na SA da API S26
     $bSa = $p.Acoes | Where-Object Id -eq 'binding-sa-user'
     Exigir ($bSa.Argumentos -contains $c.ContaApi) 'ServiceAccountUser deve ser restrito a SA da API S-26.'
     Exigir ($bSa.Argumentos -contains '--role=roles/iam.serviceAccountUser') 'Papel deve ser roles/iam.serviceAccountUser.'
     Exigir ($bSa.Argumentos -contains ('--member=serviceAccount:' + $c.EmailPipeline)) 'Membro deve ser a SA do pipeline.'
 }
 
+Caso 'Inclusao de sts.googleapis.com nas APIs obrigatorias do preflight' {
+    Reset-Mocks
+    $script:apisAtivasSimuladas = @('iam.googleapis.com', 'iamcredentials.googleapis.com', 'cloudresourcemanager.googleapis.com', 'artifactregistry.googleapis.com', 'run.googleapis.com') # falta sts
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'sts.googleapis.com'
+}
+
 Caso 'Execucao completa com sucesso chama preflight e todas as mutacoes' {
     Reset-Mocks
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     $res = Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake
-    Exigir ($script:chamadas.Count -ge 12) 'Devem ocorrer todas as consultas de preflight e acoes de criacao/binding.'
+    Exigir ($script:chamadas.Count -ge 12) 'Devem ocorrer consultas de preflight e acoes de criacao/binding.'
     Exigir ($script:chamadas[0].Id -eq 'preflight-numero-projeto') 'Primeira chamada deve ser a verificacao do NumeroProjeto.'
+}
+
+Caso 'Idempotencia: reexecucao propria pula criacao de recursos ja existentes' {
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
+    $script:simularSaPipeExiste = $true
+
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake | Out-Null
+
+    $criacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' })
+    Exigir ($criacoes.Count -eq 0) 'Nenhuma mutacao de criacao deve ocorrer quando pool, provider e SA ja existem e estao validos.'
+
+    $bindings = @($script:chamadas | Where-Object { $_.Id -like 'binding-*' })
+    Exigir ($bindings.Count -eq 4) 'Os bindings de permissao ainda devem ser garantidos.'
 }
 
 Caso 'Divergencia de NumeroProjeto falha preflight antes de qualquer mutacao' {
@@ -187,15 +289,6 @@ Caso 'Divergencia de NumeroProjeto falha preflight antes de qualquer mutacao' {
     Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se o NumeroProjeto divergir.'
 }
 
-Caso 'Ausencia de API obrigatoria falha preflight antes de mutacao' {
-    Reset-Mocks
-    $script:apisAtivasSimuladas = @('run.googleapis.com')
-    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'API obrigatoria'
-    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se houver API obrigatoria ausente.'
-}
-
 Caso 'Ausencia de pre-requisito S-26 falha preflight antes de mutacao' {
     Reset-Mocks
     $script:simularRegistroAusente = $true
@@ -205,8 +298,43 @@ Caso 'Ausencia de pre-requisito S-26 falha preflight antes de mutacao' {
     Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se pre-requisito do S-26 estiver ausente.'
 }
 
+Caso 'Falha de consulta no inventario (transporte) bloqueia antes de qualquer mutacao' {
+    foreach ($idFalha in @('preflight-check-pool', 'preflight-check-sa', 'preflight-check-registro', 'preflight-check-run')) {
+        Reset-Mocks
+        $script:falharNoId = $idFalha
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake }
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("Falha na consulta $idFalha nao deve permitir mutacoes.")
+    }
+}
+
+Caso 'Falha de consulta com JSON vazio ou whitespace bloqueia antes de qualquer mutacao' {
+    foreach ($idVazio in @('preflight-check-pool', 'preflight-check-sa', 'preflight-check-registro', 'preflight-check-run', 'preflight-apis')) {
+        Reset-Mocks
+        $script:respostaEspecialPorId[$idVazio] = '   '
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'vazio ou indeterminado'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("JSON vazio na consulta $idVazio nao deve permitir mutacoes.")
+    }
+}
+
+Caso 'Falha de consulta com JSON malformado bloqueia antes de qualquer mutacao' {
+    foreach ($idQuebrado in @('preflight-check-pool', 'preflight-check-sa', 'preflight-check-registro', 'preflight-check-run')) {
+        Reset-Mocks
+        $script:respostaEspecialPorId[$idQuebrado] = 'ERRO: gcloud internal server error'
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'vazio ou indeterminado'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("JSON malformado em $idQuebrado nao deve permitir mutacoes.")
+    }
+}
+
 Caso 'Provedor WIF existente com condicao divergente falha preflight' {
     Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
     $script:simularProviderDivergente = $true
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'divergente'
@@ -214,13 +342,42 @@ Caso 'Provedor WIF existente com condicao divergente falha preflight' {
     Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer com condicao divergente.'
 }
 
-Caso 'Recurso existente com dono divergente falha preflight' {
+Caso 'Provedor terceiro no pool bloqueia execucao' {
     Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularProviderExiste = $true
+    $script:simularProviderTerceiro = $true
+    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'provedor terceiro inesperado'
+    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se houver provedor terceiro no pool.'
+}
+
+Caso 'Recurso existente com ownership, estado ou SA desabilitada falha preflight' {
+    # 1. Pool com ownership divergente
+    Reset-Mocks
+    $script:simularPoolExiste = $true
     $script:simularPoolDivergente = $true
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership divergente'
-    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer com ownership divergente.'
+
+    # 2. Pool em estado incompativel
+    Reset-Mocks
+    $script:simularPoolExiste = $true
+    $script:simularPoolEstadoInvalido = $true
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'estado incompativel'
+
+    # 3. SA do pipeline desabilitada
+    Reset-Mocks
+    $script:simularSaPipeExiste = $true
+    $script:simularSaPipeDisabled = $true
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitada'
+
+    # 4. SA do pipeline com ownership divergente
+    Reset-Mocks
+    $script:simularSaPipeExiste = $true
+    $script:simularSaPipeDivergente = $true
+    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership divergente'
 }
 
 Caso 'Falha em comando interrompe execucao imediatamente (fail-closed)' {
@@ -232,17 +389,34 @@ Caso 'Falha em comando interrompe execucao imediatamente (fail-closed)' {
     Exigir ($posteriores.Count -eq 0) 'Falha ao criar o pool deve interromper o pipeline antes de criar provedor ou bindings.'
 }
 
-Caso 'Comandos gh variable set sao gerados corretamente sem chave JSON' {
+Caso 'Comandos gh variable set contem --repo fvconde/solar-ai-api para todos os 5 itens' {
     Reset-Mocks
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
     Exigir ($p.ComandosGitHub.Count -eq 5) 'Devem ser exatamente 5 comandos gh variable set.'
+    foreach ($cmd in $p.ComandosGitHub) {
+        Exigir ($cmd.Contains('--repo fvconde/solar-ai-api')) ("Comando gh nao contem --repo fvconde/solar-ai-api: " + $cmd)
+    }
     $txt = $p.ComandosGitHub -join "`n"
-    Exigir ($txt.Contains('GCP_PROJECT_ID --body "solar-ai-cloud"')) 'GCP_PROJECT_ID incorreto.'
-    Exigir ($txt.Contains('GCP_REGION --body "southamerica-east1"')) 'GCP_REGION incorreto.'
-    Exigir ($txt.Contains('GCP_ARTIFACT_REGISTRY --body "solar-s26-3bdd7f92"')) 'GCP_ARTIFACT_REGISTRY incorreto.'
-    Exigir ($txt.Contains('GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134/providers/github-df312134"')) 'GCP_WORKLOAD_IDENTITY_PROVIDER incorreto.'
-    Exigir ($txt.Contains('GCP_DEPLOY_SERVICE_ACCOUNT --body "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"')) 'GCP_DEPLOY_SERVICE_ACCOUNT incorreto.'
+    Exigir ($txt.Contains('GCP_PROJECT_ID --repo fvconde/solar-ai-api --body "solar-ai-cloud"')) 'GCP_PROJECT_ID incorreto.'
+    Exigir ($txt.Contains('GCP_REGION --repo fvconde/solar-ai-api --body "southamerica-east1"')) 'GCP_REGION incorreto.'
+    Exigir ($txt.Contains('GCP_ARTIFACT_REGISTRY --repo fvconde/solar-ai-api --body "solar-s26-3bdd7f92"')) 'GCP_ARTIFACT_REGISTRY incorreto.'
+    Exigir ($txt.Contains('GCP_WORKLOAD_IDENTITY_PROVIDER --repo fvconde/solar-ai-api --body "projects/123456789012/locations/global/workloadIdentityPools/solar-s27-df312134/providers/github-df312134"')) 'GCP_WORKLOAD_IDENTITY_PROVIDER incorreto.'
+    Exigir ($txt.Contains('GCP_DEPLOY_SERVICE_ACCOUNT --repo fvconde/solar-ai-api --body "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"')) 'GCP_DEPLOY_SERVICE_ACCOUNT incorreto.'
     Exigir (-not $txt.Contains('.json')) 'Nao pode haver mencao a chave JSON.'
+}
+
+Caso 'Teste stdout da invocacao direta sem -Executar exibe plano legivel e comandos completos' {
+    $caminhoScript = Join-Path $PSScriptRoot 'Preparo-Wif.ps1'
+    $psExe = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell.exe' }
+    $saida = & $psExe -NoProfile -File $caminhoScript -NumeroProjeto '123456789012'
+    $textoCompleto = $saida -join "`n"
+
+    Exigir ($textoCompleto.Contains('PLANO DE PREPARO WIF S-27 (MODO SECO / SOMENTE LEITURA)')) 'Cabecalho do plano ausente.'
+    Exigir ($textoCompleto.Contains('Projeto Google Cloud : solar-ai-cloud')) 'Projeto nao exibido legivelmente.'
+    Exigir ($textoCompleto.Contains('Pool WIF             : solar-s27-df312134')) 'Pool nao exibido legivelmente.'
+    Exigir ($textoCompleto.Contains('Condicao WIF         : assertion.repository == ''fvconde/solar-ai-api'' && assertion.ref == ''refs/heads/main''')) 'Condicao WIF nao exibida.'
+    Exigir ($textoCompleto.Contains('gh variable set GCP_PROJECT_ID --repo fvconde/solar-ai-api --body "solar-ai-cloud"')) 'Comando gh GCP_PROJECT_ID ausente.'
+    Exigir ($textoCompleto.Contains('gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --repo fvconde/solar-ai-api --body "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"')) 'Comando gh GCP_DEPLOY_SERVICE_ACCOUNT ausente.'
 }
 
 Write-Host ""

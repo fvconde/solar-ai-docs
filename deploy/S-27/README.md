@@ -8,27 +8,27 @@ Este documento detalha o script de preparo de nuvem para a federação de identi
 
 ## 1. Modo Plano Puro vs -Executar (Exclusivo do Usuário)
 
-O script [Preparo-Wif.ps1](file:///C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-27/solar-ai-docs/deploy/S-27/Preparo-Wif.ps1) segue estritamente a filosofia do S-26:
+O script [Preparo-Wif.ps1](Preparo-Wif.ps1) segue estritamente a filosofia operacional do S-26:
 
 1. **Plano Puro por Padrão (Dry-Run)**:
-   Sem o switch `-Executar`, o script apenas constrói e exibe a estrutura do plano, as ações planejadas e os comandos das variáveis do GitHub. **Nenhuma chamada ao Google Cloud ou ao GitHub é realizada**.
+   Sem o switch `-Executar`, o script apenas constrói e exibe na tela o plano legível com todas as ações e os comandos de variáveis do GitHub Actions. **Nenhuma chamada externa ao Google Cloud ou ao GitHub é realizada**.
 2. **Execução Exclusiva do Usuário**:
    Conforme as regras do projeto, **os agentes automatizados não realizam mutações no ambiente Google Cloud**. Apenas o operador humano (usuário) está autorizado a executar o script com `-Executar`.
 3. **Parâmetro Obrigatório `NumeroProjeto`**:
    O Google Cloud WIF exige o identificador numérico imutável do projeto (`projectNumber`) para compor os caminhos de recursos federados e `principalSet`. Esse valor deve ser fornecido explicitamente.
 
-### Como inspecionar o plano:
+### Como inspecionar o plano (plano puro, sem mutações):
+
+Abra o terminal PowerShell e execute com o caminho absoluto:
 
 ```powershell
-# Exibir o plano puro (sem mutações)
-& .\Preparo-Wif.ps1 -NumeroProjeto 123456789012
+& "C:\Users\felip\Documents\FIAP\Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS\solar\worktrees\S-27\solar-ai-docs\deploy\S-27\Preparo-Wif.ps1" -NumeroProjeto 123456789012
 ```
 
 ### Como aplicar as alterações na nuvem (somente usuário):
 
 ```powershell
-# Executar as mutações reais no Google Cloud
-& .\Preparo-Wif.ps1 -NumeroProjeto <NUMERO_REAL_DO_PROJETO> -Executar
+& "C:\Users\felip\Documents\FIAP\Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS\solar\worktrees\S-27\solar-ai-docs\deploy\S-27\Preparo-Wif.ps1" -NumeroProjeto <NUMERO_REAL_DO_PROJETO> -Executar
 ```
 
 ---
@@ -43,12 +43,13 @@ Antes de executar com `-Executar`, certifique-se de que:
    - `cloudresourcemanager.googleapis.com` (Cloud Resource Manager)
    - `artifactregistry.googleapis.com` (Artifact Registry)
    - `run.googleapis.com` (Cloud Run Admin API)
+   - `sts.googleapis.com` (Security Token Service — indispensável para a troca de tokens do WIF)
 2. A infraestrutura base do **S-26** já foi provisionada:
    - Repositório Artifact Registry: `solar-s26-3bdd7f92` na região `southamerica-east1`.
    - Serviço Cloud Run: `solar-api` na região `southamerica-east1`.
    - Conta de serviço de runtime da API: `s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com`.
 
-O script possui preflight automatizado (fail-closed) que valida a presença de todos esses itens antes de qualquer mutação.
+O script possui preflight automatizado em modelo fail-closed: qualquer falha em consultas de inventário (`list`), respostas nulas/inválidas ou ausência de pré-requisitos bloqueia imediatamente a execução antes de qualquer mutação. Recursos válidos da própria execução já existentes são identificados com segurança, permitindo reexecução idempotente sem recriação desnecessária.
 
 ---
 
@@ -63,7 +64,7 @@ O pipeline de CD do `solar-ai-api` não utiliza chaves de conta de serviço em a
   ```cel
   assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'
   ```
-  Isso garante matematicamente que apenas workflows disparados pela branch `main` do repositório `fvconde/solar-ai-api` consigam autenticar no pool.
+  Essa regra restringe estritamente a autenticação para execuções originadas da branch `main` do repositório `fvconde/solar-ai-api`.
 - **Conta de Serviço do Pipeline**: `s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com` (distinta da conta de runtime da API).
 
 ### Permissões IAM Atribuídas (Menor Privilégio Estrito):
@@ -82,21 +83,21 @@ Nenhum papel administrativo ou global em nível de projeto é concedido ao pipel
 
 ## 4. Configuração das GitHub Variables
 
-Após a execução do script pelo usuário, o script imprimirá os comandos abaixo para configuração no GitHub CLI (`gh`). **O script não executa comandos contra a API do GitHub automaticamente**:
+Após a execução do script pelo usuário, o script imprimirá os comandos abaixo para configuração no GitHub CLI (`gh`). Cada comando inclui explicitamente `--repo fvconde/solar-ai-api` para garantir que as variáveis sejam aplicadas no repositório correto, independentemente do diretório onde o terminal esteja:
 
 ```bash
-gh variable set GCP_PROJECT_ID --body "solar-ai-cloud"
-gh variable set GCP_REGION --body "southamerica-east1"
-gh variable set GCP_ARTIFACT_REGISTRY --body "solar-s26-3bdd7f92"
-gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/<NUMERO_REAL>/locations/global/workloadIdentityPools/solar-s27-df312134/providers/github-df312134"
-gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --body "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"
+gh variable set GCP_PROJECT_ID --repo fvconde/solar-ai-api --body "solar-ai-cloud"
+gh variable set GCP_REGION --repo fvconde/solar-ai-api --body "southamerica-east1"
+gh variable set GCP_ARTIFACT_REGISTRY --repo fvconde/solar-ai-api --body "solar-s26-3bdd7f92"
+gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --repo fvconde/solar-ai-api --body "projects/<NUMERO_REAL>/locations/global/workloadIdentityPools/solar-s27-df312134/providers/github-df312134"
+gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --repo fvconde/solar-ai-api --body "s27-pipeline-df312134@solar-ai-cloud.iam.gserviceaccount.com"
 ```
 
 ---
 
 ## 5. Próxima Release e Primeira Publicação Coordenada
 
-O workflow `.github/workflows/cd.yml` foi configurado para disparar na branch `main`. No entanto, **a primeira publicação real no Cloud Run não deve ocorrer isoladamente agora**:
+O workflow `.github/workflows/cd.yml` foi configurado para disparar em push na branch `main`. No entanto, **a primeira publicação real no Cloud Run não deve ocorrer isoladamente agora**:
 
 - Atualmente, as branches `main` e `develop` encontram-se alinhadas após o fechamento da `release/v1.2`.
 - O Cloud Run em produção ainda executa uma versão do agente cognitivo (`solar-ai`) anterior às evoluções do S-38.
@@ -107,16 +108,18 @@ O workflow `.github/workflows/cd.yml` foi configurado para disparar na branch `m
 
 ## 6. Testes Automatizados da Infraestrutura
 
-A integridade do plano, dos comandos gerados e das regras de fail-closed é validada localmente por [Testar-Preparo-Wif.ps1](file:///C:/Users/felip/Documents/FIAP/Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS/solar/worktrees/S-27/solar-ai-docs/deploy/S-27/Testar-Preparo-Wif.ps1).
+A integridade do plano, dos comandos gerados, da conformidade fail-closed e da idempotência é validada localmente por [Testar-Preparo-Wif.ps1](Testar-Preparo-Wif.ps1).
 
 O teste utiliza um executor falso (mock) e comprova:
 - Zero chamadas externas gcloud durante o planejamento.
-- Conformidade exata da `attribute-condition` do provedor WIF.
+- Conformidade exata e literal da `attribute-condition` do provedor WIF transmitida ao transporte nativo.
 - Escopo restrito de IAM em cada recurso correspondente.
-- Interrupção imediata (fail-closed) em caso de divergência de projeto, APIs faltantes, pré-requisitos ausentes ou falha em comandos.
+- Inclusão e validação de `sts.googleapis.com` no preflight.
+- Interrupção imediata (fail-closed com zero mutações) em caso de falha de consulta, JSON vazio ou malformado, APIs ausentes, pré-requisitos faltantes ou divergência de propriedade.
+- Reexecução limpa e idempotente pulando criações caso os recursos válidos já existam.
 - Nenhuma chamada real ao Google Cloud.
 
-Para executar os testes:
+Para executar os testes via PowerShell:
 ```powershell
-& .\Testar-Preparo-Wif.ps1
+& "C:\Users\felip\Documents\FIAP\Fase_5_PRIVACIDADE_SEGURANCA_DE_DADOS\solar\worktrees\S-27\solar-ai-docs\deploy\S-27\Testar-Preparo-Wif.ps1"
 ```
