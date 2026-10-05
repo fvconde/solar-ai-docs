@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 04/10/2026 (S-22 integrado; S-38 segue em execução, esperando a direção visual da exclusão)
+**Última atualização:** 05/10/2026 (S-22 e S-38 integrados; a janela de dois cards está encerrada)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -123,8 +123,30 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
   - conversa antiga não ganha data inventada.
 
   O recorte da fila e o último contato viraram código compartilhado (`RegrasDaFilaDeLeads` e `ConsultaDeUltimoContato`), que a fila, o expurgo e as métricas consomem juntos. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Metricas%20do%20painel%20sem%20copiar%20regras%20da%20Lia.md)
+- **02/10** — **O titular prova a posse da conversa pela sessão do navegador, decidido pelo usuário ao abrir o S-38.** A conversa anônima recebe no consentimento uma chave aleatória num cookie `HttpOnly`, e o banco guarda só o hash dela. Conversa com conta exige o login do dono. Ficaram de fora o código por e-mail ou SMS e emitir chave para conversa antiga, porque quem tivesse só o UUID poderia pegá-la. A decisão de 12/09 (canal humano) continua valendo para o que este canal não alcança. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Apagar%20conversa%20com%20posse%20da%20sessao.md)
+- **04/10** — **"Apagar conversa" apaga só a conversa escolhida, num fluxo simples, decidido pelo usuário ao aprovar o design do S-38.** O botão fica no rodapé do composer e abre um modal curto, sem caixa de seleção, e-mail ou código. O lead só sai junto quando aquela era a única conversa dele, e a ação nunca apaga outra conversa, nem da mesma conta. Isso revê a regra de 02/10 do S-38, que apagava o lead inteiro quando todas as conversas eram da conta dona. A proposta de recuperar a posse por e-mail para conversa antiga foi descartada nesta feature, e o legado sem chave fica para uma decisão de migração separada. **A versão do aviso de privacidade fica em 2026-09-11**, porque o texto novo só descreve um direito a mais; trocar a versão obrigaria todos a aceitar de novo. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Apagar%20conversa%20com%20posse%20da%20sessao.md)
 
 ## Feito
+
+- **05/10 — S-38 integrado: o titular apaga a própria conversa.** Em `develop`: `solar-ai-api` `516a025` (PR #18), `solar-ai-front` `2f59a9f` (PR #15) e `solar-ai-docs` `b8ee3da` (PR #20). `solar-ai` não foi tocado. Uma migration aditiva, `20261002234115_AdicionarChaveExclusaoConversa` (`conversas.chave_exclusao_hash`, bytea nullable), e nenhuma mudança no `/turn`. O líder foi o Codex (GPT-6.1-Sol xhigh). Os implementadores foram o Codex S-38 Impl (GPT-6.1-Sol high) no backend inicial e, desde 04/10, o Antigravity (Gemini 3.8 Flash), porque a cota do Codex chegou a 75%. Houve uma devolução do Maestro, para tirar do README um parágrafo provisório.
+
+  **O que entrou:**
+  - **API:** `DELETE /conversas/{id}/titular`. A conversa anônima prova a posse com o cookie da conversa, e a conversa com conta, com o login do dono. As respostas de recusa são 403, 404, 409 e 429. A ação apaga só a conversa provada, e o lead só quando era a única dele.
+  - **Front:** "Apagar conversa" no rodapé do composer e o modal curto, com Tab preso e foco inicial em Cancelar. Há estados para "Apagando…", falha, resultado incerto e sucesso. Depois de apagar, a sessão local é limpa e o chat volta ao início.
+  - **Páginas públicas:** a `/privacidade` mostra os dois caminhos lado a lado, e o README 5.9 descreve o canal direto. O item saiu do roadmap.
+
+  **Validação combinada em `develop`, com o S-22 já integrado:** API **270/270** com Postgres descartável, antes 237. Front **318/318 SUCCESS**, antes 265. O build passa, com aviso de bundle inicial em 528,60 kB para um orçamento de 500 kB. É aviso, não erro. No stack isolado `solar-s38`, com o nginx real:
+  - a tela apagou uma conversa, e o psql conferiu;
+  - o cookie de A contra a conversa B foi recusado com 403;
+  - na mesma conta, com duas conversas no mesmo lead, só A saiu.
+
+  Foram **3 de 4** chamadas ao Gemini.
+
+  **O que a janela ensinou:**
+  1. **A deduplicação por contato transforma "apagar o lead" em "apagar a conversa de outra pessoa".** O achado veio na revisão do plano, e a regra final resolveu o problema estreitando a ação.
+  2. **"Responda só: OK" encerra o turno do Codex.** O líder parou por horas depois de confirmar. Uma ordem de retomada não pede confirmação.
+  3. **O sistema com pouca memória mata o `maestri ask` que roda em segundo plano**, e a mensagem pode não chegar. Confira com `maestri check` antes de dar a ordem por entregue.
+  4. **Tela "simples" depende de decisão de servidor.** O modal curto só ficou honesto depois que a API passou a apagar exatamente o que o texto promete.
 
 - **04/10 — S-22 integrado: o painel tem métricas.** Em `develop`: `solar-ai-api` `e91df90` (PR #17), `solar-ai-front` `5dea926` (PR #14) e `solar-ai-docs` `cf02bc6` (PR #19). `solar-ai` não foi tocado. Sem migration, sem mudança no `/turn` e zero chamadas ao Gemini. O card rodou em dupla de Codex: o líder (GPT-6.1-Sol xhigh) avaliou cada entrega do implementador (GPT-6.1-Sol high). Houve duas devoluções internas e uma rodada de ajustes do aval visual do usuário.
 
@@ -314,7 +336,14 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **11/09 — Achado de ferramenta no S-33: preset do Maestri não diz qual modelo roda.** `maestri preset list` devolve só nomes; o modelo aparece na barra de status **depois** de recrutar. O `Antigravity` saiu como Gemini 3.8 Flash e foi trocado por Codex `gpt-5.6-sol` com esforço `high`, porque o card tinha migration e a classe de erro do `PK_Leads` virando `p_k_leads` já aconteceu uma vez aqui. Regra que fica: recrutar, ler o modelo, e só então confirmar o executor. Segundo achado: a cota de 5h do executor estourou com o trabalho pronto e sem commit — o fechamento usou o mesmo precedente do S-34, commit criado pelo orquestrador com a autoria do executor no corpo da mensagem. Terceiro: o escalonamento de permissão do Codex **resolve** o worktree somente-leitura do achado anterior, então os commits da entrega saram com a assinatura do próprio executor.
 
 ## Próximo
-**Integração concluída (04/10): o S-22 está em `develop`, e o S-38 segue em execução.**
+**Integração concluída (05/10): o S-38 está em `develop`, e a janela S-38 e S-22 está encerrada.**
+- **O que destravou:** recalculado contra o board ao vivo, o S-38 tem um único dependente. O **S-45 · Registro de etapas das conversas e avanço no painel** (Could, 8h, cortável) **está elegível**, porque o S-22 e o S-38 estão integrados. **Nenhum Must saiu do bloqueio.**
+- **Até o congelamento de 09/10:** os candidatos são S-45, S-27, S-25 e S-35, e a escolha é do usuário. O S-45 mexe nos quatro repositórios, no `/turn` e numa migration, então cabe com folga apertada. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
+- **Pendências herdadas do S-38:**
+  - a conversa antiga sem chave só tem o canal humano, e o legado precisa de uma decisão de migração;
+  - a exclusão pelo titular não foi validada no Cloud Run publicado. O deploy atual ainda roda a `develop` anterior, e republicar é passo manual do runbook do S-26.
+
+~~**Integração concluída (04/10): o S-22 está em `develop`, e o S-38 segue em execução.**~~ — **o S-38 foi integrado em 05/10**; ver a entrada acima.
 - **O que destravou:** recalculado contra o board ao vivo, o S-22 tem um único dependente. O **S-45 · Registro de etapas das conversas e avanço no painel** (Could, 8h, cortável) **continua bloqueado** pelo S-38, que também é dependência dele. **Nenhum Must saiu do bloqueio.**
 - **Estado do S-38:**
   - o backend está pronto na branch, sem PR;
@@ -434,6 +463,8 @@ O build do front ainda possui uma pendência independente de orçamento em paine
 > **Fechado em 29/09 — sessão sem expiração.** O S-44 trocou o cookie de dez anos por sessão de 30 dias renovada com o uso e entregou `DELETE /api/sessao`, que revoga a sessão no servidor. O parágrafo abaixo fica como registro do que valia entre 15/09 e 29/09.
 
 - **(Fechado em 29/09) A sessão do corretor não expira e não há como sair, e isso é escolha, não lacuna.** Aberto pelo S-42 em 15/09, por decisão explícita do usuário depois de aviso por escrito — o handoff de design trata as duas coisas como característica do produto. O cookie tem `max-age` de dez anos e o card não entregou `DELETE /painel/sessao`, então **uma sessão só morre quando a senha é redefinida**. Consequência prática: dispositivo compartilhado ou perdido mantém acesso à fila de leads indefinidamente, e não existe ação de produto para revogar sem trocar a senha do corretor. Registrado aqui porque a decisão é reversível a baixo custo — o backend já revoga sessões no servidor, falta só o endpoint e o botão — e porque, se a demo for gravada em máquina compartilhada, a consequência é real. Ver [[Decisao - Login por corretor substitui a chave unica no painel]].
+
+> **Fechado em 05/10 — canal de exclusão do titular.** O S-38 entregou o caminho próprio: na conversa, "Apagar conversa" elimina a conversa provada sem depender de ninguém. **Continua de fora:** a conversa antiga sem chave e os dados que não são exclusivos da conversa, como o cadastro e a reserva compartilhados. Esses dois seguem pelo canal humano, que continua sem fila, prazo nem responsável escrito. Os dois parágrafos abaixo ficam como registro.
 
 > **Metade fechada em 02/10 — prazo de retenção.** O S-39 entregou a rotina: o `ServicoDeExpurgo` elimina em cascata o lead cujo último contato passou de 12 meses, e o item saiu do roadmap do README. **Continua aberto o canal de exclusão:** o processo humano de atender o pedido do titular segue sem fila, prazo nem responsável escrito, e o S-38 continua sendo o card que o fecha. O parágrafo da seção 5.3 do README que ainda negava a rotina foi corrigido no mesmo dia; a política de retenção não mudou. O parágrafo abaixo fica como registro do que valia até 02/10.
 

@@ -45,7 +45,7 @@ navegador ──HTTP──> solar-ai-front ──/conversas/{id}/mensagens, /api
 
 ## Onde mora o estado
 
-Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot. Além das seis, `sessoes` e `recuperacoes_senha` vêm do S-42. A última migration é `20260923030409_S44DedupePorConta`, do S-44. **`corretores` guarda todas as contas**, inclusive clientes (`perfil = cliente`, `status_corretor` nulo), e `conversas.conta_id` aponta para ela com `ON DELETE CASCADE`. A deduplicação de lead por telefone e e-mail vale dentro do mesmo dono, não mais no banco inteiro.
+Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conversas`, `mensagens`, `corretores`, `encaminhamentos` e `slots` —, com `ON DELETE CASCADE` de `conversas`, `mensagens` e `encaminhamentos` a partir de `leads`. `slots.lead_id` é nulo enquanto livre e volta a nulo se o lead for eliminado; `mensagens.slot_id` preserva o vínculo do evento enquanto o slot existir. Schema nunca é DDL na mão; a API aplica as migrations pendentes no boot. Além das seis, `sessoes` e `recuperacoes_senha` vêm do S-42. A última migration é `20261002234115_AdicionarChaveExclusaoConversa`, do S-38, que acrescenta `conversas.chave_exclusao_hash` (bytea, nullable). **`corretores` guarda todas as contas**, inclusive clientes (`perfil = cliente`, `status_corretor` nulo), e `conversas.conta_id` aponta para ela com `ON DELETE CASCADE`. A deduplicação de lead por telefone e e-mail vale dentro do mesmo dono, não mais no banco inteiro.
 
 `corretores` é a única tabela **semeada**: 5 linhas literais dentro da própria migration, como os 80 imóveis são semeados por JSON. Seed não mora em `HasData` — coleção primitiva ali faz o EF ver o modelo mudando a cada build e o boot cai, com o log culpando o banco (`Solar Brain/20 - Bugs/Bug - HasData com colecao primitiva derruba o boot.md`).
 
@@ -146,6 +146,13 @@ Nenhum log, em nenhum dos três serviços, grava dado pessoal em texto claro. No
 O free tier da Gemini usa o conteúdo enviado para treino, e o desenvolvimento roda nele. Enquanto não houver tier pago confirmado, o mascaramento do S-34 é o **único controle real** sobre o que sai daqui. **Desde 11/09 o texto de consentimento do S-33 descreve o regime alvo**, o tier pago, e não o de desenvolvimento: o aviso curto e a página `/privacidade` afirmam, de forma alinhada, que as mensagens não são usadas pelo provedor para treinar ou melhorar modelos. Isso é decisão de produto registrada, não descrição do estado atual — adotar o tier pago é pré-condição para a declaração ser verdadeira em uso real. O README do hub, entregue pelo S-30, usa essas mesmas palavras; os entregáveis não divergem.
 
 **Retenção e eliminação moram no README do hub, e só lá (S-30).** O prazo declarado é de 12 meses contados do último contato, e o pedido de eliminação do titular chega pelo corretor ou pelo atendimento humano, que aciona os endpoints protegidos por `X-Chave-Privacidade`. Aqui fica apenas o fato técnico: **desde o S-39 o prazo é cumprido por rotina** — ver a seção do expurgo abaixo — e o pedido do titular continua sendo atendido sob demanda. Citar daqui, nunca reescrever: texto de conformidade escrito em dois lugares diverge em um.
+
+**Exclusão pelo titular (S-38).** `DELETE /conversas/{id}/titular` é uma porta separada da administrativa. O cabeçalho administrativo não autoriza essa porta, e o cookie do titular não autoriza a administrativa.
+- **Prova de posse:** a conversa anônima prova com o cookie `HttpOnly` emitido no consentimento, com `Path=/conversas/{id}`. O banco guarda só o hash, em `conversas.chave_exclusao_hash`. A conversa com conta prova com o login do dono.
+- **O que apaga:** a conversa provada, as mensagens e os encaminhamentos dela, com `ExcluirApenasConversaAsync`. O lead só sai, pela cascata do S-29, quando aquela era a única conversa dele. Nunca sai outra conversa, nem da mesma conta, porque a deduplicação por contato pode juntar conversas de pessoas diferentes no mesmo lead.
+- **Conversa antiga:** sem hash, recebe 403.
+
+O porquê está nas linhas de 02/10 e 04/10 do `ESTADO.md`.
 
 ## O expurgo por retenção (S-39)
 
