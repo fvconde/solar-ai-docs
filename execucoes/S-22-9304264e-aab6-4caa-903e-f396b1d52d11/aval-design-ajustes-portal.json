@@ -1,0 +1,634 @@
+[
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "tema": "claro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver mais métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 20
+    },
+    "faixa": {
+      "altura": 270.9375,
+      "percentual": 30.104166666666664,
+      "topoRolagem": 0,
+      "rolagens": []
+    },
+    "larguraCards": [
+      331,
+      331,
+      331,
+      331
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "tema": "claro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 20
+    },
+    "faixa": {
+      "altura": 360,
+      "percentual": 40,
+      "topoRolagem": 0,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      328.5,
+      328.5,
+      328.5,
+      328.5
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "tema": "escuro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver mais métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 20
+    },
+    "faixa": {
+      "altura": 270.9375,
+      "percentual": 30.104166666666664,
+      "topoRolagem": 0,
+      "rolagens": []
+    },
+    "larguraCards": [
+      331,
+      331,
+      331,
+      331
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "tema": "escuro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 20
+    },
+    "faixa": {
+      "altura": 360,
+      "percentual": 40,
+      "topoRolagem": 0,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      328.5,
+      328.5,
+      328.5,
+      328.5
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      861,
+      600
+    ],
+    "tema": "claro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver mais métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 27.1875
+    },
+    "faixa": {
+      "altura": 240,
+      "percentual": 40,
+      "topoRolagem": 0,
+      "rolagens": [
+        "metricas"
+      ]
+    },
+    "larguraCards": [
+      249,
+      249,
+      249,
+      249
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      861,
+      600
+    ],
+    "tema": "claro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 27.1875
+    },
+    "faixa": {
+      "altura": 240,
+      "percentual": 40,
+      "topoRolagem": 0,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      249,
+      249,
+      249,
+      249
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      861,
+      600
+    ],
+    "tema": "escuro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver mais métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 27.1875
+    },
+    "faixa": {
+      "altura": 240,
+      "percentual": 40,
+      "topoRolagem": 0,
+      "rolagens": [
+        "metricas"
+      ]
+    },
+    "larguraCards": [
+      249,
+      249,
+      249,
+      249
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      861,
+      600
+    ],
+    "tema": "escuro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 36,
+      "margemInferior": 8,
+      "intervaloAteCards": 27.1875
+    },
+    "faixa": {
+      "altura": 240,
+      "percentual": 40,
+      "topoRolagem": 0,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      249,
+      249,
+      249,
+      249
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "tema": "claro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver todas as métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 246.078125,
+      "percentual": 29.156175947867297,
+      "topoRolagem": 0,
+      "rolagens": []
+    },
+    "larguraCards": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "tema": "claro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 337.59375,
+      "percentual": 39.99925947867299,
+      "topoRolagem": 1458,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      348,
+      348,
+      348,
+      348
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "tema": "escuro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver todas as métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 246.078125,
+      "percentual": 29.156175947867297,
+      "topoRolagem": 0,
+      "rolagens": []
+    },
+    "larguraCards": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      844
+    ],
+    "tema": "escuro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 337.59375,
+      "percentual": 39.99925947867299,
+      "topoRolagem": 1503,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      348,
+      348,
+      348,
+      348
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      568
+    ],
+    "tema": "claro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver todas as métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 227.1875,
+      "percentual": 39.99779929577465,
+      "topoRolagem": 19,
+      "rolagens": [
+        "metricas"
+      ]
+    },
+    "larguraCards": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      568
+    ],
+    "tema": "claro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 227.1875,
+      "percentual": 39.99779929577465,
+      "topoRolagem": 1544,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      348,
+      348,
+      348,
+      348
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      568
+    ],
+    "tema": "escuro",
+    "expandido": "false",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver todas as métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 227.1875,
+      "percentual": 39.99779929577465,
+      "topoRolagem": 19,
+      "rolagens": [
+        "metricas"
+      ]
+    },
+    "larguraCards": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "filaVisivel": true
+  },
+  {
+    "viewport": [
+      390,
+      568
+    ],
+    "tema": "escuro",
+    "expandido": "true",
+    "abas": [
+      "Visão geral",
+      "Minha fila",
+      "Sem corretor elegível",
+      "Novos corretores1 pendente1"
+    ],
+    "rotulo": "Ver menos métricas",
+    "seta": {
+      "largura": 14,
+      "altura": 14,
+      "diferencaCentros": 0
+    },
+    "botao": {
+      "altura": 44,
+      "margemInferior": 8,
+      "intervaloAteCards": null
+    },
+    "faixa": {
+      "altura": 227.1875,
+      "percentual": 39.99779929577465,
+      "topoRolagem": 1517,
+      "rolagens": [
+        "metricas expandida"
+      ]
+    },
+    "larguraCards": [
+      348,
+      348,
+      348,
+      348
+    ],
+    "filaVisivel": true
+  }
+]

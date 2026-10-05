@@ -1,0 +1,54 @@
+{
+  "perfil": "supervisor",
+  "atualizadoEm": "2026-10-03T23:42:16.8394836-03:00",
+  "viewport": [
+    1440,
+    900
+  ],
+  "tema": "escuro",
+  "faixa": {
+    "altura": 250.9375,
+    "percentual": 27.881944444444446,
+    "top": 165
+  },
+  "fila": {
+    "altura": 484.0625,
+    "top": 415.9375,
+    "visivel": true
+  },
+  "rolaveis": [],
+  "botaoAltura": 36,
+  "cards": [
+    331,
+    331,
+    331,
+    331
+  ],
+  "verificacoes": 24,
+  "campos": [
+    "iniciadas",
+    "confirmadas",
+    "reservas7",
+    "intencoes",
+    "equipePresente",
+    "atribuicoes",
+    "siglas",
+    "aguardando",
+    "pendentes",
+    "scoreFaixas",
+    "scoreTotal",
+    "scorePercentuais",
+    "semAvaliacao",
+    "imoveis",
+    "regioes",
+    "coberturaRegioes",
+    "proximosHorarios",
+    "consentimentoPercentual",
+    "consentimentoContagem",
+    "vencimentoContagem",
+    "retencaoConfigurada",
+    "PIILeadAusente",
+    "NomesCorretoresSoAria",
+    "NumerosValidos"
+  ]
+}

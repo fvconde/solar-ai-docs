@@ -1,0 +1,191 @@
+{
+  "Execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238",
+  "Projeto": "solar-ai-cloud",
+  "Regiao": "southamerica-east1",
+  "PowerShell": "7.6.6",
+  "Docker": "29.6.2",
+  "Autorizacao": "Custo aprovado pelo usuario via Maestro; Recursos e Imagens somente",
+  "Preflight": {
+    "ProjetoConferido": true,
+    "ContaConfiguradaSemExibirIdentidade": true,
+    "Apis": 5,
+    "InventariosCompletos": 5,
+    "NomesAusentes": 15,
+    "AntesDeRecursos": true
+  },
+  "Worktrees": [
+    {
+      "Repositorio": "solar-ai-api",
+      "Sha": "87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+      "LimpoAntesDoRelatorio": true
+    },
+    {
+      "Repositorio": "solar-ai-front",
+      "Sha": "af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+      "LimpoAntesDoRelatorio": true
+    },
+    {
+      "Repositorio": "solar-ai",
+      "Sha": "56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+      "LimpoAntesDoRelatorio": true
+    },
+    {
+      "Repositorio": "solar-ai-docs",
+      "Sha": "0db11a8d66e8e7260a40dbe4de90e79689737ab8",
+      "LimpoAntesDoRelatorio": true
+    }
+  ],
+  "Provisionamento": {
+    "Etapa": "Recursos",
+    "InicioUtc": "2026-10-01T23:34:58.4855988Z",
+    "FimUtc": "2026-10-01T23:46:44.3549768Z",
+    "Estado": "Concluida",
+    "OperacaoFalha": null,
+    "TipoFalha": null
+  },
+  "MetadadosRecursos": {
+    "Utc": "2026-10-01T23:50:56.9977465Z",
+    "Ownership": 12,
+    "CloudRunAusentes": 3,
+    "Registro": "solar-s26-3bdd7f92",
+    "Imutavel": true,
+    "SqlEstado": "RUNNABLE",
+    "SqlTier": "db-f1-micro",
+    "Banco": "solar",
+    "Contas": 3,
+    "Segredos": [
+      {
+        "Nome": "solar-postgres-connection-string",
+        "Versoes": 0,
+        "Grant": "Api"
+      },
+      {
+        "Nome": "solar-smtp-usuario",
+        "Versoes": 0,
+        "Grant": "Api"
+      },
+      {
+        "Nome": "solar-smtp-senha-app",
+        "Versoes": 0,
+        "Grant": "Api"
+      },
+      {
+        "Nome": "solar-smtp-remetente",
+        "Versoes": 0,
+        "Grant": "Api"
+      },
+      {
+        "Nome": "solar-semente-senha-supervisor",
+        "Versoes": 0,
+        "Grant": "Api"
+      },
+      {
+        "Nome": "solar-chave-privacidade",
+        "Versoes": 0,
+        "Grant": "Api"
+      },
+      {
+        "Nome": "solar-gemini-api-key",
+        "Versoes": 0,
+        "Grant": "Agente"
+      }
+    ],
+    "Grants": 8,
+    "PlanoSQLConferido": true
+  },
+  "OperacoesSQL": [
+    {
+      "Nome": "fb94e32f-54ce-4bcd-87c6-05f700000030",
+      "Tipo": "CREATE_DATABASE",
+      "Estado": "DONE",
+      "Inicio": "2026-10-01T23:45:55.291Z",
+      "Fim": "2026-10-01T23:45:59.739Z",
+      "Erros": 0
+    },
+    {
+      "Nome": "8311111a-8c1a-48d1-875b-2e1f00000030",
+      "Tipo": "CREATE",
+      "Estado": "DONE",
+      "Inicio": "2026-10-01T23:35:30.513Z",
+      "Fim": "2026-10-01T23:45:44.407Z",
+      "Erros": 0
+    }
+  ],
+  "PlanoSQL": {
+    "name": "solar-s26-3bdd7f92",
+    "region": "southamerica-east1",
+    "databaseVersion": "POSTGRES_16",
+    "settings": {
+      "tier": "db-f1-micro",
+      "edition": "ENTERPRISE",
+      "availabilityType": "ZONAL",
+      "dataDiskType": "PD_SSD",
+      "dataDiskSizeGb": "10",
+      "storageAutoResize": false,
+      "userLabels": {
+        "s26-execucao": "3bdd7f92-dda2-492e-a399-2e209a1e6238"
+      },
+      "ipConfiguration": {
+        "ipv4Enabled": true,
+        "authorizedNetworks": []
+      },
+      "connectorEnforcement": "REQUIRED",
+      "backupConfiguration": {
+        "location": "southamerica-east1",
+        "startTime": "03:00",
+        "enabled": true
+      },
+      "deletionProtectionEnabled": true
+    }
+  },
+  "BuildPush": {
+    "Etapa": "Imagens",
+    "InicioUtc": "2026-10-01T23:51:28.4051328Z",
+    "FimUtc": "2026-10-01T23:53:03.7033598Z",
+    "Estado": "Concluida",
+    "OperacaoFalha": null,
+    "TipoFalha": null
+  },
+  "MetadadosImagens": {
+    "Utc": "2026-10-01T23:53:37.8709323Z",
+    "Imagens": [
+      {
+        "Servico": "Api",
+        "Sha": "87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+        "Tag": "southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-api:87c491bf88d7ba94be284cdf08ab1ae4efa17724",
+        "Digest": "sha256:04e395ad894c3732a0c1abecacd3f462b20f6ca1022843e8726db35d60ecf05a",
+        "Referencia": "southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-api@sha256:04e395ad894c3732a0c1abecacd3f462b20f6ca1022843e8726db35d60ecf05a",
+        "ImagemLocal": "sha256:04e395ad894c3732a0c1abecacd3f462b20f6ca1022843e8726db35d60ecf05a",
+        "Plataforma": "linux/amd64",
+        "Usuario": "1654"
+      },
+      {
+        "Servico": "Agente",
+        "Sha": "56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+        "Tag": "southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-agente:56ff8e09e616be2a6c2b5bf59cd08d7d1b0662b8",
+        "Digest": "sha256:9b4192d0b3a4068f639898f8d2b5bf17c288abfc8202020ddc700c006ce14c96",
+        "Referencia": "southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-agente@sha256:9b4192d0b3a4068f639898f8d2b5bf17c288abfc8202020ddc700c006ce14c96",
+        "ImagemLocal": "sha256:9b4192d0b3a4068f639898f8d2b5bf17c288abfc8202020ddc700c006ce14c96",
+        "Plataforma": "linux/amd64",
+        "Usuario": "solar"
+      },
+      {
+        "Servico": "Front",
+        "Sha": "af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+        "Tag": "southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-front:af366c0672c625b9fbe01cfe1832d343f4a6f6d3",
+        "Digest": "sha256:16347dc45c22f638df38c3920c2ba45eb4dc3f320fb71b0fd9bc8343ba032ffe",
+        "Referencia": "southamerica-east1-docker.pkg.dev/solar-ai-cloud/solar-s26-3bdd7f92/solar-front@sha256:16347dc45c22f638df38c3920c2ba45eb4dc3f320fb71b0fd9bc8343ba032ffe",
+        "ImagemLocal": "sha256:16347dc45c22f638df38c3920c2ba45eb4dc3f320fb71b0fd9bc8343ba032ffe",
+        "Plataforma": "linux/amd64",
+        "Usuario": "nginx"
+      }
+    ],
+    "ShasLimpos": true,
+    "DigestsConferidos": 3
+  },
+  "SegredosExecutado": false,
+  "DeployExecutado": false,
+  "Gemini": 0,
+  "SMTP": 0,
+  "UtcRegistro": "2026-10-01T23:54:57.1962101Z"
+}

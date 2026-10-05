@@ -64,6 +64,7 @@ Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o c
 - [[Bug - turno real vira 504 sob cota por minuto]] — a suíte satura o minuto e a conversa seguinte estoura o timeout; risco direto para a gravação do vídeo
 - [[Bug - falha ao retomar apagava a conversa]] — um `catch` vazio no front transformava falha de rede em perda permanente de conversa, sem sintoma
 - [[Bug - HasData com colecao primitiva derruba o boot]] — o log do boot dizia "Banco indisponivel" e o banco estava de pé; o erro era do modelo do EF
+- [[Bug - redistribuicao reescolhia o corretor que saia]] — o corretor que excluía a conta recebia a conversa de volta, e ela ficava sem ninguém (S-46)
 
 ## Gestão
 
@@ -84,3 +85,8 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 ## Decisão recente
 
 - [[Decisao - Prefixo api separa painel do SPA]] — o namespace da API do painel não disputa mais a rota de página /painel (S-43).
+- [[Decisao - Login unico com tres papeis e sessao de 30 dias]] — cliente, corretor e supervisor entram pela mesma porta; a sessão expira e tem saída (S-44).
+- [[Decisao - Front publico e API privada por IAM no Cloud Run]] — só o front é público; o IP do cliente chega à API num header que o nginx sobrescreve (S-26).
+- [[Decisao - Metricas do painel sem copiar regras da Lia]] — métricas do painel na API com uma regra em um lugar; o registro de etapas ficou para o S-45 (S-22).
+- [[Decisao - Apagar conversa com posse da sessao]] — o titular apaga só a conversa escolhida, provando a posse pela sessão (S-38).
+- [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]] — cinco marcos gravados uma vez por conversa e o início do registro no próprio banco; essenciais vêm da Lia pelo `/turn` (S-45).

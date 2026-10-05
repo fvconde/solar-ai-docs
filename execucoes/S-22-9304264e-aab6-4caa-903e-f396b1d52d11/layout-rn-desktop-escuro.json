@@ -1,0 +1,57 @@
+{
+  "perfil": "corretor",
+  "atualizadoEm": "2026-10-03T23:38:45.6443611-03:00",
+  "viewport": [
+    1440,
+    900
+  ],
+  "tema": "escuro",
+  "faixa": {
+    "altura": 360,
+    "percentual": 40,
+    "top": 108.1875
+  },
+  "fila": {
+    "altura": 368.8125,
+    "top": 531.1875,
+    "visivel": true
+  },
+  "rolaveis": [
+    "metricas expandida"
+  ],
+  "botaoAltura": 36,
+  "cards": [
+    442,
+    442,
+    442
+  ],
+  "verificacoes": 20,
+  "campos": [
+    "iniciadas",
+    "confirmadas",
+    "reservas7",
+    "intencoes",
+    "equipePresente",
+    "scoreFaixas",
+    "scoreTotal",
+    "scorePercentuais",
+    "semAvaliacao",
+    "imoveis",
+    "regioes",
+    "coberturaRegioes",
+    "proximosHorarios",
+    "consentimentoPercentual",
+    "consentimentoContagem",
+    "vencimentoContagem",
+    "retencaoConfigurada",
+    "PIILeadAusente",
+    "NomesCorretoresSoAria",
+    "NumerosValidos"
+  ],
+  "ultimoCard": {
+    "acessivel": true,
+    "scrollTop": 270,
+    "mioloScroll": 0,
+    "extrasScroll": 0
+  }
+}
