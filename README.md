@@ -191,7 +191,7 @@ Esta seção constitui a **fonte única da política oficial de retenção de da
 
 - **Prazo Oficial de Retenção**: Os dados pessoais do lead (perfil, preferências e contatos) e todo o histórico de mensagens e conversas vinculadas são mantidos pelo período de **12 (doze) meses contados da data do último contato** do titular com a plataforma ou com o corretor parceiro.
 - **Descarte e Eliminação**: Findo o prazo de doze meses sem novas interações, os dados cadastrais do lead, as mensagens e os registros de atendimento são definitiva e irreversivelmente eliminados.
-- **Operação no Tempo Presente**: Em conformidade com o estado real do código, o prazo acima é **cumprido por rotina automática**: um serviço em background da API varre diariamente os leads e elimina aqueles cujo último contato ultrapassou o prazo, conforme detalhado em [Implementação do expurgo automático](#implementação-do-expurgo-automático). O pedido de eliminação feito pelo titular antes do fim do prazo continua sendo atendido sob demanda, através dos endpoints administrativos da API.
+- **Operação no Tempo Presente**: Em conformidade com o estado real do código, o prazo acima é **cumprido por rotina automática**: um serviço em background da API varre diariamente os leads e elimina aqueles cujo último contato ultrapassou o prazo, conforme detalhado em [Implementação do expurgo automático](#implementação-do-expurgo-automático). O pedido de eliminação feito pelo titular antes do fim do prazo é atendido sob demanda pelos canais humano e direto na API, nos escopos descritos na [seção 5.9](#59-direito-de-eliminação-do-titular-lgpd-art-18-vi).
 
 ### 5.4 Compartilhamento de Dados Pessoais
 Os dados pessoais coletados são compartilhados estritamente com os seguintes destinatários:
@@ -229,12 +229,32 @@ Em conformidade com a decisão técnica de produto, foram aceitas duas limitaç�
 ### 5.9 Direito de Eliminação do Titular (LGPD Art. 18, VI)
 Esta seção estabelece o procedimento operacional que dá lastro à declaração expressa na página `/privacidade` (*"Você pode solicitar a eliminação dos dados associados ao seu lead"*):
 
-- **Canal de Recebimento do Pedido**: O pedido de eliminação formulado pelo titular é recebido pelo **corretor parceiro ou pelo atendimento humano**, atores que já integram o fluxo operacional do sistema desde o S-37.
+- **Canal Humano de Recebimento do Pedido**: O pedido de eliminação formulado pelo titular é recebido pelo **corretor parceiro ou pelo atendimento humano**, atores que já integram o fluxo operacional do sistema desde o S-37.
 - **Execução Administrativa**: Ao receber a solicitação legítima do titular, o operador aciona a exclusão diretamente nos endpoints protegidos da API, autenticando-se via cabeçalho administrativo (`X-Chave-Privacidade` / `X-Admin-Key` / `Bearer`). Não há canal de e-mail dedicado, formulário público ou encarregado de dados (DPO) nomeado nesta fase.
 - **Mecanismos Técnicos de Eliminação no Banco**:
   - `DELETE /leads/{id}`: Elimina definitivamente o lead e aciona a remoção em cascata (`ON DELETE CASCADE`) de todas as conversas, mensagens e encaminhamentos vinculados no PostgreSQL. Eventuais horários agendados têm o vínculo desfeito (`slots.lead_id` volta a `NULL`).
   - `DELETE /conversas/{id}?excluirLead=true`: Localiza o lead proprietário da conversa e executa a exclusão integral do titular e de todo o seu histórico em cascata.
   - `DELETE /conversas/{id}?excluirLead=false`: Remove exclusivamente a conversa indicada e suas mensagens, mantendo o cadastro do lead preservado para eventuais outras interações.
+
+**Canal direto pelo titular na conversa (S-38)**: No chat com a Lia, o titular aciona o botão **Apagar conversa** no rodapé do campo de mensagem, confirmando a ação em um modal curto com as opções Cancelar e Apagar conversa. A ação aciona o endpoint `DELETE /conversas/{id}/titular`, separado dos endpoints administrativos acima, executando o apagamento definitivo e irreversível exclusivamente da conversa escolhida e de suas mensagens, sem prometer apagar o cadastro ou outras conversas. A política de retenção permanece descrita exclusivamente na [seção 5.3](#53-política-de-retenção-de-dados-fonte-única).
+
+- **Conversa anônima**: Somente no nascimento bem-sucedido da conversa, em `POST /conversas/{id}/consentimento`, a API emite uma chave secreta de 32 bytes no cookie de sessão `solar.chave_exclusao`, com `HttpOnly`, `SameSite=Strict`, `Secure` fora de `Development` e `Path=/conversas/{id}`. O JavaScript não lê a chave. Apenas seu hash SHA-256 é persistido no Postgres e sobrevive ao reinício da API. O cookie válido daquela conversa é a prova exigida; o id isolado ou um cabeçalho administrativo não autorizam este canal.
+- **Conversa com conta**: Exige o login do dono pela autenticação existente (`POST /api/sessoes`). A chave anônima não substitui o login nem autoriza outra conta.
+- **Limitações de posse**: Repetir o consentimento de uma conversa existente não emite nova chave nem rotaciona o hash. Para conversas anônimas sem chave ou sem cookie válido, inclusive as legadas, o pedido segue pelo canal humano. Em navegador compartilhado, quem estiver na mesma sessão do navegador também consegue solicitar a exclusão com essa prova.
+- **Escopo `lead_e_vinculos`**: Ocorre somente quando a conversa provada é a única conversa vinculada ao lead. Elimina definitivamente esse lead e a sua única conversa, com suas respectivas mensagens e encaminhamentos; eventuais horários agendados permanecem na agenda com o vínculo `slots.lead_id` desfeito (`NULL`). Não há eliminação em cascata de múltiplas conversas, mesmo que pertençam à mesma conta.
+- **Escopo `apenas_conversa`**: Quando o lead possui outras conversas vinculadas, elimina exclusivamente a conversa provada, suas mensagens e seus encaminhamentos. As demais conversas e o cadastro do lead permanecem preservados, incluindo eventuais reservas do lead em slots de agendamento; essa regra se aplica mesmo quando todas as conversas pertencem à mesma conta autenticada. A resposta da API informa apenas o escopo executado, sem expor identificadores, contagens ou dados de outras conversas. O canal humano não é orientado como etapa obrigatória para dados restantes na resposta, continuando disponível como alternativa ao botão, destino para conversas antigas sem chave ou cookie válido e canal para solicitações sobre outros dados cadastrais.
+- **Confirmação e recusas**: O cookie da conversa só é removido após exclusão bem-sucedida, com o mesmo caminho e atributos. As respostas do canal são:
+
+  | HTTP | Significado |
+  | --- | --- |
+  | `200` | Exclusão concluída no escopo informado. |
+  | `403` | Prova de posse ou login do dono insuficiente; pedido recusado. |
+  | `404` | Conversa ausente. |
+  | `409` | A conversa mudou de lead, o conjunto de vínculos mudou ou houve conflito transacional; é necessária uma nova tentativa. |
+  | `429` | Limite de solicitações de exclusão atingido. |
+
+- **Limpeza da sessão local**: Após sucesso em ambos os escopos, o cliente limpa a sessão local da conversa: o usuário anônimo volta ao aceite, o usuário autenticado continua conectado preservando outras conversas e a próxima conversa é iniciada com novo identificador sem dados anteriores.
+- **Falha de transporte e conferência**: Em falha de transporte, o `GET` confere com as mesmas credenciais de cookie ou sessão; o `GET` `404` sozinho mantém o resultado incerto, e uma nova tentativa de `DELETE` respondida com `200` ou `404` confirma o sucesso.
 
 ### 5.10 Regime Alvo (Tier Pago) vs. Desenvolvimento
 - **Regime Declarado**: Tanto o aviso curto de consentimento na abertura quanto a página `/privacidade` afirmam expressamente que as mensagens dos usuários não são utilizadas pelo provedor de inteligência artificial para treinar ou aprimorar modelos.
@@ -287,8 +307,6 @@ Recursos avaliados e deliberadamente postergados ou cortados do escopo da POC, c
   - *Motivo do corte*: Custo de implementação elevado (15h+) e complexidade desproporcional de transcrição/latência, sem agregação de valor direta aos 11 requisitos centrais do enunciado.
 - **Observabilidade Completa Distribuída**:
   - *Motivo do corte*: O setup de coletores OpenTelemetry, Prometheus e Jaeger consumiria esforço crítico de entrega. Foi mantido logging estruturado e sanitizado com endpoints de `/health` padronizados.
-- **Portal Self-Service de Exclusão pelo Titular (Card Novo)**:
-  - *Motivo do corte*: Decidido pelo usuário como card novo independente a ser planejado para o backlog de produto. Foi mantido fora desta janela por exigir código de aplicação e componentes de frontend novos, o que violaria o escopo estritamente textual e documental deste card (S-30). O atendimento ao direito do titular no tempo presente é assegurado via canal humano (corretor/atendimento) e endpoints administrativos da API.
 - **Componentes de Machine Learning Clássico**:
   - *Motivo do corte*: O scoring e a qualificação são plenamente resolvidos pela régua determinística e pelo extrator de saída estruturada do LLM. Treinar um classificador supervisionado sobre base sintética consumiria horas sem gerar ganho prático mensurável.
 
