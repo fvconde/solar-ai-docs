@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 05/10/2026 (S-46 integrado; a janela da redistribuição está encerrada)
+**Última atualização:** 05/10/2026 (S-27 integrado; a API tem CI e CD pela `main`, que ainda não estão ativos na nuvem)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -126,8 +126,20 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **02/10** — **O titular prova a posse da conversa pela sessão do navegador, decidido pelo usuário ao abrir o S-38.** A conversa anônima recebe no consentimento uma chave aleatória num cookie `HttpOnly`, e o banco guarda só o hash dela. Conversa com conta exige o login do dono. Ficaram de fora o código por e-mail ou SMS e emitir chave para conversa antiga, porque quem tivesse só o UUID poderia pegá-la. A decisão de 12/09 (canal humano) continua valendo para o que este canal não alcança. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Apagar%20conversa%20com%20posse%20da%20sessao.md)
 - **04/10** — **"Apagar conversa" apaga só a conversa escolhida, num fluxo simples, decidido pelo usuário ao aprovar o design do S-38.** O botão fica no rodapé do composer e abre um modal curto, sem caixa de seleção, e-mail ou código. O lead só sai junto quando aquela era a única conversa dele, e a ação nunca apaga outra conversa, nem da mesma conta. Isso revê a regra de 02/10 do S-38, que apagava o lead inteiro quando todas as conversas eram da conta dona. A proposta de recuperar a posse por e-mail para conversa antiga foi descartada nesta feature, e o legado sem chave fica para uma decisão de migração separada. **A versão do aviso de privacidade fica em 2026-09-11**, porque o texto novo só descreve um direito a mais; trocar a versão obrigaria todos a aceitar de novo. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Apagar%20conversa%20com%20posse%20da%20sessao.md)
 - **05/10** — **O avanço das conversas lê marcos imutáveis, e o início do registro é gravado pela própria migration (S-45).** Cinco datas em `conversas` são gravadas uma vez e nunca reescritas: intenção, dados essenciais, encaminhamento, corretor atribuído e primeiro follow-up. O começo do registro, `registro_metricas.historico_desde`, é o `now()` do banco quando a migration roda, e não um valor de configuração. Assim, cada ambiente guarda o próprio começo sem segredo nem passo manual no deploy, e nenhuma conversa antiga ganha data inventada. Os dados essenciais chegam pela **terceira emenda do `/turn`**: o campo `essenciaisCompletos`, calculado por `lacunas_essenciais`, nunca pelo modelo. Com ele, o espelho foi a 7 tipos e 46 campos. Custo aceito: o histórico começa vazio em cada deploy, e agente e API precisam subir juntos. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Marcos%20imutaveis%20e%20inicio%20do%20registro%20gravado%20pela%20migration.md)
+- **05/10** — **Quem publica a API é o push na `main`, e a `develop` só testa (S-27), decidido pelo usuário.** O CI roda a suíte inteira contra um Postgres 16 do próprio GitHub em todo PR e em todo push na `develop`. O CD só roda em push na `main`, e o job de deploy depende do de testes. O GitHub entra no Google por Workload Identity Federation, sem chave guardada, e o provedor só aceita `fvconde/solar-ai-api` na `refs/heads/main`. O deploy troca **só** a imagem e o `SOLAR_VERSION`, e o resto da configuração de produção continua sendo a do S-26. Motivo: um merge do dia a dia não pode mudar sozinho a demo que está no ar. Custo aceito: a publicação só acontece quando o usuário promove uma release, e a primeira delas precisa subir o agente junto, pelo S-26. · [contexto](Solar%20Brain/50%20-%20Decisoes/Decisao%20-%20Publicacao%20da%20API%20pelo%20push%20na%20main.md)
 
 ## Feito
+
+- **05/10 — S-27 integrado: o `solar-ai-api` tem CI e CD no GitHub Actions, mas o CD ainda não está ativo.** Em `develop`: `solar-ai-api` `e7dbadf` (PR #23) e `solar-ai-docs` `8531138` (PR #24). Executado pela dupla `Codex S-27` (GPT-6.1-Sol high, líder) e `Antigravity S-27` (Gemini 3.8 Flash high, implementador).
+  - **O que entrou:**
+    - `ci.yml` (PR para `develop`/`main` e push na `develop`);
+    - `cd.yml` (push na `main`; testes, depois imagem `linux/amd64` com a tag do SHA completo, e `gcloud run deploy solar-api --image --update-env-vars SOLAR_VERSION`);
+    - o badge no README;
+    - `deploy/S-27/Preparo-Wif.ps1`, que mostra o plano por padrão e só altera a nuvem com `-Executar`, e foi testado com executor falso (23/23 no PS 7 e no 5.1).
+  - **Guardas do CD:** `concurrency` com `cancel-in-progress: false`, e um commit que deixou de ser o topo da `main` termina sem publicar.
+  - **Provas:** o PR descartável #22, com um teste quebrado de propósito, ficou vermelho e foi fechado sem merge. O PR real ficou verde, com 318/318.
+  - **A lição do teste instável:** `AutenticacaoPainelPostgresTeste.Postgres_reset_consume_token_...` falhou nas 3 tentativas no GitHub, e localmente passava. A causa foi diagnosticada em vez de virar retry. O `RelogioFixo` dá o mesmo `CriadaEm` às duas sessões, o `OrderBy` empatava, e o Postgres devolve o empate em qualquer ordem. O usuário autorizou corrigir só as asserções, que agora identificam a sessão pelo id. **A "instabilidade" registrada no S-46 era ordenação indefinida, não acaso.** · [contexto](Solar%20Brain/20%20-%20Bugs/Bug%20-%20teste%20de%20reset%20ordenava%20sessoes%20por%20horario%20empatado.md)
+  - **Antes do card:** o usuário promoveu a `release/v1.2` (`develop` → `main`) nos quatro repositórios: solar-ai #11, solar-ai-api #21, solar-ai-front #17 e solar-ai-docs #23.
 
 - **05/10 — S-46 integrado: a redistribuição não devolve mais a conversa ao corretor que exclui a própria conta.** Em `develop`: `solar-ai-api` `8a18238` (PR #20) e `solar-ai-docs` `444f8f4` (PR #22). `CandidatosAsync` recebe o corretor de origem e o deixa de fora da consulta. Com outro elegível, a conversa vai para ele; sem nenhum, fica `aguardando`, e a conta é removida normalmente. Sem migration, sem `/turn` e com o snapshot idêntico. O primeiro instante de atribuição do S-45 e as barras do avanço não mudam.
 
@@ -381,7 +393,19 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **11/09 — Achado de ferramenta no S-33: preset do Maestri não diz qual modelo roda.** `maestri preset list` devolve só nomes; o modelo aparece na barra de status **depois** de recrutar. O `Antigravity` saiu como Gemini 3.8 Flash e foi trocado por Codex `gpt-5.6-sol` com esforço `high`, porque o card tinha migration e a classe de erro do `PK_Leads` virando `p_k_leads` já aconteceu uma vez aqui. Regra que fica: recrutar, ler o modelo, e só então confirmar o executor. Segundo achado: a cota de 5h do executor estourou com o trabalho pronto e sem commit — o fechamento usou o mesmo precedente do S-34, commit criado pelo orquestrador com a autoria do executor no corpo da mensagem. Terceiro: o escalonamento de permissão do Codex **resolve** o worktree somente-leitura do achado anterior, então os commits da entrega saram com a assinatura do próprio executor.
 
 ## Próximo
-**Integração concluída (05/10): o S-46 está em `develop`, e a janela da redistribuição está encerrada.**
+**Integração concluída (05/10): o S-27 está em `develop`, e a janela do pipeline está encerrada.**
+- **O que destravou:** recalculado contra o board ao vivo, o **S-28 · Replicar pipeline no front e no agente** (Could, 2h) ficou elegível, porque dependia só do S-27. **Nenhum Must saiu do bloqueio.**
+- **Até o congelamento de 09/10:** os candidatos são S-28, S-25 e S-35, e a escolha é do usuário. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
+- **Para o CD funcionar, o usuário faz três coisas, nesta ordem:**
+  1. **Prévia do script:** roda `solar-ai-docs/deploy/S-27/Preparo-Wif.ps1 -NumeroProjeto <número real de solar-ai-cloud>`. Sem `-Executar`, o script só mostra o plano.
+  2. **Execução:** revisa o plano e roda de novo com `-Executar`.
+  3. **Variables do GitHub:** roda os 5 `gh variable set --repo fvconde/solar-ai-api` que o script imprime. Nenhum é Secret.
+  - O passo a passo completo está em `execucoes/S-27-df312134-114c-4742-80c3-01ac29034216.md`.
+  - Sem as Variables, o CD falha na primeira validação e não toca a nuvem.
+- **A próxima release para a `main` publica a API sozinha.** A `main` ainda não tem o `cd.yml`, porque a `release/v1.2` entrou antes do S-27. Por isso, a próxima release é a que liga o CD, e ela não pode publicar a API com o agente antigo na nuvem. Desde o S-45 a API espera `essenciaisCompletos`, e o painel erraria sem dar erro. Antes ou junto dessa release, atualize o agente (e o front) pelo runbook do S-26.
+- **Tags imutáveis no registro:** não refaça o CD do mesmo SHA esperando sobrescrever a imagem.
+
+~~**Integração concluída (05/10): o S-46 está em `develop`, e a janela da redistribuição está encerrada.**~~ — **o S-27 foi integrado no mesmo dia**; ver a entrada acima.
 - **O que destravou:** recalculado contra o board ao vivo, nenhum card depende do S-46. **Nenhum Must saiu do bloqueio.**
 - **Até o congelamento de 09/10:** os candidatos são S-27, S-25 e S-35, e a escolha é do usuário. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
 - **Deploy:** o S-46 só muda a API e pode subir junto com o S-45, sem passo novo.
@@ -508,7 +532,7 @@ Revalidação pós-merge na árvore integrada: `solar-ai-front` **78/78 SUCCESS*
 
 **Venv do agente:** `solar-ai/.venv` (gitignorado), criado em 05/09 para iterar prompt sem rebuildar imagem. `./.venv/Scripts/python.exe scripts/conversas_exemplo.py`. Cuidado: rodar `uvicorn` local na 8000 com o container de pé cria disputa de porta e teste falso.
 
-**Versão no `/health`:** o campo `version` vale `dev` a menos que `SOLAR_VERSION` venha do ambiente. Para ver o SHA de verdade em local, antes do `up`: `$env:SOLAR_VERSION = git rev-parse --short HEAD`. No Cloud Run quem injeta é o script de deploy do S-26, com o SHA exato de cada repositório. Pipeline automático ainda não existe, porque é o escopo do S-27 e do S-28.
+**Versão no `/health`:** o campo `version` vale `dev` a menos que `SOLAR_VERSION` venha do ambiente. Para ver o SHA de verdade em local, antes do `up`: `$env:SOLAR_VERSION = git rev-parse --short HEAD`. No Cloud Run quem injeta é o script de deploy do S-26, com o SHA exato de cada repositório. Desde o S-27, o CD da API injeta o mesmo SHA completo na publicação pela `main`. O agente e o front só ganham pipeline no S-28.
 
 **Segredos:** cada repo tem o seu `.env`, com `.env.example` ao lado — credenciais do Postgres no `solar-ai-api`, chave da Gemini no `solar-ai`. O `solar-ai-docs` não tem `.env`. Cuidado: `docker compose config` imprime todos eles em texto claro.
 
