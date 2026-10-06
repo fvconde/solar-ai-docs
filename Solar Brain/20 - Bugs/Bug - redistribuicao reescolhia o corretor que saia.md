@@ -33,3 +33,4 @@ Ao propor o card, o Maestro leu `DeleteBehavior.Restrict` em `SolarDbContext` e 
 - [[Decisao - Encaminhamento ao corretor com contato fora do LLM]]: onde nasceram a escolha de corretor e a FK `Restrict`.
 - [[Decisao - Login unico com tres papeis e sessao de 30 dias]]: o S-44, que criou a exclusão da própria conta.
 - [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]]: o S-45, cujo teste revelou o bug e cujo marco a correção preserva.
+- [[Bug - teste de reset ordenava sessoes por horario empatado]]: o teste de autenticação que a validação do S-46 chamou de instável; a causa veio no S-27.

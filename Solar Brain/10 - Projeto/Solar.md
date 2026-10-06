@@ -65,6 +65,7 @@ Decisões: [[Decisao - Encaminhamento ao corretor com contato fora do LLM]] (o c
 - [[Bug - falha ao retomar apagava a conversa]] — um `catch` vazio no front transformava falha de rede em perda permanente de conversa, sem sintoma
 - [[Bug - HasData com colecao primitiva derruba o boot]] — o log do boot dizia "Banco indisponivel" e o banco estava de pé; o erro era do modelo do EF
 - [[Bug - redistribuicao reescolhia o corretor que saia]] — o corretor que excluía a conta recebia a conversa de volta, e ela ficava sem ninguém (S-46)
+- [[Bug - teste de reset ordenava sessoes por horario empatado]] — a "instabilidade" era ordenação indefinida com relógio fixo; travou o primeiro CI verde (S-27)
 
 ## Gestão
 
@@ -90,3 +91,5 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 - [[Decisao - Metricas do painel sem copiar regras da Lia]] — métricas do painel na API com uma regra em um lugar; o registro de etapas ficou para o S-45 (S-22).
 - [[Decisao - Apagar conversa com posse da sessao]] — o titular apaga só a conversa escolhida, provando a posse pela sessão (S-38).
 - [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]] — cinco marcos gravados uma vez por conversa e o início do registro no próprio banco; essenciais vêm da Lia pelo `/turn` (S-45).
+- [[Decisao - Publicacao da API pelo push na main]] — a `develop` só testa e a `main` publica a API, sem chave e trocando só a imagem (S-27).
+- [[Decisao - Publicacao dos tres servicos pelo push na main]] — agente e front no mesmo molde, num só pool WIF, e o CI do agente sem chave do Gemini (S-28).

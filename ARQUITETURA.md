@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 05/10/2026 (S-46)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 06/10/2026 (S-28)
 
 ---
 
@@ -179,7 +179,15 @@ Os três serviços rodam no Cloud Run (gen2), no projeto `solar-ai-cloud`, em `s
 
 **O IP do cliente chega à API num header próprio.** O nginx normaliza o IP, confiando em um único salto (o proxy do Google), e **sobrescreve** `X-Solar-Client-IP`. A API ignora o `X-Forwarded-For` e só aceita esse header quando o peer é o proxy do Cloud Run, com `ForwardLimit=1` (`ProxyTrust`, em `ConfiancaDeProxies.cs`). O IP de saída do front vem de um pool compartilhado do Google e não serve para allow-list. O porquê está em [ESTADO.md](ESTADO.md), na linha de 02/10.
 
-Segredos (conexão do banco, SMTP, chave da Gemini, chave de privacidade e senha inicial do supervisor) ficam no Secret Manager e entram por `--set-secrets`, nunca em imagem ou repositório. O e-mail sai por SMTP do Gmail. A API roda com `max-instances=1`, uma instância mínima e CPU contínua, porque o follow-up e o expurgo rodam em background. Front e agente escalam a zero. O deploy é manual, por scripts PowerShell em `solar-ai-docs/deploy/S-26/`; pipeline automático é o escopo do S-27 e do S-28.
+Segredos (conexão do banco, SMTP, chave da Gemini, chave de privacidade e senha inicial do supervisor) ficam no Secret Manager e entram por `--set-secrets`, nunca em imagem ou repositório. O e-mail sai por SMTP do Gmail. A API roda com `max-instances=1`, uma instância mínima e CPU contínua, porque o follow-up e o expurgo rodam em background. Front e agente escalam a zero. O deploy completo é manual, por scripts PowerShell em `solar-ai-docs/deploy/S-26/`.
+
+**A API também publica por pipeline (S-27).**
+- **Testes (`ci.yml`):** rodam no GitHub Actions em todo PR e em todo push na `develop`. Restaura, compila e roda a suíte inteira contra um Postgres 16 de serviço, no banco `solar_test`.
+- **Publicação (`cd.yml`):** só em push na `main`. Repete os testes e, se passarem, constrói a imagem `linux/amd64` com a tag do SHA completo (o registro tem tags imutáveis). Depois roda `gcloud run deploy solar-api` com `--image` e `--update-env-vars SOLAR_VERSION`. **Não** redefine segredos, conta de serviço, Cloud SQL, instâncias nem IAM, que continuam sendo os do S-26.
+- **Login no Google:** o GitHub entra por Workload Identity Federation, sem chave. O provedor exige `assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'`. A conta do pipeline tem só `artifactregistry.writer` no registro, `run.developer` em `solar-api` e `iam.serviceAccountUser` sobre a conta da API.
+- **Ordem de publicação:** com `concurrency` sem cancelamento, as publicações saem em fila. Um commit que já não é o topo da `main` termina sem publicar.
+- **Agente e front no mesmo molde (S-28):** cada repositório tem `ci.yml` e `cd.yml` próprios, e o deploy roda `gcloud run deploy solar-agente`/`solar-front` só com `--image` e `SOLAR_VERSION`. O CI do agente roda só a suíte sem o marker `llm` e não recebe `GEMINI_API_KEY`; o do front roda Karma em Chrome headless sem watch, o build e `deploy/tests/test_front.py`. O provedor WIF é um só e aceita os três repositórios, sempre só em `refs/heads/main`; a conta do pipeline tem `run.developer` nos três serviços e `serviceAccountUser` sobre as três contas de execução.
+- **Sem ordem entre serviços:** os três CDs disparam independentes numa release. Uma release que mude o `/turn` pode deixar API e agente desencontrados por alguns minutos (ver `ESTADO.md`, Próximo).
 
 ## Regras que não mudam
 
