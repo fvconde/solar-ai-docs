@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-    Script de preparo de infraestrutura para Workload Identity Federation (WIF) do S-27.
+    Script de preparo de infraestrutura para Workload Identity Federation (WIF) do S-27 e S-28.
 .DESCRIPTION
     Cria pool, provedor OIDC dedicado para o GitHub Actions e conta de servico de deploy
-    com privilegios minimos para publicacao continua no Cloud Run.
+    com privilegios minimos para publicacao continua no Cloud Run dos tres servicos:
+    solar-ai-api, solar-ai (agente) e solar-ai-front.
     Por padrao, opera em modo plano puro (dry-run) sem invocar o Google Cloud.
     Requer -Executar explicito e -NumeroProjeto para aplicar as alteracoes.
 #>
@@ -35,42 +36,61 @@ function New-S27Contexto {
         Regiao = $c26.Regiao
         Gcloud = $c26.Gcloud
         Registro = $c26.Registro
+        ExecucaoS26 = $c26.Execucao
+        MarcaS26 = $c26.Marca
+        ServicosRun = @('solar-api', 'solar-agente', 'solar-front')
         ServicoApi = 'solar-api'
+        ServicoAgente = 'solar-agente'
+        ServicoFront = 'solar-front'
         ContaApi = Get-S26EmailConta $c26 'Api'
+        ContaAgente = Get-S26EmailConta $c26 'Agente'
+        ContaFront = Get-S26EmailConta $c26 'Front'
+        ContasRuntime = [ordered]@{
+            Api = Get-S26EmailConta $c26 'Api'
+            Agente = Get-S26EmailConta $c26 'Agente'
+            Front = Get-S26EmailConta $c26 'Front'
+        }
         ContaPipeline = $saPipelineNome
         EmailPipeline = $emailPipeline
         PoolId = $poolId
         ProviderId = $providerId
         Marca = ('s27-execucao=' + $execucao)
+        RepositoriosGit = @(
+            'fvconde/solar-ai-api',
+            'fvconde/solar-ai',
+            'fvconde/solar-ai-front'
+        )
         RepositorioGit = 'fvconde/solar-ai-api'
         BranchAlvo = 'refs/heads/main'
-        CondicaoWif = "assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'"
+        CondicaoWif = "(assertion.repository == 'fvconde/solar-ai-api' || assertion.repository == 'fvconde/solar-ai' || assertion.repository == 'fvconde/solar-ai-front') && assertion.ref == 'refs/heads/main'"
     }
 }
 
 function Get-S27ComandosGitHub($Contexto, [string]$NumeroProjeto) {
     $num = if ([string]::IsNullOrWhiteSpace($NumeroProjeto)) { '<NUMERO_DO_PROJETO>' } else { $NumeroProjeto }
     $provider = 'projects/' + $num + '/locations/global/workloadIdentityPools/' + $Contexto.PoolId + '/providers/' + $Contexto.ProviderId
-    $repo = $Contexto.RepositorioGit
-    return @(
-        ('gh variable set GCP_PROJECT_ID --repo ' + $repo + ' --body "' + $Contexto.Projeto + '"'),
-        ('gh variable set GCP_REGION --repo ' + $repo + ' --body "' + $Contexto.Regiao + '"'),
-        ('gh variable set GCP_ARTIFACT_REGISTRY --repo ' + $repo + ' --body "' + $Contexto.Registro + '"'),
-        ('gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --repo ' + $repo + ' --body "' + $provider + '"'),
-        ('gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --repo ' + $repo + ' --body "' + $Contexto.EmailPipeline + '"')
-    )
+    $comandos = @()
+    foreach ($repo in $Contexto.RepositoriosGit) {
+        $comandos += @(
+            ('gh variable set GCP_PROJECT_ID --repo ' + $repo + ' --body "' + $Contexto.Projeto + '"'),
+            ('gh variable set GCP_REGION --repo ' + $repo + ' --body "' + $Contexto.Regiao + '"'),
+            ('gh variable set GCP_ARTIFACT_REGISTRY --repo ' + $repo + ' --body "' + $Contexto.Registro + '"'),
+            ('gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --repo ' + $repo + ' --body "' + $provider + '"'),
+            ('gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --repo ' + $repo + ' --body "' + $Contexto.EmailPipeline + '"')
+        )
+    }
+    return $comandos
 }
 
 function New-S27PlanoPreparoWif([string]$NumeroProjeto = '') {
     $c = New-S27Contexto
     $num = if ([string]::IsNullOrWhiteSpace($NumeroProjeto)) { '<NUMERO_DO_PROJETO>' } else { $NumeroProjeto }
-    $principalSet = 'principalSet://iam.googleapis.com/projects/' + $num + '/locations/global/workloadIdentityPools/' + $c.PoolId + '/attribute.repository/' + $c.RepositorioGit
 
     $acoes = @(
         (New-S26Gcloud $c 'criar-pool' @(
             'iam','workload-identity-pools','create',$c.PoolId,
             '--location=global',
-            '--display-name=Solar API Pipeline Pool S-27',
+            '--display-name=Solar Pipeline Pool S-27',
             ('--description=' + $c.Marca)
         )),
         (New-S26Gcloud $c 'criar-provider' @(
@@ -84,13 +104,23 @@ function New-S27PlanoPreparoWif([string]$NumeroProjeto = '') {
         )),
         (New-S26Gcloud $c 'criar-sa-pipeline' @(
             'iam','service-accounts','create',$c.ContaPipeline,
-            '--display-name=Solar API Pipeline S-27',
+            '--display-name=Solar Pipeline Deploy S-27',
             ('--description=' + $c.Marca)
         )),
-        (New-S26Gcloud $c 'binding-workload-identity' @(
+        (New-S26Gcloud $c 'binding-workload-identity-api' @(
             'iam','service-accounts','add-iam-policy-binding',$c.EmailPipeline,
             '--role=roles/iam.workloadIdentityUser',
-            ('--member=' + $principalSet)
+            ('--member=principalSet://iam.googleapis.com/projects/' + $num + '/locations/global/workloadIdentityPools/' + $c.PoolId + '/attribute.repository/fvconde/solar-ai-api')
+        )),
+        (New-S26Gcloud $c 'binding-workload-identity-agente' @(
+            'iam','service-accounts','add-iam-policy-binding',$c.EmailPipeline,
+            '--role=roles/iam.workloadIdentityUser',
+            ('--member=principalSet://iam.googleapis.com/projects/' + $num + '/locations/global/workloadIdentityPools/' + $c.PoolId + '/attribute.repository/fvconde/solar-ai')
+        )),
+        (New-S26Gcloud $c 'binding-workload-identity-front' @(
+            'iam','service-accounts','add-iam-policy-binding',$c.EmailPipeline,
+            '--role=roles/iam.workloadIdentityUser',
+            ('--member=principalSet://iam.googleapis.com/projects/' + $num + '/locations/global/workloadIdentityPools/' + $c.PoolId + '/attribute.repository/fvconde/solar-ai-front')
         )),
         (New-S26Gcloud $c 'binding-artifact-registry' @(
             'artifacts','repositories','add-iam-policy-binding',$c.Registro,
@@ -98,14 +128,36 @@ function New-S27PlanoPreparoWif([string]$NumeroProjeto = '') {
             '--role=roles/artifactregistry.writer',
             ('--member=serviceAccount:' + $c.EmailPipeline)
         )),
-        (New-S26Gcloud $c 'binding-run-developer' @(
+        (New-S26Gcloud $c 'binding-run-developer-api' @(
             'run','services','add-iam-policy-binding',$c.ServicoApi,
             ('--region=' + $c.Regiao),
             '--role=roles/run.developer',
             ('--member=serviceAccount:' + $c.EmailPipeline)
         )),
-        (New-S26Gcloud $c 'binding-sa-user' @(
+        (New-S26Gcloud $c 'binding-run-developer-agente' @(
+            'run','services','add-iam-policy-binding',$c.ServicoAgente,
+            ('--region=' + $c.Regiao),
+            '--role=roles/run.developer',
+            ('--member=serviceAccount:' + $c.EmailPipeline)
+        )),
+        (New-S26Gcloud $c 'binding-run-developer-front' @(
+            'run','services','add-iam-policy-binding',$c.ServicoFront,
+            ('--region=' + $c.Regiao),
+            '--role=roles/run.developer',
+            ('--member=serviceAccount:' + $c.EmailPipeline)
+        )),
+        (New-S26Gcloud $c 'binding-sa-user-api' @(
             'iam','service-accounts','add-iam-policy-binding',$c.ContaApi,
+            '--role=roles/iam.serviceAccountUser',
+            ('--member=serviceAccount:' + $c.EmailPipeline)
+        )),
+        (New-S26Gcloud $c 'binding-sa-user-agente' @(
+            'iam','service-accounts','add-iam-policy-binding',$c.ContaAgente,
+            '--role=roles/iam.serviceAccountUser',
+            ('--member=serviceAccount:' + $c.EmailPipeline)
+        )),
+        (New-S26Gcloud $c 'binding-sa-user-front' @(
+            'iam','service-accounts','add-iam-policy-binding',$c.ContaFront,
             '--role=roles/iam.serviceAccountUser',
             ('--member=serviceAccount:' + $c.EmailPipeline)
         ))
@@ -195,28 +247,56 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
     }
 
     $servicosRun = Get-S27InventarioJson $Contexto 'preflight-check-run' @('run','services','list',('--region=' + $Contexto.Regiao),'--format=json') $Executor
-    $runEncontrado = $servicosRun | Where-Object {
-        $meta = Get-S26Campo $_ 'metadata'
-        $n = if ($meta -and (Get-S26Campo $meta 'name')) {
-            [string](Get-S26Campo $meta 'name')
-        } else {
-            [string](Get-S26Campo $_ 'name')
+    foreach ($sNome in $Contexto.ServicosRun) {
+        $runEncontrado = $servicosRun | Where-Object {
+            $meta = Get-S26Campo $_ 'metadata'
+            $n = if ($meta -and (Get-S26Campo $meta 'name')) {
+                [string](Get-S26Campo $meta 'name')
+            } else {
+                [string](Get-S26Campo $_ 'name')
+            }
+            $n -eq $sNome -or $n.EndsWith('/' + $sNome)
         }
-        $n -eq $Contexto.ServicoApi -or $n.EndsWith('/' + $Contexto.ServicoApi)
-    }
-    if (-not $runEncontrado) {
-        throw "Pre-requisito ausente: Cloud Run service '$($Contexto.ServicoApi)' do S-26 nao encontrado."
+        if (-not $runEncontrado) {
+            throw "Pre-requisito ausente: Cloud Run service '$sNome' do S-26 nao encontrado."
+        }
+        $meta = Get-S26Campo $runEncontrado 'metadata'
+        $labels = if ($meta -and (Get-S26Campo $meta 'labels')) {
+            Get-S26Campo $meta 'labels'
+        } else {
+            Get-S26Campo $runEncontrado 'labels'
+        }
+        if ($null -eq $labels) {
+            throw "Cloud Run service '$sNome' nao possui labels de ownership (s26-execucao ausente)."
+        }
+        $labelDono = [string](Get-S26Campo $labels 's26-execucao')
+        if ([string]::IsNullOrWhiteSpace($labelDono)) {
+            throw "Cloud Run service '$sNome' nao possui o label 's26-execucao' de ownership."
+        }
+        if ($labelDono -cne $Contexto.ExecucaoS26) {
+            throw "Cloud Run service '$sNome' possui ownership divergente ($labelDono vs $($Contexto.ExecucaoS26))."
+        }
     }
 
-    # 4. Conferir Service Accounts (API S-26 e Pipeline S-27)
+    # 4. Conferir Service Accounts (API, Agente e Front S-26, e Pipeline S-27)
     $contas = Get-S27InventarioJson $Contexto 'preflight-check-sa' @('iam','service-accounts','list','--format=json') $Executor
-    $saApiEncontrada = $contas | Where-Object { [string](Get-S26Campo $_ 'email') -eq $Contexto.ContaApi }
-    if (-not $saApiEncontrada) {
-        throw "Pre-requisito ausente: Conta de servico da API '$($Contexto.ContaApi)' do S-26 nao encontrada."
-    }
-    $saApiDisabled = [bool](Get-S26Campo $saApiEncontrada 'disabled')
-    if ($saApiDisabled) {
-        throw "Conta de servico da API '$($Contexto.ContaApi)' esta desabilitada."
+    foreach ($chave in $Contexto.ContasRuntime.Keys) {
+        $emailEsperado = $Contexto.ContasRuntime[$chave]
+        $saEncontrada = $contas | Where-Object { [string](Get-S26Campo $_ 'email') -eq $emailEsperado }
+        if (-not $saEncontrada) {
+            throw "Pre-requisito ausente: Conta de servico $chave '$emailEsperado' do S-26 nao encontrada."
+        }
+        $saDisabled = [bool](Get-S26Campo $saEncontrada 'disabled')
+        if ($saDisabled) {
+            throw "Conta de servico $chave '$emailEsperado' esta desabilitada."
+        }
+        $saDesc = [string](Get-S26Campo $saEncontrada 'description')
+        if ([string]::IsNullOrWhiteSpace($saDesc)) {
+            throw "Conta de servico $chave '$emailEsperado' nao possui description de ownership (ausente)."
+        }
+        if ($saDesc -cne $Contexto.MarcaS26) {
+            throw "Conta de servico $chave '$emailEsperado' possui description/ownership divergente ($saDesc vs $($Contexto.MarcaS26))."
+        }
     }
 
     $saPipeEncontrada = $contas | Where-Object { [string](Get-S26Campo $_ 'email') -eq $Contexto.EmailPipeline }
@@ -368,7 +448,7 @@ if (-not $Executar) {
         Write-Host "  [$($a.Id)] gcloud $($a.Argumentos -join ' ')"
     }
     Write-Host ""
-    Write-Host "Comandos gh variable set para configuracao manual no GitHub:" -ForegroundColor Yellow
+    Write-Host "Comandos gh variable set para configuracao manual no GitHub (15 comandos):" -ForegroundColor Yellow
     foreach ($cmd in $plano.ComandosGitHub) {
         Write-Host "  $cmd"
     }
@@ -381,7 +461,7 @@ $resultado = Invoke-S27PlanoPreparoWif $plano -Executar:$Executar -NumeroProjeto
 Write-Host "==========================================================================" -ForegroundColor Green
 Write-Host " PREPARO WIF S-27 CONCLUIDO COM SUCESSO" -ForegroundColor Green
 Write-Host "==========================================================================" -ForegroundColor Green
-Write-Host "Execute os comandos abaixo para configurar as GitHub Variables no repositorio fvconde/solar-ai-api:" -ForegroundColor Yellow
+Write-Host "Execute os comandos abaixo para configurar as GitHub Variables nos tres repositorios (15 comandos):" -ForegroundColor Yellow
 Write-Host ""
 foreach ($cmd in $resultado.ComandosGitHub) {
     Write-Host "  $cmd"
