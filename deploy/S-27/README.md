@@ -140,10 +140,10 @@ gh variable set GCP_DEPLOY_SERVICE_ACCOUNT --repo fvconde/solar-ai-front --body 
 
 Os workflows `.github/workflows/cd.yml` nos três repositórios disparam exclusivamente em push na branch `main`. No entanto, **a primeira publicação real no Cloud Run não deve ocorrer isoladamente agora**:
 
-- Atualmente, as branches `main` e `develop` encontram-se alinhadas após o fechamento da `release/v1.2`.
+- As branches `develop` e `main` dos repositórios não estão no mesmo commit (`git ls-remote`: agente `develop` `f99adcb` vs `main` `32796fd`; front `develop` `7c03526` vs `main` `00a24f2`; API `develop` `e7dbadf` vs `main` `422635b`).
 - O Cloud Run em produção ainda executa uma versão do agente cognitivo (`solar-ai`) anterior às evoluções do S-38.
 - A versão de desenvolvimento da API requer o campo `essenciaisCompletos` nos diálogos do agente. Se a API for publicada isoladamente antes da atualização do agente Python, o painel do corretor apresentará instabilidade em produção.
-- **Ordem de publicação obrigatória**: O agente (`solar-ai`) deve ser publicado antes ou junto da API (`solar-ai-api`), seguido pelo front (`solar-ai-front`).
+- **Ordem de publicação obrigatória**: O agente (`solar-ai`) deve ser publicado antes ou junto da API (`solar-ai-api`), seguido pelo front (`solar-ai-front`). A primeira publicação real na nuvem é uma ação posterior exclusiva do usuário após a execução do preparo WIF.
 
 ---
 
