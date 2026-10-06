@@ -45,6 +45,10 @@ $script:simularRunFrontAusente = $false
 $script:simularRunApiDivergente = $false
 $script:simularRunAgenteDivergente = $false
 $script:simularRunFrontDivergente = $false
+$script:simularRunApiSemOwner = $false
+$script:simularRunAgenteSemOwner = $false
+$script:simularRunFrontSemOwner = $false
+$script:simularRunFormatoRoot = $false
 
 $script:simularSaApiAusente = $false
 $script:simularSaAgenteAusente = $false
@@ -55,6 +59,9 @@ $script:simularSaFrontDisabled = $false
 $script:simularSaApiDivergente = $false
 $script:simularSaAgenteDivergente = $false
 $script:simularSaFrontDivergente = $false
+$script:simularSaApiSemOwner = $false
+$script:simularSaAgenteSemOwner = $false
+$script:simularSaFrontSemOwner = $false
 
 $script:simularPoolExiste = $false
 $script:simularPoolDivergente = $false
@@ -92,7 +99,8 @@ function Invoke-AvaliarCondicaoWifEmissao([string]$CondicaoCel, [string]$Repo, [
     $expr = $condStr
     $expr = $expr.Replace('assertion.repository', $repoEscapado)
     $expr = $expr.Replace('assertion.ref', $refEscapado)
-    $expr = $expr.Replace('==', '-eq')
+    # CEL string equality e case-sensitive: mapear para -ceq no PowerShell
+    $expr = $expr.Replace('==', '-ceq')
     $expr = $expr.Replace('&&', '-and')
     $expr = $expr.Replace('||', '-or')
 
@@ -129,26 +137,33 @@ $fake = {
         'preflight-check-run' {
             if ($script:simularRunAusente) { return '[]' }
             $lista = New-Object 'System.Collections.Generic.List[object]'
-            if (-not $script:simularRunApiAusente) {
-                $meta = [ordered]@{ name = 'solar-api' }
-                if ($script:simularRunApiDivergente) {
-                    $meta['labels'] = @{ 's26-execucao' = 'outro-dono' }
+            $c26 = New-S26Contexto
+            foreach ($srv in @(@('Api','solar-api'), @('Agente','solar-agente'), @('Front','solar-front'))) {
+                $tipo = $srv[0]
+                $nome = $srv[1]
+                $ausente = (Get-Variable -Name ("simularRun" + $tipo + "Ausente") -Scope Script).Value
+                if (-not $ausente) {
+                    $divergente = (Get-Variable -Name ("simularRun" + $tipo + "Divergente") -Scope Script).Value
+                    $semOwner = (Get-Variable -Name ("simularRun" + $tipo + "SemOwner") -Scope Script).Value
+
+                    $labels = if ($semOwner) {
+                        $null
+                    } elseif ($divergente) {
+                        @{ 's26-execucao' = '3bdd7f92-outroUUID' }
+                    } else {
+                        @{ 's26-execucao' = $c26.Execucao }
+                    }
+
+                    if ($script:simularRunFormatoRoot) {
+                        $item = [ordered]@{ name = $nome }
+                        if ($null -ne $labels) { $item['labels'] = $labels }
+                        $lista.Add($item)
+                    } else {
+                        $meta = [ordered]@{ name = $nome }
+                        if ($null -ne $labels) { $meta['labels'] = $labels }
+                        $lista.Add([ordered]@{ metadata = $meta })
+                    }
                 }
-                $lista.Add([ordered]@{ metadata = $meta })
-            }
-            if (-not $script:simularRunAgenteAusente) {
-                $meta = [ordered]@{ name = 'solar-agente' }
-                if ($script:simularRunAgenteDivergente) {
-                    $meta['labels'] = @{ 's26-execucao' = 'outro-dono' }
-                }
-                $lista.Add([ordered]@{ metadata = $meta })
-            }
-            if (-not $script:simularRunFrontAusente) {
-                $meta = [ordered]@{ name = 'solar-front' }
-                if ($script:simularRunFrontDivergente) {
-                    $meta['labels'] = @{ 's26-execucao' = 'outro-dono' }
-                }
-                $lista.Add([ordered]@{ metadata = $meta })
             }
             $json = ConvertTo-Json -InputObject $lista.ToArray() -Depth 5
             if (-not $json.TrimStart().StartsWith('[')) { $json = '[' + "`n" + $json + "`n" + ']' }
@@ -156,23 +171,28 @@ $fake = {
         }
         'preflight-check-sa' {
             $lista = New-Object 'System.Collections.Generic.List[object]'
-            if (-not $script:simularSaApiAusente) {
-                $desc = if ($script:simularSaApiDivergente) { 'outro-dono' } else { 's26-execucao=3bdd7f92' }
-                $item = [ordered]@{ email = "s26-api-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"; description = $desc }
-                if ($script:simularSaApiDisabled) { $item['disabled'] = $true }
-                $lista.Add($item)
-            }
-            if (-not $script:simularSaAgenteAusente) {
-                $desc = if ($script:simularSaAgenteDivergente) { 'outro-dono' } else { 's26-execucao=3bdd7f92' }
-                $item = [ordered]@{ email = "s26-agente-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"; description = $desc }
-                if ($script:simularSaAgenteDisabled) { $item['disabled'] = $true }
-                $lista.Add($item)
-            }
-            if (-not $script:simularSaFrontAusente) {
-                $desc = if ($script:simularSaFrontDivergente) { 'outro-dono' } else { 's26-execucao=3bdd7f92' }
-                $item = [ordered]@{ email = "s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com"; description = $desc }
-                if ($script:simularSaFrontDisabled) { $item['disabled'] = $true }
-                $lista.Add($item)
+            $c26 = New-S26Contexto
+            foreach ($srv in @('Api','Agente','Front')) {
+                $ausente = (Get-Variable -Name ("simularSa" + $srv + "Ausente") -Scope Script).Value
+                if (-not $ausente) {
+                    $email = Get-S26EmailConta $c26 $srv
+                    $disabled = (Get-Variable -Name ("simularSa" + $srv + "Disabled") -Scope Script).Value
+                    $divergente = (Get-Variable -Name ("simularSa" + $srv + "Divergente") -Scope Script).Value
+                    $semOwner = (Get-Variable -Name ("simularSa" + $srv + "SemOwner") -Scope Script).Value
+
+                    $desc = if ($semOwner) {
+                        $null
+                    } elseif ($divergente) {
+                        's26-execucao=00000000-outra-execucao'
+                    } else {
+                        $c26.Marca
+                    }
+
+                    $item = [ordered]@{ email = $email }
+                    if ($null -ne $desc) { $item['description'] = $desc }
+                    if ($disabled) { $item['disabled'] = $true }
+                    $lista.Add($item)
+                }
             }
             if ($script:simularSaPipeExiste) {
                 $desc = if ($script:simularSaPipeDivergente) { 'outro-dono' } else { 's27-execucao=df312134-114c-4742-80c3-01ac29034216' }
@@ -278,6 +298,10 @@ function Reset-Mocks {
     $script:simularRunApiDivergente = $false
     $script:simularRunAgenteDivergente = $false
     $script:simularRunFrontDivergente = $false
+    $script:simularRunApiSemOwner = $false
+    $script:simularRunAgenteSemOwner = $false
+    $script:simularRunFrontSemOwner = $false
+    $script:simularRunFormatoRoot = $false
 
     $script:simularSaApiAusente = $false
     $script:simularSaAgenteAusente = $false
@@ -288,6 +312,9 @@ function Reset-Mocks {
     $script:simularSaApiDivergente = $false
     $script:simularSaAgenteDivergente = $false
     $script:simularSaFrontDivergente = $false
+    $script:simularSaApiSemOwner = $false
+    $script:simularSaAgenteSemOwner = $false
+    $script:simularSaFrontSemOwner = $false
 
     $script:simularPoolExiste = $false
     $script:simularPoolDivergente = $false
@@ -361,6 +388,16 @@ Caso 'Nota (b) Maestro: avaliacao dinamica da condicao WIF emitida aceita os 3 r
         Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond $repo 'main')) ("Deve recusar 'main' sem refs/heads/ em $repo.")
         Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond $repo '')) ("Deve recusar ref vazio em $repo.")
     }
+
+    # 4. Semantica CEL case-sensitive: igualdade estrita deve recusar variantes de case do ref e do repo
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'fvconde/solar-ai-api' 'refs/heads/Main')) "CEL deve recusar 'refs/heads/Main' com M maiusculo."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'fvconde/solar-ai-api' 'refs/heads/MAIN')) "CEL deve recusar 'refs/heads/MAIN' com caixa alta."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'fvconde/solar-ai' 'refs/Heads/main')) "CEL deve recusar 'refs/Heads/main' com case misto."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'Fvconde/solar-ai-api' 'refs/heads/main')) "CEL deve recusar 'Fvconde/solar-ai-api' com F maiusculo."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'fvconde/Solar-ai' 'refs/heads/main')) "CEL deve recusar 'fvconde/Solar-ai' com S maiusculo."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'FVCONDE/SOLAR-AI' 'refs/heads/main')) "CEL deve recusar 'FVCONDE/SOLAR-AI' em maiusculas."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'fvconde/solar-ai-Front' 'refs/heads/main')) "CEL deve recusar 'fvconde/solar-ai-Front' com F maiusculo."
+    Exigir (-not (Invoke-AvaliarCondicaoWifEmissao $argCond 'fvconde/SOLAR-AI-FRONT' 'refs/heads/main')) "CEL deve recusar 'fvconde/SOLAR-AI-FRONT' em maiusculas."
 }
 
 Caso 'Comandos e argumentos esperados para criacao e bindings' {
@@ -540,44 +577,69 @@ Caso 'Ausencia de pre-requisito S-26 falha preflight antes de mutacao' {
     Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se SA Front estiver ausente.'
 }
 
-Caso 'Preflight fail-closed: recusa SA do agente ou do front desabilitada ou com ownership divergente' {
-    # SA Agente desabilitada
-    Reset-Mocks
-    $script:simularSaAgenteDisabled = $true
-    $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitada'
-    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se SA do agente estiver desabilitada.'
-
-    # SA Front desabilitada
-    Reset-Mocks
-    $script:simularSaFrontDisabled = $true
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitada'
-    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se SA do front estiver desabilitada.'
-
-    # SA Agente com ownership divergente
-    Reset-Mocks
-    $script:simularSaAgenteDivergente = $true
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'description/ownership divergente'
-    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se SA do agente tiver ownership divergente.'
-
-    # SA Front com ownership divergente
-    Reset-Mocks
-    $script:simularSaFrontDivergente = $true
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'description/ownership divergente'
-    $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se SA do front tiver ownership divergente.'
+Caso 'Preflight fail-closed: recusa SA desabilitada nas tres contas com zero mutacoes' {
+    foreach ($srv in @('Api', 'Agente', 'Front')) {
+        Reset-Mocks
+        Set-Variable -Name ("simularSa" + $srv + "Disabled") -Value $true -Scope Script
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'desabilitada'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("SA $srv desabilitada deve barrar com zero mutacoes.")
+    }
 }
 
-Caso 'Preflight fail-closed: recusa servico Cloud Run com ownership divergente' {
+Caso 'Preflight fail-closed: recusa SA com s26-execucao=outroUUID nas tres contas com zero mutacoes' {
+    foreach ($srv in @('Api', 'Agente', 'Front')) {
+        Reset-Mocks
+        Set-Variable -Name ("simularSa" + $srv + "Divergente") -Value $true -Scope Script
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'description/ownership divergente'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("SA $srv com outro UUID deve barrar com zero mutacoes.")
+    }
+}
+
+Caso 'Preflight fail-closed: recusa SA com marca ausente nas tres contas com zero mutacoes' {
+    foreach ($srv in @('Api', 'Agente', 'Front')) {
+        Reset-Mocks
+        Set-Variable -Name ("simularSa" + $srv + "SemOwner") -Value $true -Scope Script
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership (ausente)'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("SA $srv sem marca de ownership deve barrar com zero mutacoes.")
+    }
+}
+
+Caso 'Preflight fail-closed: recusa Run com 3bdd7f92-outroUUID nos tres servicos com zero mutacoes' {
+    foreach ($srv in @('Api', 'Agente', 'Front')) {
+        Reset-Mocks
+        Set-Variable -Name ("simularRun" + $srv + "Divergente") -Value $true -Scope Script
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership divergente'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("Servico Run $srv com outro UUID deve barrar com zero mutacoes.")
+    }
+}
+
+Caso 'Preflight fail-closed: recusa Run com marca ausente nos tres servicos com zero mutacoes' {
+    foreach ($srv in @('Api', 'Agente', 'Front')) {
+        Reset-Mocks
+        Set-Variable -Name ("simularRun" + $srv + "SemOwner") -Value $true -Scope Script
+        $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
+        Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership (s26-execucao ausente)'
+        $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
+        Exigir ($mutacoes.Count -eq 0) ("Servico Run $srv sem labels de ownership deve barrar com zero mutacoes.")
+    }
+}
+
+Caso 'Preflight suporta formato de inventario de servicos Run com labels no nivel raiz (root)' {
     Reset-Mocks
-    $script:simularRunAgenteDivergente = $true
+    $script:simularRunFormatoRoot = $true
     $p = New-S27PlanoPreparoWif -NumeroProjeto '123456789012'
-    Recusa { Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake } 'ownership divergente'
+    $res = Invoke-S27PlanoPreparoWif $p -Executar -NumeroProjeto '123456789012' -Executor $fake
+    Exigir ($res.Acoes.Count -eq 13) 'Deve executar com sucesso aceitando labels em formato root.'
     $mutacoes = @($script:chamadas | Where-Object { $_.Id -like 'criar-*' -or $_.Id -like 'binding-*' })
-    Exigir ($mutacoes.Count -eq 0) 'Nenhuma mutacao pode ocorrer se servico solar-agente tiver ownership divergente.'
+    Exigir ($mutacoes.Count -eq 13) 'Devem ocorrer as 13 mutacoes planejadas.'
 }
 
 Caso 'Falha de consulta no inventario (transporte) bloqueia antes de qualquer mutacao' {

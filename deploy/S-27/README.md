@@ -64,7 +64,7 @@ Antes de executar com `-Executar`, certifique-se de que:
      - Agente: `s26-agente-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com`
      - Front: `s26-front-3bdd7f92@solar-ai-cloud.iam.gserviceaccount.com`
 
-O script possui preflight automatizado em modelo **fail-closed**: qualquer falha em consultas de inventário (`list`), respostas nulas/inválidas, contas desabilitadas, serviços inexistentes ou divergência de ownership bloqueia imediatamente a execução antes de qualquer mutação. Recursos válidos da própria execução já existentes são identificados com segurança, permitindo reexecução idempotente sem recriação desnecessária.
+O script possui preflight automatizado em modelo **fail-closed**: qualquer falha em consultas de inventário (`list`), respostas nulas/inválidas, contas desabilitadas, serviços inexistentes, marcas ausentes ou divergência de ownership (exigindo correspondência exata e case-sensitive de `s26-execucao=3bdd7f92-dda2-492e-a399-2e209a1e6238` na description das contas e no label `s26-execucao` dos serviços em `metadata.labels` ou `root`) bloqueia imediatamente a execução com **zero mutações**. Recursos válidos da própria execução já existentes são identificados com segurança, permitindo reexecução idempotente sem recriação desnecessária.
 
 ---
 
@@ -149,15 +149,16 @@ Os workflows `.github/workflows/cd.yml` nos três repositórios disparam exclusi
 
 ## 7. Testes Automatizados da Infraestrutura
 
-A integridade do plano, dos comandos gerados, da conformidade fail-closed e da idempotência é validada localmente por [Testar-Preparo-Wif.ps1](Testar-Preparo-Wif.ps1).
+A integridade do plano, dos comandos gerados, da conformidade fail-closed e da idempotência é validada localmente por [Testar-Preparo-Wif.ps1](Testar-Preparo-Wif.ps1) com uma suíte de **30 testes automatizados** sob executor falso (mock).
 
-O teste utiliza um executor falso (mock) e comprova:
+O teste comprova:
 - Zero chamadas externas gcloud durante o planejamento.
 - Conformidade exata e literal da `attribute-condition` do provedor WIF transmitida ao transporte nativo.
-- **Avaliação dinâmica da condição (Nota b Maestro)**: comprovação de que a condição efetivamente emitida aceita exatamente os 3 repositórios na `main` e rejeita qualquer 4º repositório ou branches divergentes (`develop`, `feature/*`, `refs/pull/*`, etc.).
-- Escopo restrito de IAM em cada recurso correspondente para os 3 serviços e 3 contas runtime.
+- **Avaliação dinâmica da condição (Nota b Maestro)**: comprovação de que a condição efetivamente emitida aceita exatamente os 3 repositórios na `main` e rejeita qualquer 4º repositório ou branches divergentes (`develop`, `feature/*`, `refs/pull/*`, etc.), preservando semântica CEL estrita e case-sensitive (`-ceq`) ao recusar `refs/heads/Main` e variantes de caixa dos repositórios.
+- Escopo restrito de IAM em cada recurso correspondente para os 3 serviços e 3 contas runtime (10 bindings, zero papéis amplos ou administrativos).
 - Inclusão e validação de `sts.googleapis.com` no preflight.
-- Interrupção imediata (fail-closed com zero mutações) em caso de falha de consulta, JSON vazio ou malformado, APIs ausentes, pré-requisitos faltantes ou divergência de propriedade em qualquer um dos 3 serviços ou 3 contas de serviço.
+- **Preflight fail-closed exato (Zero mutações)**: recusa imediata antes de qualquer mutação quando as contas de runtime ou serviços Cloud Run estiverem ausentes, desabilitados, com marcas ausentes ou com ownership divergente (inclusive quando prefixos como `s26-execucao=` ou `3bdd7f92-` forem sucedidos por UUID de outro dono).
+- Suporte a formatos de inventário com labels em `metadata.labels` e no nível raiz (`root`).
 - Reexecução limpa e idempotente pulando as 3 criações caso os recursos válidos já existam e aplicando os 10 bindings.
 - Geração dos 15 comandos `gh variable set` contendo explicitamente `--repo` e sem nenhuma chave JSON.
 - Nenhuma chamada real ao Google Cloud.

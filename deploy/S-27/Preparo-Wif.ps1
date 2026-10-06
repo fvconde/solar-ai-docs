@@ -261,14 +261,20 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
             throw "Pre-requisito ausente: Cloud Run service '$sNome' do S-26 nao encontrado."
         }
         $meta = Get-S26Campo $runEncontrado 'metadata'
-        if ($meta) {
-            $labels = Get-S26Campo $meta 'labels'
-            if ($labels) {
-                $labelDono = [string](Get-S26Campo $labels 's26-execucao')
-                if (-not [string]::IsNullOrWhiteSpace($labelDono) -and $labelDono -cne $Contexto.ExecucaoS26 -and -not $labelDono.StartsWith('3bdd7f92')) {
-                    throw "Cloud Run service '$sNome' possui ownership divergente ($labelDono)."
-                }
-            }
+        $labels = if ($meta -and (Get-S26Campo $meta 'labels')) {
+            Get-S26Campo $meta 'labels'
+        } else {
+            Get-S26Campo $runEncontrado 'labels'
+        }
+        if ($null -eq $labels) {
+            throw "Cloud Run service '$sNome' nao possui labels de ownership (s26-execucao ausente)."
+        }
+        $labelDono = [string](Get-S26Campo $labels 's26-execucao')
+        if ([string]::IsNullOrWhiteSpace($labelDono)) {
+            throw "Cloud Run service '$sNome' nao possui o label 's26-execucao' de ownership."
+        }
+        if ($labelDono -cne $Contexto.ExecucaoS26) {
+            throw "Cloud Run service '$sNome' possui ownership divergente ($labelDono vs $($Contexto.ExecucaoS26))."
         }
     }
 
@@ -285,10 +291,11 @@ function Invoke-S27Preflight($Contexto, [string]$NumeroProjeto, [scriptblock]$Ex
             throw "Conta de servico $chave '$emailEsperado' esta desabilitada."
         }
         $saDesc = [string](Get-S26Campo $saEncontrada 'description')
-        if (-not [string]::IsNullOrWhiteSpace($saDesc)) {
-            if (-not ($saDesc.StartsWith('s26-execucao=') -or $saDesc -ceq $Contexto.MarcaS26)) {
-                throw "Conta de servico $chave '$emailEsperado' possui description/ownership divergente."
-            }
+        if ([string]::IsNullOrWhiteSpace($saDesc)) {
+            throw "Conta de servico $chave '$emailEsperado' nao possui description de ownership (ausente)."
+        }
+        if ($saDesc -cne $Contexto.MarcaS26) {
+            throw "Conta de servico $chave '$emailEsperado' possui description/ownership divergente ($saDesc vs $($Contexto.MarcaS26))."
         }
     }
 
