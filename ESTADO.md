@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 06/10/2026 (S-28 integrado; API, agente e front têm CI e CD pela `main`, que ainda não estão ativos na nuvem)
+**Última atualização:** 06/10/2026 (release v2.0 na `main` e publicada pelos três CDs; o pipeline está ativo na nuvem)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -400,6 +400,13 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 - **11/09 — Achado de ferramenta no S-33: preset do Maestri não diz qual modelo roda.** `maestri preset list` devolve só nomes; o modelo aparece na barra de status **depois** de recrutar. O `Antigravity` saiu como Gemini 3.8 Flash e foi trocado por Codex `gpt-5.6-sol` com esforço `high`, porque o card tinha migration e a classe de erro do `PK_Leads` virando `p_k_leads` já aconteceu uma vez aqui. Regra que fica: recrutar, ler o modelo, e só então confirmar o executor. Segundo achado: a cota de 5h do executor estourou com o trabalho pronto e sem commit — o fechamento usou o mesmo precedente do S-34, commit criado pelo orquestrador com a autoria do executor no corpo da mensagem. Terceiro: o escalonamento de permissão do Codex **resolve** o worktree somente-leitura do achado anterior, então os commits da entrega saram com a assinatura do próprio executor.
 
 ## Próximo
+**Release v2.0 publicada pelo pipeline (06/10).** A `release/v2.0` entrou na `main` nos quatro repositórios (solar-ai #14, solar-ai-api #24, solar-ai-front #20, solar-ai-docs #26). O primeiro disparo dos CDs falhou de propósito na validação, sem Variables e sem tocar a nuvem. Depois, com o usuário:
+- `sts.googleapis.com` e `cloudresourcemanager.googleapis.com` foram ligadas, porque o login sem chave do GitHub depende delas e o projeto do S-26 não as tinha. **O `Preparo-Wif.ps1` não confere isso** — dívida pequena para quem reaproveitar o script.
+- `Preparo-Wif.ps1 -NumeroProjeto 935010665676 -Executar` criou pool, provedor e conta `s27-pipeline-df312134`; conferido por leitura: condição com os três repositórios só em `refs/heads/main` e só as permissões previstas.
+- As 15 Variables foram criadas, e as três execuções foram refeitas em ordem: agente, API, front. Todas verdes.
+- **No ar:** `solar-agente:cba1ebe`, `solar-api:9c80e15`, `solar-front:d1148d5`, com o `/health` de agente e API devolvendo o SHA da `main`. **Imagens anteriores, para voltar atrás:** API `87c491b`, agente `56ff8e0`, front `af366c0` (`gcloud run services update-traffic` para a revisão antiga, ou `gcloud run deploy --image` com a tag antiga).
+- **A partir de agora, todo merge na `main` publica o serviço daquele repositório.** As instruções de preparo abaixo já foram cumpridas.
+
 **Integração concluída (06/10): o S-28 está em `develop`, e a janela do pipeline do front e do agente está encerrada.**
 - **O que destravou:** recalculado contra o board ao vivo, nenhum card depende do S-28. **Nenhum Must saiu do bloqueio.**
 - **Até o congelamento de 09/10:** os candidatos são S-25 e S-35, ambos Could, e a escolha é do usuário. Os Must abertos seguem sendo **S-31 · Vídeo** e **S-32 · Pitch**, de 09/10 a 12/10.
