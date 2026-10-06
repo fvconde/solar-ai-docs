@@ -35,3 +35,4 @@ A demo que está no ar é a que vai para o vídeo e para a banca. Publicar por r
 - [[Decisao - Front publico e API privada por IAM no Cloud Run]]: o deploy do S-26, cuja configuração este pipeline preserva.
 - [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]]: a emenda do `/turn` que obriga agente e API a subirem juntos.
 - [[Bug - teste de reset ordenava sessoes por horario empatado]]: o teste que travou o primeiro CI verde.
+- [[Decisao - Publicacao dos tres servicos pelo push na main]]: o S-28, que estendeu este molde ao agente e ao front.

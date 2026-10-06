@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 05/10/2026 (S-27)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 06/10/2026 (S-28)
 
 ---
 
@@ -186,7 +186,8 @@ Segredos (conexão do banco, SMTP, chave da Gemini, chave de privacidade e senha
 - **Publicação (`cd.yml`):** só em push na `main`. Repete os testes e, se passarem, constrói a imagem `linux/amd64` com a tag do SHA completo (o registro tem tags imutáveis). Depois roda `gcloud run deploy solar-api` com `--image` e `--update-env-vars SOLAR_VERSION`. **Não** redefine segredos, conta de serviço, Cloud SQL, instâncias nem IAM, que continuam sendo os do S-26.
 - **Login no Google:** o GitHub entra por Workload Identity Federation, sem chave. O provedor exige `assertion.repository == 'fvconde/solar-ai-api' && assertion.ref == 'refs/heads/main'`. A conta do pipeline tem só `artifactregistry.writer` no registro, `run.developer` em `solar-api` e `iam.serviceAccountUser` sobre a conta da API.
 - **Ordem de publicação:** com `concurrency` sem cancelamento, as publicações saem em fila. Um commit que já não é o topo da `main` termina sem publicar.
-- **Fora do pipeline:** agente e front ainda publicam só pelos scripts do S-26 (pipeline deles é o S-28). Por isso, uma release que mude o `/turn` exige subir o agente antes ou junto da API.
+- **Agente e front no mesmo molde (S-28):** cada repositório tem `ci.yml` e `cd.yml` próprios, e o deploy roda `gcloud run deploy solar-agente`/`solar-front` só com `--image` e `SOLAR_VERSION`. O CI do agente roda só a suíte sem o marker `llm` e não recebe `GEMINI_API_KEY`; o do front roda Karma em Chrome headless sem watch, o build e `deploy/tests/test_front.py`. O provedor WIF é um só e aceita os três repositórios, sempre só em `refs/heads/main`; a conta do pipeline tem `run.developer` nos três serviços e `serviceAccountUser` sobre as três contas de execução.
+- **Sem ordem entre serviços:** os três CDs disparam independentes numa release. Uma release que mude o `/turn` pode deixar API e agente desencontrados por alguns minutos (ver `ESTADO.md`, Próximo).
 
 ## Regras que não mudam
 
