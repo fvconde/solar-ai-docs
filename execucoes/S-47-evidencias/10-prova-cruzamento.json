@@ -1,0 +1,51 @@
+{
+  "threeLeads": true,
+  "threeSlotsUnique": true,
+  "threeConfirmedMessages": true,
+  "metricasHttp200": true,
+  "metricas3": true,
+  "details": [
+    {
+      "nome": "Bruno Teste",
+      "http200": true,
+      "oneSlot": true,
+      "sameOwner": true,
+      "sameTimes": true,
+      "status": true,
+      "sameSlot": true,
+      "oneConfirmedMessage": true,
+      "leadThenLia": true,
+      "fixedLia": true,
+      "sameLeadText": true,
+      "helena": true
+    },
+    {
+      "nome": "Carla Teste",
+      "http200": true,
+      "oneSlot": true,
+      "sameOwner": true,
+      "sameTimes": true,
+      "status": true,
+      "sameSlot": true,
+      "oneConfirmedMessage": true,
+      "leadThenLia": true,
+      "fixedLia": true,
+      "sameLeadText": true,
+      "helena": true
+    },
+    {
+      "nome": "Marina Teste",
+      "http200": true,
+      "oneSlot": true,
+      "sameOwner": true,
+      "sameTimes": true,
+      "status": true,
+      "sameSlot": true,
+      "oneConfirmedMessage": true,
+      "leadThenLia": true,
+      "fixedLia": true,
+      "sameLeadText": true,
+      "helena": true
+    }
+  ]
+}
