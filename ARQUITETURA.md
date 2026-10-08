@@ -130,6 +130,18 @@ Uma segunda porta para a mesma reserva, **sem passar pelo agente**. Depois do en
 
 O contrato `/turn` não mudou, e não houve migration. Duas rotas chegam à mesma reserva: regra nova de elegibilidade precisa valer nas duas. Decisão em `Solar Brain/50 - Decisoes/Decisao - Reserva por botoes confirmada pelo banco.md`.
 
+## A trilha do chat como projeção (S-48)
+
+O que a API grava não mudou: a reserva continua deixando a fala do lead e a confirmação da Lia. Só a tela as mostra de outro jeito.
+
+- **`leads.contato_em`.** Coluna `timestamp with time zone` anulável, sem default e sem backfill, criada pela migration `AdicionarContatoEmAoLead`. `Lead.RegistrarContato` grava essa coluna. `POST /conversas/{id}/contato` e `GET /conversas/{id}` a devolvem como `contatoEm` (ISO 8601 ou `null`). Ela sai junto com o lead na exclusão física e no expurgo.
+- **Aviso "Reunião agendada".** O front troca o par lead + confirmação por um único evento, ao vivo e no reload, só quando o par é inequívoco (mesmo `em`, mesmo horário reservado). Painel, métricas e expurgo continuam lendo as falas gravadas.
+- **Hora dos avisos.** Sempre vem do banco: Encaminhado usa a fala da Lia que fechou em handoff, Reunião agendada usa o `em` da confirmação e Contato enviado usa `contatoEm`. Sem `contatoEm`, o aviso aparece sem hora.
+- **Contato preenchido.** Com sessão, o formulário usa `GET /api/conta` só para preencher os campos. O envio continua por `POST /conversas/{id}/contato`, e nada escreve na conta.
+- **Painel.** As métricas saíram da Visão geral para uma aba própria, `Métricas`, com a mesma visibilidade por perfil.
+
+O contrato `/turn` não mudou. Decisão em `Solar Brain/50 - Decisoes/Decisao - Trilha do chat projetada sobre o que a API grava.md`; o porquê está na linha de 08/10 do `ESTADO.md`.
+
 ## O follow-up (S-24)
 
 Um `BackgroundService` na API — o primeiro `IHostedService` do projeto — varre conversas inativas e manda a Lia retomar o contato. A varredura e o limiar de inatividade são configuráveis em `FollowUp`: o `appsettings.json` carrega o padrão de produção (inatividade de 2h, varredura a cada 15min) e o `appsettings.Development.json` os valores de demonstração (2min e 30s). **O padrão do arquivo base nunca é o valor da demo** — agente que persegue lead é antipadrão, e o limite de 2 tentativas por conversa é o outro lado dessa mesma regra.
