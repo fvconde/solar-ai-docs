@@ -93,3 +93,4 @@ Decisões: [[Decisao - Entrega individual confirmada]]
 - [[Decisao - Marcos imutaveis e inicio do registro gravado pela migration]] — cinco marcos gravados uma vez por conversa e o início do registro no próprio banco; essenciais vêm da Lia pelo `/turn` (S-45).
 - [[Decisao - Publicacao da API pelo push na main]] — a `develop` só testa e a `main` publica a API, sem chave e trocando só a imagem (S-27).
 - [[Decisao - Publicacao dos tres servicos pelo push na main]] — agente e front no mesmo molde, num só pool WIF, e o CI do agente sem chave do Gemini (S-28).
+- [[Decisao - Reserva por botoes confirmada pelo banco]] — depois do contato, três horários como botões; o clique reserva pela API, sem LLM, e o `409` traz oferta nova (S-47).

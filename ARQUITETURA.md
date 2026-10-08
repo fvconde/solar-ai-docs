@@ -4,7 +4,7 @@
 > O **porquê** de cada decisão mora no `ESTADO.md` (linha datada) e no vault `Solar Brain/`.
 > Este arquivo é o mapa; ele não repete o raciocínio, aponta para ele.
 
-**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 06/10/2026 (S-28)
+**Criado em:** 08/09/2026 (S-14) · **Última atualização:** 08/10/2026 (S-47)
 
 ---
 
@@ -58,7 +58,7 @@ Seis tabelas em snake_case, criadas por migration versionada — `leads`, `conve
 
 `corretores` é a única tabela **semeada**: 5 linhas literais dentro da própria migration, como os 80 imóveis são semeados por JSON. Seed não mora em `HasData` — coleção primitiva ali faz o EF ver o modelo mudando a cada build e o boot cai, com o log culpando o banco (`Solar Brain/20 - Bugs/Bug - HasData com colecao primitiva derruba o boot.md`).
 
-Os slots não ficam presos a datas de migration. Depois de aplicar o schema, a rotina de boot `AgendaInicial` garante ao menos 6 horários futuros livres por corretor ativo, em dias úteis e relativos ao relógio corrente; horários persistidos usam UTC, e a conversão para São Paulo acontece nas bordas.
+Os slots não ficam presos a datas de migration. Depois de aplicar o schema, a rotina de boot `AgendaInicial` garante ao menos 9 horários futuros livres por corretor ativo (`Agenda:SlotsLivresPorCorretor`), às 9h, 14h e 19h de São Paulo em dias úteis, relativos ao relógio corrente. Desde o S-47, ela também apaga no boot os slots **futuros e livres** fora desses três horários; slot reservado ou passado nunca é tocado. Horários persistidos usam UTC, e a conversão para São Paulo acontece nas bordas.
 
 `encaminhamentos.resumo` é `jsonb` nulável e guarda o resumo já gerado para o corretor (S-18). Nulo ali significa **ainda não gerado**, não "sem conteúdo" — a ausência de conteúdo é expressa pelas cinco seções internas, cada uma nulável por si. É a distinção que evita regerar à toa e queimar cota.
 
@@ -117,6 +117,18 @@ Os horários só entram na conversa depois do handoff. Antes de chamar o agente,
 **A fala não confirma o banco.** A Lia só declara a intenção de reservar. A API executa um `UPDATE` condicional — corretor correto, slot futuro e `lead_id IS NULL` — na mesma transação que grava as duas mensagens e o encaminhamento. Exatamente uma disputa pode alterar a linha. A vencedora produz o evento estruturado `confirmado`; a perdedora produz `indisponivel` com até três alternativas atuais. O front prefere esse evento ao evento genérico de handoff e o `GET /conversas/{id}` o reconstrói depois do reload.
 
 Agenda vazia não derruba o turno e não autoriza invenção: o prompt orienta a Lia a dizer que a confirmação seguirá pelo contato informado. Se o agente falhar, a transação nem começa; não ficam conversa, encaminhamento ou reserva parciais.
+
+## A reserva por botões (S-47)
+
+Uma segunda porta para a mesma reserva, **sem passar pelo agente**. Depois do encaminhamento com corretor atribuído e do contato registrado, o chat mostra os próximos três horários livres do corretor como botões.
+
+- **Oferta.** `POST /conversas/{id}/contato` e `GET /conversas/{id}` devolvem `oferta`: lista de `SlotOferecido` (`id`, `inicio`, `fim` em UTC), nunca nula, recalculada a cada leitura. Ela só vem preenchida com corretor atribuído, contato registrado e nenhum agendamento confirmado.
+- **Reserva.** `POST /conversas/{id}/agendamentos { slotId }` usa a mesma trava da conversa e o mesmo `UPDATE` condicional do S-17. Na mesma transação, grava a fala do lead com o horário e a fala fixa da Lia; nenhuma chamada ao agente e nenhum encaminhamento ou follow-up novo. O `200` devolve `AgendamentoDaConversa`. `409 horario_indisponivel` traz `oferta` nova, que pode ser vazia; `agendamento_ja_confirmado`, `contato_pendente` e `corretor_nao_atribuido` são os outros `409`. Slot inexistente ou de outro corretor responde `404`.
+- **Front.** Confirma só depois do `200` e reconstrói oferta, cartão e recibo de contato pelo `GET`, sem repetir o `POST`. Na trilha, encaminhamento, recibo e cartão ficam ancorados nessa ordem, antes das mensagens posteriores. O polling não mexe na rolagem quando o conteúdo não mudou.
+- **Painel.** `GET /api/painel/leads/{id}` passa a devolver `agendamento.fim` real do slot, em vez de inferir uma hora.
+- **Turno seguinte.** A flag `VisitaConfirmada`, que já existia, passa a vir do agendamento persistido. Com reunião marcada, a Lia responde com a frase fixa.
+
+O contrato `/turn` não mudou, e não houve migration. Duas rotas chegam à mesma reserva: regra nova de elegibilidade precisa valer nas duas. Decisão em `Solar Brain/50 - Decisoes/Decisao - Reserva por botoes confirmada pelo banco.md`.
 
 ## O follow-up (S-24)
 

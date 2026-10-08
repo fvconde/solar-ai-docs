@@ -287,13 +287,16 @@ As principais decisões técnicas consolidadas no projeto, registradas no histó
 3. **Contrato Congelado do `POST /turn`**: Definido por DTOs estritos com recusa ativa de campos desconhecidos. Erros de incompatibilidade quebram imediatamente no primeiro turno (fail-fast), impedindo corrupção silenciosa de dados.
 4. **Índice Vetorial em Memória com Cache sha256**: A base estática de 80 imóveis é vetorizada no boot em memória RAM. Os vetores residem versionados em `data/embeddings.json` e são revalidados via hash sha256 do corpus, permitindo boot instantâneo sem consumo de rede ou cota da API.
 5. **Scoring de Lead por Régua Determinística**: O score (0 a 100) e a escolha da próxima lacuna de qualificação são calculados por uma tabela estrita de sinais no Python, garantindo 100% de explicabilidade no pitch e eliminando alucinações de pontuação pelo LLM.
-6. **Agenda na Requisição e Slots no Banco**: Em vez de consultar APIs de calendário externas, a agenda é gerada dinamicamente no boot da API (`AgendaInicial`) em dias úteis e enviada no payload do turno para que o agente ofereça apenas horários reais.
+6. **Agenda na Requisição e Slots no Banco**: Em vez de consultar APIs de calendário externas, a agenda é gerada dinamicamente no boot da API (`AgendaInicial`) em dias úteis e enviada no payload do turno para que o agente ofereça apenas horários reais. Depois do contato, o chat também oferece os próximos três horários como botões, e o clique reserva direto pela API, sem chamada ao LLM (S-47).
 
 ---
 
 ## 7. Roadmap e Cortes Justificados
 
 Recursos avaliados e deliberadamente postergados ou cortados do escopo da POC, com as respectivas justificativas técnicas e de negócio:
+
+- **Calendário semanal do corretor**:
+  - *Motivo do corte*: O S-47 entrega o essencial para o lead, que são os próximos três horários livres como botões e a confirmação no chat e no painel. A visão da semana inteira, a gestão de disponibilidade pelo próprio corretor e remarcar ou cancelar pedem escopo e critérios próprios, e ficam como evolução.
 
 - **pgvector e Base Dinâmica (Card S-35)**:
   - *Motivo do corte*: A base simulada atual é estática (80 imóveis) e carrega em milissegundos em RAM. Migrar para pgvector no Postgres exigiria criar rotinas de ingestão dinâmica de catálogo e lidar com duas armadilhas críticas mapeadas no S-35: concorrência transacional de escrita/atualização de vetores e recalibração de índices HNSW/IVFFlat sob dados instáveis.
