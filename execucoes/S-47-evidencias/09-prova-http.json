@@ -1,0 +1,103 @@
+{
+  "loginStatus": 200,
+  "metricasHttp": 200,
+  "horariosConfirmados": 3,
+  "detalhes": [
+    {
+      "id": "01a11811-1cc5-7195-96b7-9bdb3b765124",
+      "http": 200,
+      "nome": "Bruno Teste",
+      "agendamento": {
+        "dataHora": "2026-10-07T22:00:00+00:00",
+        "status": "confirmado",
+        "fim": "2026-10-07T23:00:00+00:00"
+      },
+      "encaminhamento": {
+        "id": 3,
+        "status": "atribuido",
+        "corretor": {
+          "id": "3f6b9c21-4d0a-4c7e-9a11-000000000001",
+          "nome": "Helena Braga",
+          "iniciais": "HB"
+        },
+        "atribuidoEm": "2026-10-07T20:32:38.73156+00:00"
+      },
+      "transcricaoFinal": [
+        {
+          "papel": "lead",
+          "texto": "Quarta, 7 de outubro às 19h",
+          "em": "2026-10-07T20:33:10.614833+00:00"
+        },
+        {
+          "papel": "lia",
+          "texto": "Combinado! Helena Braga vai te chamar no contato que você deixou.",
+          "em": "2026-10-07T20:33:10.614833+00:00"
+        }
+      ]
+    },
+    {
+      "id": "01a1180f-1205-76d4-b4f1-e0803f1b39c6",
+      "http": 200,
+      "nome": "Carla Teste",
+      "agendamento": {
+        "dataHora": "2026-10-08T12:00:00+00:00",
+        "status": "confirmado",
+        "fim": "2026-10-08T13:00:00+00:00"
+      },
+      "encaminhamento": {
+        "id": 2,
+        "status": "atribuido",
+        "corretor": {
+          "id": "3f6b9c21-4d0a-4c7e-9a11-000000000001",
+          "nome": "Helena Braga",
+          "iniciais": "HB"
+        },
+        "atribuidoEm": "2026-10-07T20:31:31.62465+00:00"
+      },
+      "transcricaoFinal": [
+        {
+          "papel": "lead",
+          "texto": "Quinta, 8 de outubro às 9h",
+          "em": "2026-10-07T20:36:32.492663+00:00"
+        },
+        {
+          "papel": "lia",
+          "texto": "Combinado! Helena Braga vai te chamar no contato que você deixou.",
+          "em": "2026-10-07T20:36:32.492663+00:00"
+        }
+      ]
+    },
+    {
+      "id": "01a1180d-1a94-7f99-99ff-9128b28e79ae",
+      "http": 200,
+      "nome": "Marina Teste",
+      "agendamento": {
+        "dataHora": "2026-10-08T17:00:00+00:00",
+        "status": "confirmado",
+        "fim": "2026-10-08T18:00:00+00:00"
+      },
+      "encaminhamento": {
+        "id": 1,
+        "status": "atribuido",
+        "corretor": {
+          "id": "3f6b9c21-4d0a-4c7e-9a11-000000000001",
+          "nome": "Helena Braga",
+          "iniciais": "HB"
+        },
+        "atribuidoEm": "2026-10-07T20:28:04.370179+00:00"
+      },
+      "transcricaoFinal": [
+        {
+          "papel": "lead",
+          "texto": "Quinta, 8 de outubro às 14h",
+          "em": "2026-10-07T20:28:47.095492+00:00"
+        },
+        {
+          "papel": "lia",
+          "texto": "Combinado! Helena Braga vai te chamar no contato que você deixou.",
+          "em": "2026-10-07T20:28:47.095492+00:00"
+        }
+      ]
+    }
+  ]
+}
