@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 08/10/2026 (S-47 integrado em `develop`: agendamento por botões depois do encaminhamento; ainda não está na `main` nem na nuvem)
+**Última atualização:** 08/10/2026 (release v2.1 na `main` e publicada pelos três CDs: o agendamento por botões do S-47 está no ar)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -409,7 +409,7 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 ## Próximo
 **Integração concluída (08/10): o S-47 está em `develop`, e a janela do agendamento por botões está encerrada.**
 - **O que destravou:** recalculado contra o board ao vivo, nenhum card depende do S-47. **Nenhum Must saiu do bloqueio.** Abertos: **S-31 · Vídeo** e **S-32 · Pitch** (Must), S-25 e S-35 (Could).
-- **O S-47 ainda não está na nuvem.** A demo publicada roda a release v2.0. Para o vídeo mostrar os botões, o usuário promove uma release da `develop` para a `main` nos três repositórios de código antes do congelamento de 09/10. Os três CDs publicam sozinhos; confira o `/health` de agente e API com o SHA da `main` antes de gravar. O boot da API nova apaga os slots livres fora de 9h, 14h e 19h e completa 9 por corretor.
+- **O S-47 está no ar desde 08/10 (release v2.1).** A `release/v2.1` entrou na `main` nos quatro repositórios (solar-ai-api #26 → `d23fe63`, solar-ai-front #22 → `a578e1c`, solar-ai #16 → `d2f5754`, solar-ai-docs #28 → `4c80c94`). Os merges foram feitos pelo usuário: primeiro a API, depois o front. Os três CDs ficaram verdes, e as revisões `solar-api-00003-l7r`, `solar-agente-00003-v5h` e `solar-front-00003-m6w` estão prontas, com 100% do tráfego e a imagem com a tag do SHA da `main`. A API não registrou nenhum erro desde o boot, que apagou os slots livres fora de 9h, 14h e 19h e completou 9 por corretor. **Imagens anteriores, para voltar atrás:** API `9c80e15`, agente `cba1ebe`, front `d1148d5`. O `/health` de API e agente responde `403` para chamada anônima de fora; a conferência foi feita pela imagem da revisão, com o `gcloud`.
 - **Congelamento de código em 09/10.** Depois disso, só vídeo e pitch.
 
 **Release v2.0 publicada pelo pipeline (06/10).** A `release/v2.0` entrou na `main` nos quatro repositórios (solar-ai #14, solar-ai-api #24, solar-ai-front #20, solar-ai-docs #26). O primeiro disparo dos CDs falhou de propósito na validação, sem Variables e sem tocar a nuvem. Depois, com o usuário:
