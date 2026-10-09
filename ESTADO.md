@@ -4,7 +4,7 @@
 > O board no Notion mostra **onde** ele está: "Solar — Backlog".
 > Atualizar este arquivo é o último ato de toda sessão. Sempre.
 
-**Última atualização:** 08/10/2026 (S-48 integrado em `develop`: ajustes de UX no chat e no painel depois do tour; ainda não está na `main`)
+**Última atualização:** 09/10/2026 (release v2.2 na `main` e publicada pelos CDs da API e do front: os ajustes de UX do S-48 estão no ar)
 **Entrega:** 12/10/2026, adiada de 29/09/2026 23:59 · **Congelamento de código:** 09/10/2026, adiado de 24/09
 **Fase atual:** 4 · Ciclo fechado
 
@@ -428,7 +428,7 @@ Solar é uma plataforma de atendimento e qualificação de leads imobiliários. 
 ## Próximo
 **Integração concluída (08/10): o S-48 está em `develop`, e a janela dos ajustes de UX está encerrada.**
 - **O que destravou:** recalculado contra o board ao vivo, nenhum card depende do S-48. **Nenhum Must saiu do bloqueio.** Abertos: **S-31 · Vídeo** e **S-32 · Pitch** (Must), S-25 e S-35 (Could).
-- **O S-48 ainda não está no ar.** A produção continua na release v2.1, do S-47. Para o vídeo mostrar os ajustes, o usuário precisa promover uma `release/v2.2` da `develop` para a `main` em front, API e docs. O agente não mudou. A API precisa subir antes do front ou junto com ele, porque a migration `AdicionarContatoEmAoLead` roda no boot. O front aceita resposta sem `contatoEm`, então a ordem inversa não quebra a tela.
+- ~~O S-48 ainda não está no ar.~~ **O S-48 está no ar desde 09/10 (release v2.2).** A `release/v2.2` entrou na `main` em front, API e docs: solar-ai-front #24 → `dab3896` (00:21Z), solar-ai-api #28 → `e704b3b` (00:26Z) e solar-ai-docs #30 → `5fe0ae5`. O agente ficou na v2.1, porque não mudou. Os merges foram feitos pelo usuário, com o front alguns minutos antes da API, o que o front tolera. Os dois CDs ficaram verdes, e as revisões `solar-api-00004-7fd` e `solar-front-00004-gww` recebem 100% do tráfego, com a imagem na tag do SHA da `main`. O `solar-agente-00003-v5h` não mudou. No boot, a API registrou `Aplicando 1 migration(s): 20261008184515_AdicionarContatoEmAoLead` às 00:29:29Z e nenhum erro. O front também não teve erro. **Imagens anteriores, para voltar atrás:** API `d23fe63`, front `a578e1c`. A coluna `contato_em` é anulável e o código anterior a ignora, então voltar a imagem não exige desfazer a migration.
 - **Para gravar o vídeo:** peça os imóveis **antes** do encaminhamento. Depois do handoff, a Lia só agenda.
 - **Congelamento de código em 09/10.** Depois disso, só vídeo e pitch.
 
