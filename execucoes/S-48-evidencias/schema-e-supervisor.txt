@@ -1,0 +1,10 @@
+ column_name |        data_type         | is_nullable | column_default 
+-------------+--------------------------+-------------+----------------
+ contato_em  | timestamp with time zone | YES         | 
+(1 row)
+
+ supervisor_telefone_nulo 
+--------------------------
+ t
+(1 row)
+
